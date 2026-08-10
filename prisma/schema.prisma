@@ -1,0 +1,326 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum UserRole {
+  CLIENT_EDITOR
+  PRODUCT_TECH
+  LAWYER_REVIEWER
+  ADMIN
+}
+
+enum ProjectStatus {
+  INFORMATION_COLLECTING
+  REVIEW_PENDING
+  READY_TO_EXPORT
+  EXPORTING
+  EXPORTED
+  STOPPED
+}
+
+enum ActivityStatus {
+  SELECTED
+  CANDIDATE
+  EXCLUDED
+}
+
+enum RecipientKind {
+  THIRD_PARTY
+  SDK
+  PROCESSOR
+}
+
+enum RecipientRole {
+  PROCESSOR
+  SHARED_WITH
+  SDK_PROVIDER
+}
+
+enum OriginType {
+  REGULATION
+  EXPERT_CONTENT
+  REFERENCE_POLICY
+  AI_INFERRED
+  CLIENT_ORIGINAL
+}
+
+enum FactVerificationStatus {
+  UNCONFIRMED
+  CLIENT_CONFIRMED
+  LAWYER_CONFIRMED
+  EXCLUDED
+  CONFLICT
+}
+
+enum LegalReviewStatus {
+  NOT_REQUIRED
+  PENDING
+  LAWYER_REVIEWED
+  NEEDS_CHANGE
+}
+
+enum ConfirmationResult {
+  CONFIRMED
+  EXCLUDED
+  REJECTED
+}
+
+enum TaskRole {
+  CLIENT_EDITOR
+  PRODUCT_TECH
+  LAWYER_REVIEWER
+  ADMIN
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+  BLOCKED
+  CANCELLED
+}
+
+enum SnapshotState {
+  PENDING
+  GENERATING
+  SUCCEEDED
+  FAILED
+}
+
+model User {
+  id          String      @id @db.VarChar(64)
+  tenantId    String      @db.VarChar(64)
+  email       String?     @db.VarChar(255)
+  displayName String      @db.VarChar(120)
+  role        UserRole
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  projects    Project[]   @relation("ProjectOwner")
+  access      ProjectAccess[]
+  confirmations Confirmation[]
+  auditEvents AuditEvent[]
+
+  @@index([tenantId, role])
+  @@map("users")
+}
+
+model Project {
+  id             String          @id @db.VarChar(64)
+  tenantId       String          @db.VarChar(64)
+  ownerId        String          @db.VarChar(64)
+  name           String          @db.VarChar(160)
+  productName    String?         @db.VarChar(160)
+  status         ProjectStatus   @default(INFORMATION_COLLECTING)
+  revision       Int             @default(0)
+  contentVersion String          @db.VarChar(64)
+  contentHash    String          @db.Char(71)
+  formData       Json?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  owner          User            @relation("ProjectOwner", fields: [ownerId], references: [id])
+  access         ProjectAccess[]
+  activities     ProcessingActivity[]
+  assertions     FactAssertion[]
+  recipients     ProcessingRecipient[]
+  tasks          Task[]
+  snapshots      DraftSnapshot[]
+  auditEvents    AuditEvent[]
+
+  @@index([tenantId, status])
+  @@index([ownerId, updatedAt])
+  @@map("projects")
+}
+
+model ProjectAccess {
+  id        String   @id @db.VarChar(64)
+  projectId String   @db.VarChar(64)
+  userId    String   @db.VarChar(64)
+  role      UserRole
+  grantedBy String   @db.VarChar(64)
+  grantedAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([userId, projectId])
+  @@map("project_access")
+}
+
+model ProcessingActivity {
+  id                String          @id @db.VarChar(64)
+  projectId         String          @db.VarChar(64)
+  featureKey        String          @db.VarChar(64)
+  featureContentHash String         @db.Char(71)
+  title             String          @db.VarChar(160)
+  status            ActivityStatus  @default(CANDIDATE)
+  purpose           String?         @db.Text
+  lawfulBasis      String?         @db.VarChar(120)
+  retentionPeriod   String?         @db.VarChar(120)
+  riskCode          String?         @db.VarChar(80)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  project           Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assertions        FactAssertion[]
+  recipients        ProcessingRecipient[]
+  tasks             Task[]
+
+  @@unique([projectId, featureKey])
+  @@index([projectId, status])
+  @@map("processing_activities")
+}
+
+model FactAssertion {
+  id               String                @id @db.VarChar(160)
+  projectId        String                @db.VarChar(64)
+  activityId       String?               @db.VarChar(64)
+  recipientId      String?               @db.VarChar(64)
+  subjectKey       String                @db.VarChar(160)
+  groupKey         String                @db.VarChar(120)
+  fieldKey         String                @db.VarChar(120)
+  value            Json
+  valueVersion     Int                   @default(1)
+  originType       OriginType
+  factVerification FactVerificationStatus @default(UNCONFIRMED)
+  legalReview      LegalReviewStatus     @default(PENDING)
+  current          Boolean               @default(true)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  project          Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  activity         ProcessingActivity?   @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  recipient        ProcessingRecipient? @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  provenance       ProvenanceLink[]
+  confirmations    Confirmation[]
+
+  @@index([projectId, subjectKey, groupKey, fieldKey])
+  @@index([projectId, activityId, current])
+  @@index([projectId, recipientId, current])
+  @@map("fact_assertions")
+}
+
+model ProcessingRecipient {
+  id          String              @id @db.VarChar(64)
+  projectId   String              @db.VarChar(64)
+  activityId  String              @db.VarChar(64)
+  recipientKey String             @db.VarChar(120)
+  kind        RecipientKind
+  role        RecipientRole
+  name        String              @db.VarChar(160)
+  privacyUrl  String?             @db.VarChar(512)
+  fields      Json?
+  project     Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  activity    ProcessingActivity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  assertions  FactAssertion[]
+  tasks       Task[]
+
+  @@unique([projectId, activityId, recipientKey, role])
+  @@index([activityId, kind])
+  @@map("processing_recipients")
+}
+
+model Evidence {
+  id          String           @id @db.VarChar(120)
+  projectId   String?          @db.VarChar(64)
+  kind        String           @db.VarChar(48)
+  title       String           @db.VarChar(255)
+  summary     String           @db.Text
+  url         String?          @db.VarChar(512)
+  contentHash String?          @db.Char(71)
+  createdAt   DateTime         @default(now())
+  provenance  ProvenanceLink[]
+
+  @@index([projectId, kind])
+  @@map("evidence")
+}
+
+model ProvenanceLink {
+  id          String        @id @db.VarChar(64)
+  assertionId String        @db.VarChar(64)
+  evidenceId  String        @db.VarChar(120)
+  originType  OriginType
+  note        String?       @db.Text
+  assertion   FactAssertion @relation(fields: [assertionId], references: [id], onDelete: Cascade)
+  evidence    Evidence      @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+
+  @@unique([assertionId, evidenceId, originType])
+  @@index([evidenceId])
+  @@map("provenance_links")
+}
+
+model Confirmation {
+  id           String             @id @db.VarChar(64)
+  assertionId  String             @db.VarChar(64)
+  valueVersion Int
+  confirmerId  String             @db.VarChar(64)
+  result       ConfirmationResult
+  confirmedAt  DateTime           @default(now())
+  invalidatedAt DateTime?
+  assertion    FactAssertion      @relation(fields: [assertionId], references: [id], onDelete: Cascade)
+  confirmer    User               @relation(fields: [confirmerId], references: [id])
+
+  @@unique([assertionId, valueVersion, confirmerId, result])
+  @@index([confirmerId, confirmedAt])
+  @@map("confirmations")
+}
+
+model Task {
+  id           String              @id @db.VarChar(64)
+  projectId    String              @db.VarChar(64)
+  activityId   String?             @db.VarChar(64)
+  recipientId  String?             @db.VarChar(64)
+  targetRole   TaskRole
+  status       TaskStatus          @default(OPEN)
+  title        String              @db.VarChar(255)
+  details      String?             @db.Text
+  dueAt        DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  project      Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  activity     ProcessingActivity? @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  recipient    ProcessingRecipient? @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, status, targetRole])
+  @@map("tasks")
+}
+
+model DraftSnapshot {
+  id              String        @id @db.VarChar(64)
+  projectId       String        @db.VarChar(64)
+  projectRevision Int
+  idempotencyKey   String        @db.VarChar(120)
+  templateHash     String        @db.Char(71)
+  contentVersion   String        @db.VarChar(64)
+  inputHash        String        @db.Char(71)
+  state            SnapshotState @default(PENDING)
+  markdown         String?       @db.LongText
+  docx             Bytes?        @db.LongBlob
+  docxHash         String?       @db.Char(71)
+  failureCode      String?       @db.VarChar(80)
+  leaseExpiresAt   DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  project          Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, idempotencyKey])
+  @@index([projectId, createdAt])
+  @@index([state, leaseExpiresAt])
+  @@map("draft_snapshots")
+}
+
+model AuditEvent {
+  id         String   @id @db.VarChar(160)
+  commandId  String   @unique @db.VarChar(120)
+  projectId  String   @db.VarChar(64)
+  userId     String   @db.VarChar(64)
+  action     String   @db.VarChar(80)
+  metadata   Json
+  createdAt  DateTime @default(now())
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([projectId, createdAt])
+  @@map("audit_events")
+}

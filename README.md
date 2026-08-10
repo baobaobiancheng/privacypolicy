@@ -1,92 +1,49 @@
-# privacyPolicy
+# 知证 · 隐私政策协作生成器
 
+这是地图导航类首期的本地纵切片。代码只放在本目录，当前默认使用预置身份和冻结内容包，不连接远程仓库、不启动容器、不接入真实客户数据。
 
+## 本地运行
 
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin http://git.100credit.cn/zhenghe.bao/privacypolicy.git
-git branch -M main
-git push -uf origin main
+```bash
+npm install
+npm run dev
 ```
 
-## Integrate with your tools
+首次生成草稿前，在 `privacyPolicy/.env.local` 填写服务端模型配置（不要提交到 Git）：
 
-- [ ] [Set up project integrations](http://git.100credit.cn/zhenghe.bao/privacypolicy/-/settings/integrations)
+```bash
+DEEPSEEK_API_KEY="你的 DeepSeek API Key"
+DEEPSEEK_MODEL="deepseek-v4-flash"
+```
 
-## Collaborate with your team
+模型调用发生在 Next.js 服务端；浏览器只提交经过 Zod 校验的表单 JSON，不会接触 API Key。DeepSeek 返回 Markdown 政策正文，服务端校验章节和溯源注释后，将 Markdown 同时用于页面预览和 DOCX 编译，文件带律师复核标记。
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+打开 `http://localhost:3000`，可体验范围门禁、通用披露、五组地图场景、自定义功能、处理活动总览和工作草稿预览。导航右侧的身份菜单仅用于本地角色边界演示，生产环境必须替换为公司 SSO/Auth.js 会话。
 
-## Test and Deploy
+验证命令：
 
-Use the built-in continuous integration in GitLab.
+```bash
+npm run typecheck
+npx next build --webpack
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+当前 Next Turbopack 在受限开发环境可能因 CSS 处理器无法绑定内部端口而失败，webpack 构建是等价的生产编译验证路径。
 
-***
+## 代码边界
 
-# Editing this README
+- `src/content/map-v1/`：不可变 JSON 内容包、Zod schema、引用检查和服务端内容哈希校验。
+- `src/domain/rules/`：范围门禁、事实确认、风险、占位符和导出不变量的纯函数。
+- `src/domain/draft/`：工作草稿正文与律师复核附录的确定性编排。
+- `src/ai/deepseek.ts`：DeepSeek 服务端适配器、表单 JSON 合同、Markdown 章节校验和溯源注释隔离；模型只接收客户表单与参考结构，不接收参考政策全文。
+- `components/markdown-preview.tsx`：将模型返回的 Markdown 安全渲染为工作区预览。
+- `src/documents/`：服务端 DOCX 渲染器；`/api/draft/demo` 将表单 JSON 送入模型，再返回 Markdown 和同内容的 Word 工作草稿。
+- `src/application/`：项目授权和事务命令合同，包含 `commandId + expectedProjectRevision` 乐观并发入口。
+- `src/data/`：Prisma 7 + MySQL 驱动适配器、项目授权查询和事实更新事务绑定。
+- `src/auth/`：仅开发环境可用的预置身份定义。
+- `prisma/schema.prisma`：MySQL 8.4 的 12 张物理表合同；迁移和真实集成测试需在本地数据库准备好后执行。
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+服务端内容版本可通过 `GET /api/content/map-v1` 检查。示例 DOCX 下载路由只用于本地纵切片，正式版本需接入授权、规范化表单版本记录和幂等导出命令。
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## 范围边界
 
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+首期只支持单产品、单一地图导航类别、中国境内版本、无跨境处理的工作草稿。参考政策和 AI 候选不会自动成为客户事实；未确认事实只能以显式 `[[待确认:字段]]` 占位符进入复核附录。

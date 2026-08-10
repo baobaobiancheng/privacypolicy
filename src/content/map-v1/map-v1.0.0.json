@@ -1,0 +1,145 @@
+{
+  "schemaVersion": "1",
+  "contentVersion": "map-v1.0.0",
+  "contentHash": "sha256:93f0bf4f26a83beaf51d67aac213747f388a95f7ce92a954fc9f11d1c58b6002",
+  "publishedAt": "2026-08-09T00:00:00.000Z",
+  "payload": {
+    "category": "地图导航类",
+    "scopeGates": [
+      {
+        "id": "single-product",
+        "label": "只生成一个产品的一份中国境内版隐私政策",
+        "blockingCode": "SCOPE_NOT_SUPPORTED"
+      },
+      {
+        "id": "map-primary",
+        "label": "产品以地图、定位或导航为主要功能",
+        "blockingCode": "SCOPE_NOT_SUPPORTED"
+      },
+      {
+        "id": "single-category",
+        "label": "不同时属于支付、网约车或社区等其他类别",
+        "blockingCode": "SCOPE_NOT_SUPPORTED"
+      },
+      {
+        "id": "no-cross-border",
+        "label": "不涉及向境外提供个人信息",
+        "blockingCode": "SCOPE_NOT_SUPPORTED"
+      }
+    ],
+    "evidence": [
+      {
+        "id": "REG-map-01",
+        "kind": "REGULATION",
+        "title": "地图导航类必要个人信息规则",
+        "summary": "提供基本功能时，地图导航类 App 必要个人信息包括位置信息、出发地和到达地。",
+        "url": "https://www.gov.cn/zhengce/zhengceku/2021-03/23/content_5595088.htm"
+      },
+      {
+        "id": "LAWYER-map-v1",
+        "kind": "EXPERT_CONTENT",
+        "title": "律师冻结的地图类首期场景",
+        "summary": "五组场景用于首期事实收集，代表性政策只用于提醒，不证明客户事实。"
+      },
+      {
+        "id": "REFERENCE-map-01",
+        "kind": "REFERENCE_POLICY",
+        "title": "代表性地图应用政策结构",
+        "summary": "用于提醒可能遗漏的处理活动和披露结构，默认不进入客户事实。"
+      }
+    ],
+    "features": [
+      {
+        "key": "navigation",
+        "title": "定位和导航",
+        "group": "地图类基本功能规则",
+        "summary": "让用户完成定位、路线规划与导航。法规列明的必要信息仅包括位置信息、出发地和到达地。",
+        "sourceRefs": ["REG-map-01", "LAWYER-map-v1"],
+        "defaultSelection": true,
+        "riskCode": null,
+        "fields": [
+          { "key": "location", "label": "位置信息", "dataClass": "LOCATION", "required": true, "sourceRefs": ["REG-map-01"] },
+          { "key": "origin", "label": "出发地", "dataClass": "LOCATION", "required": true, "sourceRefs": ["REG-map-01"] },
+          { "key": "destination", "label": "到达地", "dataClass": "LOCATION", "required": true, "sourceRefs": ["REG-map-01"] }
+        ]
+      },
+      {
+        "key": "traffic",
+        "title": "实时路况与智能交通",
+        "group": "地图软件常见功能",
+        "summary": "根据道路位置和交通变化展示拥堵情况。它是常见可选功能，不属于法定必要信息基线。",
+        "sourceRefs": ["LAWYER-map-v1", "REFERENCE-map-01"],
+        "defaultSelection": false,
+        "riskCode": "OPTIONAL_LOCATION_PURPOSE",
+        "fields": [
+          { "key": "location", "label": "位置信息", "dataClass": "LOCATION", "required": true, "sourceRefs": ["LAWYER-map-v1"] },
+          { "key": "road_position", "label": "道路位置", "dataClass": "LOCATION", "required": true, "sourceRefs": ["LAWYER-map-v1"] },
+          { "key": "usage_time", "label": "使用时间", "dataClass": "USAGE_METADATA", "required": true, "sourceRefs": ["LAWYER-map-v1"] }
+        ]
+      },
+      {
+        "key": "discovery",
+        "title": "浏览地图、附近与探索",
+        "group": "地图软件常见功能",
+        "summary": "帮助用户浏览地点、查看附近内容。浏览、点击、设备和日志必须逐项确认，不能整组默认选择。",
+        "sourceRefs": ["REFERENCE-map-01"],
+        "defaultSelection": false,
+        "riskCode": "DISCOVERY_TRACKING",
+        "fields": [
+          { "key": "view_history", "label": "浏览记录", "dataClass": "USAGE_METADATA", "required": true, "sourceRefs": ["REFERENCE-map-01"] },
+          { "key": "click_history", "label": "点击记录", "dataClass": "USAGE_METADATA", "required": true, "sourceRefs": ["REFERENCE-map-01"] },
+          { "key": "device_info", "label": "设备信息", "dataClass": "DEVICE", "required": true, "sourceRefs": ["REFERENCE-map-01"] },
+          { "key": "log_info", "label": "日志信息", "dataClass": "LOG", "required": true, "sourceRefs": ["REFERENCE-map-01"] }
+        ]
+      },
+      {
+        "key": "support",
+        "title": "客服服务",
+        "group": "通用支持场景",
+        "summary": "拆分为身份核验、沟通留存和主动联系三个目的，避免用一个笼统客服目的覆盖全部处理。",
+        "sourceRefs": ["LAWYER-map-v1"],
+        "defaultSelection": false,
+        "riskCode": "SUPPORT_RETENTION_UNCONFIRMED",
+        "fields": [
+          { "key": "contact", "label": "联系方式", "dataClass": "CONTACT", "required": true, "sourceRefs": ["LAWYER-map-v1"] },
+          { "key": "account", "label": "账号信息", "dataClass": "IDENTIFIER", "required": true, "sourceRefs": ["LAWYER-map-v1"] },
+          { "key": "conversation", "label": "沟通记录", "dataClass": "COMMUNICATION", "required": true, "sourceRefs": ["LAWYER-map-v1"] },
+          { "key": "case_material", "label": "问题材料", "dataClass": "CONTENT", "required": false, "sourceRefs": ["LAWYER-map-v1"] }
+        ]
+      },
+      {
+        "key": "security",
+        "title": "安全保障服务",
+        "group": "通用合规场景",
+        "summary": "确认实际使用的设备标识、崩溃日志和安全信号。履行安全义务不等于所有设备字段天然必要。",
+        "sourceRefs": ["LAWYER-map-v1"],
+        "defaultSelection": false,
+        "riskCode": "DEVICE_IDENTIFIER_REVIEW",
+        "fields": [
+          { "key": "device_identifier", "label": "设备标识符", "dataClass": "DEVICE", "required": true, "sourceRefs": ["LAWYER-map-v1"] },
+          { "key": "system_version", "label": "系统版本", "dataClass": "DEVICE", "required": true, "sourceRefs": ["LAWYER-map-v1"] },
+          { "key": "ip_address", "label": "IP 地址", "dataClass": "NETWORK", "required": true, "sourceRefs": ["LAWYER-map-v1"] },
+          { "key": "crash_log", "label": "崩溃日志", "dataClass": "LOG", "required": true, "sourceRefs": ["LAWYER-map-v1"] }
+        ]
+      }
+    ],
+    "commonDisclosureFields": [
+      { "key": "operator_name", "label": "运营主体全称", "required": true, "group": "organization" },
+      { "key": "operator_contact", "label": "运营主体联系信息", "required": true, "group": "organization" },
+      { "key": "product_name", "label": "产品名称", "required": true, "group": "product" },
+      { "key": "product_version", "label": "产品版本", "required": true, "group": "product" },
+      { "key": "rights_entry", "label": "用户权利请求入口", "required": true, "group": "rights" },
+      { "key": "rights_response_period", "label": "权利请求响应方式和期限", "required": true, "group": "rights" },
+      { "key": "minor_processing", "label": "未成年人信息实际处理情况", "required": true, "group": "minor" },
+      { "key": "security_measures", "label": "安全措施概述", "required": true, "group": "security" },
+      { "key": "incident_channel", "label": "个人信息事件通知渠道", "required": true, "group": "incident" },
+      { "key": "policy_effective_date", "label": "政策生效日期", "required": true, "group": "policy" },
+      { "key": "policy_update_notice", "label": "政策更新通知方式", "required": true, "group": "policy" }
+    ],
+    "reviewNotes": [
+      { "role": "客户法务", "quote": "我只确认产品真实做了什么，不需要替系统作出法律必要性结论。" },
+      { "role": "技术负责人", "quote": "每个 SDK 都要落到实际调用条件和真实字段，而不是复制 SDK 文档。" },
+      { "role": "复核律师", "quote": "草稿保留证据与待确认项，我能直接定位需要判断的处理活动。" }
+    ]
+  }
+}
