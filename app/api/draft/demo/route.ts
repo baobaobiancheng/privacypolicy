@@ -78,6 +78,25 @@ export async function POST(request: Request) {
   }
 
   try {
+    const claim = await claimSnapshot(prisma, {
+      projectId,
+      expectedRevision,
+      generationId,
+      input: parsed.data,
+    });
+    if (claim.kind === "SUCCEEDED") {
+      return NextResponse.json({
+        generationId,
+        filename: `privacy-policy-${generationId}.docx`,
+        model: process.env.DEEPSEEK_MODEL?.trim() || "deepseek-v4-flash",
+        markdown: claim.markdown,
+        docxBase64: Buffer.from(claim.docx).toString("base64"),
+        projectId,
+      }, { headers: { "Cache-Control": "no-store", "X-Generation-Reused": "true" } });
+    }
+    if (claim.kind === "IN_PROGRESS") {
+      return NextResponse.json({ code: "GENERATION_IN_PROGRESS", message: "同一份表单正在生成，请勿重复提交。", retryable: true }, { status: 409 });
+    }
     const { buffer, ...rest } = await renderDraftResponse(parsed.data, generationId);
     await persistSnapshot(prisma, {
       projectId, expectedRevision, generationId, input: parsed.data,
@@ -184,7 +203,12 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
     },
     contentVersion: verifiedMapV1Content.contentVersion,
     contentHash: verifiedMapV1Content.contentHash,
-    selectedFeatures: selectedFeatures.map((feature) => ({ key: feature.key, title: feature.title, summary: feature.summary, fields: feature.fields.map((field) => ({ key: field.key, label: field.label })) })),
+    selectedFeatures: selectedFeatures.map((feature) => ({
+      key: feature.key,
+      title: feature.title,
+      summary: feature.summary,
+      fields: feature.fields.map((field, index) => ({ key: field.key, label: field.label, confirmed: confirmed.has(`${feature.key}.${index}`) })),
+    })),
     allowedFactKeys: [
       ...selectedFeatures.flatMap((feature) => feature.fields.map((field) => `${feature.key}.${field.key}`)),
       ...Object.keys(input.profile),
@@ -193,6 +217,13 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       ...input.customFeatures,
       "additionalNotes",
     ],
+    confirmedFactKeys: [
+      ...selectedFeatures.flatMap((feature) => feature.fields.flatMap((field, index) => confirmed.has(`${feature.key}.${index}`) ? [`${feature.key}.${field.key}`] : [])),
+      ...Object.keys(input.profile),
+      ...Object.keys(input.profile).map((key) => `profile.${key}`),
+      "additionalNotes",
+    ],
+    pendingFacts: selectedFeatures.flatMap((feature) => feature.fields.flatMap((field, index) => confirmed.has(`${feature.key}.${index}`) ? [] : [{ key: `${feature.key}.${field.key}`, label: field.label }])),
     referenceStructure: [
       { id: "overview", title: "政策概述", summary: "说明运营主体、产品、适用范围和版本。" },
       { id: "collection_and_use", title: "我们如何收集和使用个人信息", summary: "按处理活动说明目的、字段和使用场景。" },
@@ -258,8 +289,57 @@ async function persistSnapshot(prisma: PrismaClient, args: {
       docx: (args.docx ?? null) as unknown as Uint8Array<ArrayBuffer>,
       docxHash,
       failureCode: args.failureCode ?? null,
+      leaseExpiresAt: null,
     },
   });
+}
+
+async function claimSnapshot(prisma: PrismaClient, args: {
+  projectId: string;
+  expectedRevision: number;
+  generationId: string;
+  input: unknown;
+}): Promise<{ kind: "CLAIMED" } | { kind: "IN_PROGRESS" } | { kind: "SUCCEEDED"; markdown: string; docx: Uint8Array }> {
+  const inputHash = `sha256:${createHash("sha256").update(JSON.stringify(args.input)).digest("hex")}`;
+  const leaseExpiresAt = new Date(Date.now() + 5 * 60_000);
+  try {
+    await prisma.draftSnapshot.create({
+      data: {
+        id: `snap-${args.generationId}`,
+        projectId: args.projectId,
+        projectRevision: args.expectedRevision,
+        idempotencyKey: args.generationId,
+        templateHash: verifiedMapV1Content.contentHash,
+        contentVersion: verifiedMapV1Content.contentVersion,
+        inputHash,
+        state: "GENERATING",
+        leaseExpiresAt,
+      },
+    });
+    return { kind: "CLAIMED" };
+  } catch {
+    const existing = await prisma.draftSnapshot.findUnique({
+      where: { projectId_idempotencyKey: { projectId: args.projectId, idempotencyKey: args.generationId } },
+    });
+    if (!existing) throw new Error("生成租约创建失败");
+    if (existing.inputHash !== inputHash) return { kind: "IN_PROGRESS" };
+    if (existing.state === "SUCCEEDED" && existing.markdown && existing.docx) {
+      return { kind: "SUCCEEDED", markdown: existing.markdown, docx: existing.docx };
+    }
+
+    const now = new Date();
+    const reclaimable = existing.state === "FAILED" || (existing.state === "GENERATING" && existing.leaseExpiresAt !== null && existing.leaseExpiresAt <= now);
+    if (!reclaimable) return { kind: "IN_PROGRESS" };
+    const reclaimed = await prisma.draftSnapshot.updateMany({
+      where: {
+        id: existing.id,
+        state: existing.state,
+        ...(existing.state === "GENERATING" ? { leaseExpiresAt: { lte: now } } : {}),
+      },
+      data: { state: "GENERATING", leaseExpiresAt, failureCode: null, markdown: null, docx: null, docxHash: null },
+    });
+    return reclaimed.count === 1 ? { kind: "CLAIMED" } : { kind: "IN_PROGRESS" };
+  }
 }
 
 function fieldEvidence(fields: Array<{ key: string; sourceRefs: string[] }>, fieldKey: string): string[] {
