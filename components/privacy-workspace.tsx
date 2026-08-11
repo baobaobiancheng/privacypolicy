@@ -22,6 +22,7 @@ import { scenarios } from "@/src/content/map-v1/ui-content";
 import { MarkdownPreview } from "@/components/markdown-preview";
 
 const steps = ["适用范围", "通用信息", "功能与信息", "复核", "生成草稿"];
+const stepRoutes = ["scope", "profile", "features", "review", "draft"] as const;
 const profileFields = [
   ["operatorName", "运营主体全称", "例如：杭州行迹科技有限公司"],
   ["operatorContact", "运营主体联系信息", "例如：浙江省杭州市西湖区××路××号"],
@@ -162,6 +163,44 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   const progress = activeStep === 0 ? (scopeConfirmed ? 20 : 8) : Math.min(96, activeStep * 20 + (canReview ? 18 : 8));
 
   useEffect(() => {
+    let cancelled = false;
+    setHydrated(false);
+
+    // 已创建项目必须先完成服务端水合，再启用自动保存。否则空白初始状态
+    // 会在 MySQL 返回前抢先 PUT，覆盖 POST 创建时保存的范围答案。
+    if (projectId) {
+      loadProjectFromServer(projectId).then((server) => {
+        if (cancelled) return;
+        if (!server) {
+          setStatusMessage("项目数据加载失败，请刷新后重试");
+          setActiveStep(0);
+          setHydrated(true);
+          return;
+        }
+        const serverData: ProjectData = {
+          ...initialProject,
+          ...server.formData,
+          projectId,
+          revision: server.revision,
+          generated: undefined,
+        };
+        lastSavedKeyRef.current = computeFormKey(serverData);
+        setData(serverData);
+        const detailsComplete = scenarios
+          .filter((scenario) => serverData.selected.includes(scenario.id))
+          .every((scenario) => Boolean(serverData.activityDetails[scenario.id]?.purpose.trim() && serverData.activityDetails[scenario.id]?.retention.trim()))
+          && serverData.customFeatures.every((feature) => Boolean(serverData.customDetails[feature]?.purpose.trim() && serverData.customDetails[feature]?.retention.trim()));
+        const serverScopeConfirmed = mapV1Content.payload.scopeGates.every((gate) => serverData.scopeAnswers[gate.id] === true);
+        const serverProfileComplete = profileFields.every(([key]) => Boolean(serverData.profile[key]?.trim()));
+        const firstIncomplete: StepIndex = !serverScopeConfirmed ? 0 : !serverProfileComplete ? 1 : !serverData.selected.length || !detailsComplete ? 2 : 4;
+        setActiveStep(initialStep > firstIncomplete ? firstIncomplete : initialStep);
+        setHydrated(true);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+
     const saved = window.localStorage.getItem(storageKey);
     if (saved) {
       try {
@@ -169,7 +208,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
         setData({
           ...initialProject,
           ...parsed,
-          projectId: projectId ?? parsed.projectId ?? null,
+          projectId: parsed.projectId ?? null,
           scopeAnswers: parsed.scopeAnswers ?? {},
           profile: parsed.profile ?? {},
           selected: parsed.selected ?? [],
@@ -185,20 +224,10 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       }
     }
     setHydrated(true);
-    // MySQL 为数据源：存在 projectId 时用服务端数据覆盖（localStorage 仅离线兜底）。
-    if (projectId) {
-      loadProjectFromServer(projectId).then((server) => {
-        if (!server) return;
-        lastSavedKeyRef.current = computeFormKey(server.formData);
-        setData({
-          ...initialProject,
-          ...server.formData,
-          projectId,
-          revision: server.revision,
-          generated: undefined,
-        });
-      });
-    }
+
+    return () => {
+      cancelled = true;
+    };
   }, [projectId, storageKey, personaId]);
 
   useEffect(() => {
@@ -207,7 +236,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
 
   useEffect(() => {
     if (!hydrated) return;
-    const firstIncomplete: StepIndex = !scopeConfirmed ? 0 : !profileComplete ? 1 : !data.selected.length || !selectedDetailsComplete ? 2 : 3;
+    const firstIncomplete: StepIndex = !scopeConfirmed ? 0 : !profileComplete ? 1 : !data.selected.length || !selectedDetailsComplete ? 2 : 4;
     if (initialStep > firstIncomplete) setActiveStep(firstIncomplete);
   }, [data.selected.length, hydrated, initialStep, profileComplete, scopeConfirmed, selectedDetailsComplete]);
 
@@ -249,7 +278,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     }, 400);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formKey, hydrated, data.projectId, personaId]);
+  }, [formKey, hydrated, data.projectId, data.revision, personaId]);
 
   // 第 4 步加载生成历史记录。
   useEffect(() => {
@@ -286,6 +315,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       throw new Error(payload?.message || "项目创建失败，请检查数据库连接");
     }
     const payload = await res.json() as { projectId: string; revision: number };
+    lastSavedKeyRef.current = formKey;
     setData((current) => ({ ...current, projectId: payload.projectId, revision: payload.revision }));
     return payload.projectId;
   }
@@ -307,6 +337,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       return;
     }
     setActiveStep(step);
+    if (data.projectId) router.push(`/projects/${data.projectId}/${stepRoutes[step]}`);
   }
 
   function updateScope(gateId: string) {
@@ -389,6 +420,10 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   }
 
   async function handleDraftAction() {
+    if (data.generated?.status === "GENERATING") {
+      setStatusMessage("同一份表单正在生成，请稍候");
+      return;
+    }
     if (data.generated?.status === "SUCCEEDED" && downloadUrl) {
       const anchor = document.createElement("a");
       anchor.href = downloadUrl;
@@ -475,7 +510,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
 
           {activeStep === 3 && <section className="workspace-panel panel-enter"><div className="panel-heading"><p>处理活动总览</p><h2>先解决阻断项，再生成工作草稿。</h2><span>客户确认事实，律师判断必要性和处理依据。</span></div><div className="review-summary-grid"><div><span>已选功能</span><strong>{selectedCount}</strong></div><div><span>客户已确认字段</span><strong>{confirmedFieldCount} / {selectedFieldItems.length}</strong></div><div><span>待确认字段</span><strong>{selectedFieldItems.length - confirmedFieldCount}</strong></div><div data-warning={warningCount > 0}><span>律师复核</span><strong>{warningCount}</strong></div></div><div className="field-confirm-list" aria-label="字段级事实确认"><div className="field-confirm-heading"><strong>字段级事实确认</strong><span>只确认产品实际处理什么，不确认法律必要性。</span></div>{draftFields.map((field) => <label key={field.id} className="field-confirm-item"><input type="checkbox" checked={field.confirmed} onChange={() => toggleField(field.id)} /><span className="custom-checkbox"><Check weight="bold" /></span><span><strong>{field.label}</strong><small>{field.feature}</small></span></label>)}</div><div className="review-table" role="table" aria-label="处理活动总览"><div className="review-row review-head" role="row"><span>处理活动</span><span>来源</span><span>状态</span></div>{selectedScenarios.map((item) => { const fields = selectedFieldItems.filter((field) => field.featureId === item.id); const complete = fields.length > 0 && fields.every((field) => confirmedFieldSet.has(field.id)); return <div className="review-row" role="row" key={item.id}><span><strong>{item.title}</strong><small>{item.fields.join("、")}</small></span><span>{item.source}</span><span className={item.risk ? "status-warning" : complete ? "status-complete" : "status-pending"}>{item.risk ? "待律师复核" : complete ? "客户已确认" : "待客户确认"}</span></div>; })}{selectedCustomFeatures.map((item) => <div className="review-row" role="row" key={item}><span><strong>{item}</strong><small>客户自定义功能</small></span><span>客户填写</span><span className={data.customDetails[item]?.purpose && data.customDetails[item]?.retention ? "status-complete" : "status-pending"}>{data.customDetails[item]?.purpose && data.customDetails[item]?.retention ? "客户已确认" : "待客户确认"}</span></div>)}</div>{warningCount > 0 && <div className="warning-callout"><Warning weight="fill" /><div><strong>存在律师复核提示</strong><span>风险活动会进入复核附录，不会被系统自动判断为合规。</span></div></div>}<div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(2)}><ArrowLeft weight="bold" /> 返回修改</button><button type="button" className="button button-primary" disabled={!canReview} onClick={() => goToStep(4)}>预览草稿 <ArrowRight weight="bold" /></button></div></section>}
 
-          {activeStep === 4 && <section className="workspace-panel draft-panel panel-enter"><div className="panel-heading"><p>工作草稿</p><h2>{data.generated?.status === "SUCCEEDED" ? "Markdown 草稿已生成，可直接预览。" : "准备生成 Markdown 工作草稿。"}</h2><span>模型输出 Markdown，页面实时渲染；下载按钮会获取同一份内容对应的 Word 文件。文件会标注“工作草稿，未经律师批准”。{pendingFieldCount > 0 ? ` ${pendingFieldCount} 个未确认字段会以占位符进入律师复核附录。` : ""}{data.generated?.status === "FAILED" ? ` ${data.generated.message}` : ""}</span></div><div className="draft-preview"><div className="draft-page"><span className="draft-watermark">工作草稿 · 律师复核前</span><MarkdownPreview markdown={data.generatedMarkdown} fallback={<><h3>{data.profile.productName || "未填写产品名称"} 隐私政策</h3><p>本政策适用于{data.profile.operatorName || "[[待确认:运营主体]]"}提供的{data.profile.productName || "[[待确认:产品名称]]"} {data.profile.productVersion || "[[待确认:产品版本]]"}。</p><h4>我们如何收集和使用个人信息</h4><p>为提供{[...selectedScenarios.map((scenario) => scenario.title), ...selectedCustomFeatures].join("、") || "[[待确认:产品功能]]"}，本产品可能处理以下信息：</p><p>{draftFields.map((field) => field.confirmed ? field.label : `[[待确认:${field.label}]]`).join("、") || "[[待确认:个人信息字段]]"}。</p></>} /><p className="draft-footnote">当前项目修订号：{data.revision} · {confirmedFieldCount} 个字段已确认</p></div><aside className="draft-audit"><FileDoc weight="duotone" /><strong>{data.generated?.status === "GENERATING" ? "正在生成 Markdown" : "Markdown 预览"}</strong><span>内容版本 {mapV1Content.contentVersion}</span><span>{selectedCount} 项处理活动</span><span>{pendingFieldCount} 个待确认字段</span><span>{warningCount} 项律师复核提示</span></aside></div>{data.projectId && <div className="draft-history"><div className="field-confirm-heading"><strong>生成历史记录</strong><span>历次生成都会持久化到服务器，可随时重新下载 Word。</span></div>{history === null ? <p className="history-empty">正在加载历史…</p> : history.length === 0 ? <p className="history-empty">暂无生成记录。</p> : <ul className="history-list">{history.map((item) => <li key={item.id}><span className={item.state === "SUCCEEDED" ? "status-complete" : "status-pending"}>{item.state === "SUCCEEDED" ? "已生成" : "生成失败"}</span><span>{new Date(item.createdAt).toLocaleString()}</span>{item.failureCode ? <small>{item.failureCode}</small> : null}{item.docxBase64 ? <button type="button" className="button button-ghost" onClick={() => downloadSnapshotDocx(item)}><DownloadSimple weight="bold" /> 重新下载</button> : null}</li>)}</ul>}</div>}<div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(3)}><ArrowLeft weight="bold" /> 返回总览</button><button type="button" className="button button-primary" disabled={!canGenerate && data.generated?.status !== "SUCCEEDED"} onClick={handleDraftAction}>{data.generated?.status === "SUCCEEDED" ? <><DownloadSimple weight="bold" /> 下载 Word 工作草稿</> : <><FileDoc weight="bold" /> {data.generated?.status === "FAILED" ? "使用同一份表单重试" : "生成 Markdown 草稿"}</>}</button></div></section>}
+          {activeStep === 4 && <section className="workspace-panel draft-panel panel-enter"><div className="panel-heading"><p>工作草稿</p><h2>{data.generated?.status === "SUCCEEDED" ? "Markdown 草稿已生成，可直接预览。" : "准备生成 Markdown 工作草稿。"}</h2><span>模型输出 Markdown，页面实时渲染；下载按钮会获取同一份内容对应的 Word 文件。文件会标注“工作草稿，未经律师批准”。{pendingFieldCount > 0 ? ` ${pendingFieldCount} 个未确认字段会以占位符进入律师复核附录。` : ""}{data.generated?.status === "FAILED" ? ` ${data.generated.message}` : ""}</span></div><div className="draft-preview"><div className="draft-page"><span className="draft-watermark">工作草稿 · 律师复核前</span><MarkdownPreview markdown={data.generatedMarkdown} fallback={<><h3>{data.profile.productName || "未填写产品名称"} 隐私政策</h3><p>本政策适用于{data.profile.operatorName || "[[待确认:运营主体]]"}提供的{data.profile.productName || "[[待确认:产品名称]]"} {data.profile.productVersion || "[[待确认:产品版本]]"}。</p><h4>我们如何收集和使用个人信息</h4><p>为提供{[...selectedScenarios.map((scenario) => scenario.title), ...selectedCustomFeatures].join("、") || "[[待确认:产品功能]]"}，本产品可能处理以下信息：</p><p>{draftFields.map((field) => field.confirmed ? field.label : `[[待确认:${field.label}]]`).join("、") || "[[待确认:个人信息字段]]"}。</p></>} /><p className="draft-footnote">当前项目修订号：{data.revision} · {confirmedFieldCount} 个字段已确认</p></div><aside className="draft-audit"><FileDoc weight="duotone" /><strong>{data.generated?.status === "GENERATING" ? "正在生成 Markdown" : "Markdown 预览"}</strong><span>内容版本 {mapV1Content.contentVersion}</span><span>{selectedCount} 项处理活动</span><span>{pendingFieldCount} 个待确认字段</span><span>{warningCount} 项律师复核提示</span></aside></div>{data.projectId && <div className="draft-history"><div className="field-confirm-heading"><strong>生成历史记录</strong><span>历次生成都会持久化到服务器，可随时重新下载 Word。</span></div>{history === null ? <p className="history-empty">正在加载历史…</p> : history.length === 0 ? <p className="history-empty">暂无生成记录。</p> : <ul className="history-list">{history.map((item) => <li key={item.id}><span className={item.state === "SUCCEEDED" ? "status-complete" : "status-pending"}>{item.state === "SUCCEEDED" ? "已生成" : "生成失败"}</span><span>{new Date(item.createdAt).toLocaleString()}</span>{item.failureCode ? <small>{item.failureCode}</small> : null}{item.docxBase64 ? <button type="button" className="button button-ghost" onClick={() => downloadSnapshotDocx(item)}><DownloadSimple weight="bold" /> 重新下载</button> : null}</li>)}</ul>}</div>}<div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(3)}><ArrowLeft weight="bold" /> 返回总览</button><button type="button" className="button button-primary" disabled={data.generated?.status === "GENERATING" || (!canGenerate && data.generated?.status !== "SUCCEEDED")} onClick={handleDraftAction}>{data.generated?.status === "SUCCEEDED" ? <><DownloadSimple weight="bold" /> 下载 Word 工作草稿</> : <><FileDoc weight="bold" /> {data.generated?.status === "GENERATING" ? "正在生成…" : data.generated?.status === "FAILED" ? "使用同一份表单重试" : "生成 Markdown 草稿"}</>}</button></div></section>}
         </div>
       </div>
     </main>
