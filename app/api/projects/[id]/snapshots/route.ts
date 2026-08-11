@@ -29,6 +29,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     state: snapshot.state,
     createdAt: snapshot.createdAt.toISOString(),
     failureCode: snapshot.failureCode,
+    inputJson: snapshot.inputJson,
     markdown: snapshot.markdown,
     docxBase64: snapshot.docx ? Buffer.from(snapshot.docx).toString("base64") : null,
   }));

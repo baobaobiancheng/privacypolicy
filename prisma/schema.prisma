@@ -294,6 +294,7 @@ model DraftSnapshot {
   templateHash     String        @db.Char(71)
   contentVersion   String        @db.VarChar(64)
   inputHash        String        @db.Char(71)
+  inputJson        Json?
   state            SnapshotState @default(PENDING)
   markdown         String?       @db.LongText
   docx             Bytes?        @db.LongBlob

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createHash } from "node:crypto";
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { verifiedMapV1Content } from "@/src/content/map-v1/server-content";
 import { buildDraftPlan } from "@/src/domain/draft/export-plan";
 import { evaluateExportInvariants, type ActivityFacts } from "@/src/domain/rules";
@@ -277,6 +277,7 @@ async function persistSnapshot(prisma: PrismaClient, args: {
       templateHash: content.contentHash,
       contentVersion: content.contentVersion,
       inputHash,
+      inputJson: args.input as Prisma.InputJsonValue,
       state: args.state,
       markdown: args.markdown ?? null,
       docx: (args.docx ?? null) as unknown as Uint8Array<ArrayBuffer>,
@@ -285,6 +286,7 @@ async function persistSnapshot(prisma: PrismaClient, args: {
     },
     update: {
       state: args.state,
+      inputJson: args.input as Prisma.InputJsonValue,
       markdown: args.markdown ?? null,
       docx: (args.docx ?? null) as unknown as Uint8Array<ArrayBuffer>,
       docxHash,
@@ -312,6 +314,7 @@ async function claimSnapshot(prisma: PrismaClient, args: {
         templateHash: verifiedMapV1Content.contentHash,
         contentVersion: verifiedMapV1Content.contentVersion,
         inputHash,
+        inputJson: args.input as Prisma.InputJsonValue,
         state: "GENERATING",
         leaseExpiresAt,
       },
