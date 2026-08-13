@@ -13,6 +13,8 @@ import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
 import { ensureDevUsers } from "@/src/data/dev-seed";
 import { getPrisma } from "@/src/data/prisma";
 import { authorizeProject, type ProjectAccessRecord } from "@/src/application/authorization";
+import { evaluateFormalPolicyReadiness } from "@/src/knowledge/readiness";
+import { mapCnKnowledgePackage } from "@/src/knowledge/map-cn";
 
 export const runtime = "nodejs";
 
@@ -39,6 +41,11 @@ export async function GET() {
       customDetails: {},
       activityDetails: { navigation: { purpose: "提供定位和路线规划", retention: "导航结束后删除或去标识化" } },
       additionalNotes: "",
+      scopeAnswers: { "single-product": true, "map-primary": true, "single-category": true, "no-cross-border": true },
+      supplementAnswers: {
+        "third-party-services": { answer: "NO", detail: "" },
+        "background-location": { answer: "NO", detail: "" },
+      },
     }, `generation-demo-${Date.now().toString(36)}`);
     return NextResponse.json(rest);
   } catch (error) {
@@ -61,6 +68,14 @@ export async function POST(request: Request) {
   }
   const hasSelected = verifiedMapV1Content.payload.features.some((feature) => parsed.data.selected.includes(feature.key));
   if (!hasSelected) return NextResponse.json({ code: "NO_SELECTED_FEATURE" }, { status: 422 });
+  const readiness = evaluateFormalPolicyReadiness(parsed.data);
+  if (!readiness.ready) {
+    return NextResponse.json({
+      code: "FORM_NOT_READY",
+      message: "请先完成字段确认和动态补充问卷，再生成待律师批准版本。",
+      diagnostics: readiness.diagnostics,
+    }, { status: 422 });
+  }
 
   await ensureDevUsers();
   const prisma = getPrisma();
@@ -115,7 +130,7 @@ export async function POST(request: Request) {
 
 function modelErrorResponse(error: unknown) {
   if (isDomainError(error)) {
-    const status = error.code === "MODEL_NOT_CONFIGURED" ? 503 : error.code === "PROJECT_FORBIDDEN" ? 403 : 502;
+    const status = error.code === "MODEL_NOT_CONFIGURED" ? 503 : error.code === "PROJECT_FORBIDDEN" ? 403 : error.code === "FORM_NOT_READY" || error.code === "EXPORT_BLOCKED" ? 422 : 502;
     return NextResponse.json({ code: error.code, message: error.message, retryable: error.retryable }, { status });
   }
   return NextResponse.json({ code: "DOCX_GENERATION_FAILED", message: "草稿生成失败，请使用同一份表单重新生成。", retryable: true }, { status: 502 });
@@ -181,7 +196,7 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
     };
   }));
   const evaluation = evaluateExportInvariants({
-    scope: { "single-product": true, "map-primary": true, "single-category": true, "no-cross-border": true },
+    scope: input.scopeAnswers,
     activities,
     commonFacts: [],
   });
@@ -201,9 +216,16 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       activityDetails: input.activityDetails,
       confirmedFields: input.confirmedFields,
       additionalNotes: input.additionalNotes,
+      scopeAnswers: input.scopeAnswers,
+      supplementAnswers: input.supplementAnswers,
     },
     contentVersion: verifiedMapV1Content.contentVersion,
     contentHash: verifiedMapV1Content.contentHash,
+    knowledgeContext: {
+      packageVersion: mapCnKnowledgePackage.contentVersion,
+      packageHash: mapCnKnowledgePackage.packageHash,
+      ruleSummary: mapCnKnowledgePackage.sources.map((source) => `${source.id}:${source.role}`),
+    },
     selectedFeatures: selectedFeatures.map((feature) => ({
       key: feature.key,
       title: feature.title,
@@ -216,6 +238,7 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       ...input.customFeatures.flatMap((key) => [`customDetails.${key}.purpose`, `customDetails.${key}.retention`]),
       ...Object.keys(input.profile),
       ...Object.keys(input.profile).map((key) => `profile.${key}`),
+      ...Object.keys(input.supplementAnswers).map((key) => `supplementAnswers.${key}.detail`),
       ...verifiedMapV1Content.payload.commonDisclosureFields.map((field) => field.key),
       ...input.customFeatures,
       "additionalNotes",
@@ -226,13 +249,14 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       ...input.customFeatures.flatMap((key) => [`customDetails.${key}.purpose`, `customDetails.${key}.retention`]),
       ...Object.keys(input.profile),
       ...Object.keys(input.profile).map((key) => `profile.${key}`),
+      ...Object.entries(input.supplementAnswers).flatMap(([key, answer]) => answer.answer === "YES" && answer.detail ? [`supplementAnswers.${key}.detail`] : []),
       "additionalNotes",
     ],
-    pendingFacts: selectedFeatures.flatMap((feature) => feature.fields.flatMap((field, index) => confirmed.has(`${feature.key}.${index}`) ? [] : [{ key: `${feature.key}.${field.key}`, label: field.label }])),
+    pendingFacts: [],
     referenceStructure: [
       { id: "overview", title: "政策概述", summary: "说明运营主体、产品、适用范围和版本。" },
       { id: "collection_and_use", title: "我们如何收集和使用个人信息", summary: "按处理活动说明目的、字段和使用场景。" },
-      { id: "retention", title: "保存期限", summary: "披露客户填写的保存期限规则，未确认处使用占位符。" },
+      { id: "retention", title: "保存期限", summary: "披露客户填写的保存期限规则。" },
       { id: "rights", title: "用户权利", summary: "使用客户填写的权利请求入口和响应信息，法律细节留待律师复核。" },
       { id: "third_parties", title: "委托、共享与第三方", summary: "仅在客户事实中出现时披露，不得凭参考政策推断第三方。" },
       { id: "security", title: "安全措施", summary: "只写客户确认的安全事实，不能自动承诺不存在的措施。" },

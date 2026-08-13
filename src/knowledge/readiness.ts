@@ -1,0 +1,62 @@
+import type { FormPayload } from "@/src/ai/deepseek";
+import { getRequiredSupplementQuestions } from "./map-cn";
+import { SupplementAnswerSchema, type SupplementAnswer } from "./map-cn/schema";
+import { mapV1Content } from "@/src/content/map-v1";
+
+export type ReadinessDiagnostic = {
+  code: "OUT_OF_SCOPE" | "NEEDS_CUSTOMER_INPUT" | "NEEDS_PRODUCT_OR_TECH" | "NEEDS_LEGAL_REVIEW";
+  severity: "BLOCKING" | "WARNING";
+  message: string;
+  target?: string;
+};
+
+export type FormalPolicyReadiness = {
+  ready: boolean;
+  diagnostics: ReadinessDiagnostic[];
+  requiredQuestionIds: string[];
+  answers: Record<string, SupplementAnswer>;
+};
+
+const profileKeys = ["operatorName", "operatorContact", "productName", "productVersion", "contactEmail", "rightsEntry", "rightsResponsePeriod", "minorProcessing", "securityMeasures", "incidentChannel", "policyEffectiveDate", "policyUpdateNotice"] as const;
+
+export function evaluateFormalPolicyReadiness(input: FormPayload & { scopeAnswers?: Record<string, boolean>; supplementAnswers?: Record<string, SupplementAnswer> }): FormalPolicyReadiness {
+  const diagnostics: ReadinessDiagnostic[] = [];
+  const scopeAnswers = input.scopeAnswers ?? {};
+  for (const gate of ["single-product", "map-primary", "single-category", "no-cross-border"]) {
+    if (scopeAnswers[gate] !== true) diagnostics.push({ code: "OUT_OF_SCOPE", severity: "BLOCKING", target: gate, message: "当前项目未通过地图类首期范围门禁，不能生成待批准版本。" });
+  }
+  for (const key of profileKeys) {
+    if (!(input.profile[key] ?? "").trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `profile.${key}`, message: "通用披露信息尚未填写完整。" });
+  }
+  for (const feature of input.selected) {
+    const detail = input.activityDetails[feature];
+    if (!detail?.purpose?.trim() || !detail.retention?.trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `activity.${feature}`, message: "每个已选功能都需要填写实际处理目的和保存期限。" });
+  }
+  const confirmed = new Set(input.confirmedFields);
+  for (const feature of mapV1Content.payload.features.filter((item) => input.selected.includes(item.key))) {
+    feature.fields.forEach((field, index) => {
+      if (!confirmed.has(`${feature.key}.${index}`)) {
+        diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `field.${feature.key}.${field.key}`, message: `请确认“${feature.title}”实际处理的“${field.label}”。` });
+      }
+    });
+  }
+  for (const feature of input.customFeatures) {
+    const detail = input.customDetails[feature];
+    if (!detail?.purpose?.trim() || !detail.retention?.trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `custom.${feature}`, message: `自定义功能“${feature}”缺少处理目的或保存期限。` });
+  }
+
+  const requiredQuestions = getRequiredSupplementQuestions(input);
+  const answers: Record<string, SupplementAnswer> = {};
+  for (const question of requiredQuestions) {
+    const result = SupplementAnswerSchema.safeParse(input.supplementAnswers?.[question.id]);
+    if (!result.success) {
+      diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `question.${question.id}`, message: `请确认“${question.title}”。` });
+      continue;
+    }
+    answers[question.id] = result.data;
+    if (result.data.answer === "UNKNOWN") diagnostics.push({ code: "NEEDS_PRODUCT_OR_TECH", severity: "BLOCKING", target: `question.${question.id}`, message: question.unknownMessage });
+    if (result.data.answer === "YES" && !result.data.detail.trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `question.${question.id}`, message: `“${question.title}”已选择“有”，请补充具体事实。` });
+    if (result.data.answer === "YES") diagnostics.push({ code: "NEEDS_LEGAL_REVIEW", severity: "WARNING", target: `question.${question.id}`, message: `“${question.title}”会在律师复核时重点核对。` });
+  }
+  return { ready: !diagnostics.some((item) => item.severity === "BLOCKING"), diagnostics, requiredQuestionIds: requiredQuestions.map((item) => item.id), answers };
+}

@@ -1,0 +1,143 @@
+{
+  "schemaVersion": "1",
+  "contentVersion": "map-cn-v1.0.0",
+  "packageHash": "sha256:583c62d9255b7fac103396abacd7376a2edc32e01464936591d727b9b4390b8e",
+  "publishedAt": "2026-08-13T00:00:00.000Z",
+  "category": "地图导航类",
+  "sources": [
+    {
+      "id": "REG-CORE-01",
+      "title": "中华人民共和国个人信息保护法",
+      "role": "法律披露与处理规则",
+      "url": "https://www.npc.gov.cn/npc/c2/c30834/202108/t20210820_313088.html"
+    },
+    {
+      "id": "REG-CORE-02",
+      "title": "网络数据安全管理条例",
+      "role": "网络数据处理规则",
+      "url": "https://www.cac.gov.cn/2024-09/30/c_1729384452307680.htm"
+    },
+    {
+      "id": "REG-CORE-03",
+      "title": "常见类型移动互联网应用程序必要个人信息范围规定",
+      "role": "地图基本功能及必要信息边界",
+      "url": "https://www.cac.gov.cn/2021-03/22/c_1617990997054277.htm"
+    },
+    {
+      "id": "REG-CORE-04",
+      "title": "App违法违规收集使用个人信息行为认定方法",
+      "role": "收集使用行为核对",
+      "url": "https://www.cac.gov.cn/2019-12/27/c_1578986455686625.htm"
+    },
+    {
+      "id": "REG-CORE-05",
+      "title": "移动互联网应用程序信息服务管理规定",
+      "role": "应用服务管理规则",
+      "url": "https://www.cac.gov.cn/2022-06/14/c_1656821626455324.htm"
+    },
+    {
+      "id": "STD-CORE-01",
+      "title": "GB/T 44588-2024",
+      "role": "个人信息保护告知同意指南"
+    },
+    {
+      "id": "STD-CORE-02",
+      "title": "GB/T 42574-2023",
+      "role": "个人信息处理告知同意指南"
+    },
+    {
+      "id": "STD-CORE-03",
+      "title": "GB/T 45574-2025",
+      "role": "个人信息保护影响评估指南"
+    },
+    {
+      "id": "STD-CORE-04",
+      "title": "GB/T 35273-2020",
+      "role": "个人信息安全规范"
+    }
+  ],
+  "questions": [
+    {
+      "id": "third-party-services",
+      "title": "SDK 与第三方服务",
+      "prompt": "产品是否使用 SDK、云服务、统计、推送、地图或其他第三方服务，并因此向其提供个人信息？",
+      "help": "仅回答本产品实际使用的服务。不要凭行业惯例填写；如有，请列出服务名称、用途、涉及信息和是否可能接收信息。",
+      "requiredWhen": {
+        "always": true
+      },
+      "yesDetailLabel": "请填写服务名称、用途、涉及信息和接收方式",
+      "unknownMessage": "请由产品或技术负责人确认 SDK 和第三方数据流后再生成。",
+      "riskCode": "THIRD_PARTY_REVIEW"
+    },
+    {
+      "id": "background-location",
+      "title": "后台定位",
+      "prompt": "用户未主动使用导航时，产品是否仍会在后台持续或定时获取位置信息？",
+      "help": "前台导航期间获取定位与后台持续定位不同，请按产品实际行为回答。",
+      "requiredWhen": {
+        "selectedAny": [
+          "navigation",
+          "traffic"
+        ]
+      },
+      "yesDetailLabel": "请说明触发条件、用途、关闭方式和保存期限",
+      "unknownMessage": "请由产品或技术负责人确认定位权限和后台任务配置。",
+      "riskCode": "BACKGROUND_LOCATION_REVIEW"
+    },
+    {
+      "id": "history-and-favorites",
+      "title": "搜索、浏览与收藏记录",
+      "prompt": "产品是否保存用户的搜索、浏览、路线、地点收藏或常用地点记录？",
+      "help": "如有，请说明保存哪些记录、用途、是否与账号同步及删除规则。",
+      "requiredWhen": {
+        "selectedAny": [
+          "discovery"
+        ]
+      },
+      "yesDetailLabel": "请说明记录类型、用途、账号同步方式和删除规则",
+      "unknownMessage": "请确认搜索、浏览和收藏记录的实际存储行为。",
+      "riskCode": "HISTORY_REVIEW"
+    },
+    {
+      "id": "personalized-content",
+      "title": "个性化展示或推荐",
+      "prompt": "产品是否依据浏览、点击、位置或设备信息进行个性化内容展示、广告或推荐？",
+      "help": "如有，请说明使用的信息、目的以及用户可用的关闭入口。",
+      "requiredWhen": {
+        "selectedAny": [
+          "discovery"
+        ]
+      },
+      "yesDetailLabel": "请说明使用的信息、目的和关闭入口",
+      "unknownMessage": "请确认推荐、广告或排序功能是否使用个人信息。",
+      "riskCode": "PERSONALIZATION_REVIEW"
+    },
+    {
+      "id": "diagnostic-logs",
+      "title": "诊断日志与崩溃信息",
+      "prompt": "产品是否收集崩溃日志、性能诊断信息或设备标识符以排查故障？",
+      "help": "如有，请说明涉及信息、触发时机、用途和保存规则。",
+      "requiredWhen": {
+        "selectedAny": [
+          "security",
+          "support"
+        ]
+      },
+      "yesDetailLabel": "请说明涉及信息、触发时机、用途和保存规则",
+      "unknownMessage": "请由技术负责人确认监控、崩溃收集和日志 SDK 的配置。",
+      "riskCode": "DIAGNOSTIC_LOG_REVIEW"
+    },
+    {
+      "id": "custom-feature-data",
+      "title": "自定义功能的额外信息",
+      "prompt": "表单外新增功能是否还会处理上述功能卡片未列出的个人信息？",
+      "help": "如有，请按功能说明信息类型、处理目的、保存期限、权限和第三方情况。",
+      "requiredWhen": {
+        "hasCustomFeature": true
+      },
+      "yesDetailLabel": "请按功能说明涉及信息、目的、保存期限、权限和第三方情况",
+      "unknownMessage": "请将自定义功能的数据流补充给产品或技术负责人确认。",
+      "riskCode": "CUSTOM_FEATURE_REVIEW"
+    }
+  ]
+}

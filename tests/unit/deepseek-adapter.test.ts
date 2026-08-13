@@ -22,7 +22,8 @@ const input: PolicyGenerationInput = {
     customDetails: {},
     activityDetails: { navigation: { purpose: "导航", retention: "导航结束后" } },
     confirmedFields: ["navigation.0"],
-    additionalNotes: "仅前台调用定位 SDK",
+    additionalNotes: "",
+    supplementAnswers: { "third-party-services": { answer: "YES", detail: "定位 SDK，用于路线规划" } },
   },
   contentVersion: "map-v1.0.0",
   contentHash: "sha256:test",
@@ -79,11 +80,11 @@ describe("DeepSeek adapter", () => {
     await expect(generatePolicyDraft(input)).resolves.toMatchObject({ unmatchedReferences: ["invented-field"] });
   });
 
-  it("adds pending facts deterministically instead of asking the model to maintain placeholders", async () => {
+  it("rejects pending facts so a formal candidate cannot contain placeholders", async () => {
     process.env.DEEPSEEK_API_KEY = "test-key";
     vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: completeMarkdown } }] }), { status: 200 })));
 
-    const result = await generatePolicyDraft({
+    await expect(generatePolicyDraft({
       ...input,
       allowedFactKeys: [...input.allowedFactKeys, "navigation.origin"],
       pendingFacts: [{ key: "navigation.origin", label: "出发地" }],
@@ -91,9 +92,6 @@ describe("DeepSeek adapter", () => {
         ...input.selectedFeatures[0],
         fields: [...input.selectedFeatures[0].fields, { key: "origin", label: "出发地", confirmed: false }],
       }],
-    });
-
-    expect(result.markdown).toContain("[[待确认:出发地]]");
-    expect(result.openItems).toContainEqual({ assertionId: "navigation.origin", reason: "请确认产品是否处理「出发地」" });
+    })).rejects.toMatchObject({ code: "EXPORT_BLOCKED" });
   });
 });

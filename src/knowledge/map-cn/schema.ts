@@ -1,0 +1,40 @@
+import { z } from "zod";
+
+const StableId = z.string().regex(/^[a-z][a-z0-9-]{1,63}$/);
+
+const RequirementSchema = z.object({
+  always: z.boolean().optional(),
+  selectedAny: z.array(StableId).min(1).optional(),
+  hasCustomFeature: z.boolean().optional(),
+}).strict().refine((value) => Boolean(value.always || value.selectedAny?.length || value.hasCustomFeature), "至少定义一个触发条件");
+
+export const SupplementAnswerSchema = z.object({
+  answer: z.enum(["YES", "NO", "UNKNOWN"]),
+  detail: z.string().trim().max(4_000).default(""),
+  updatedAt: z.string().datetime().optional(),
+}).strict();
+
+export const KnowledgeQuestionSchema = z.object({
+  id: StableId,
+  title: z.string().min(1),
+  prompt: z.string().min(1),
+  help: z.string().min(1),
+  requiredWhen: RequirementSchema,
+  yesDetailLabel: z.string().min(1),
+  unknownMessage: z.string().min(1),
+  riskCode: z.string().min(1),
+}).strict();
+
+export const MapKnowledgePackageSchema = z.object({
+  schemaVersion: z.literal("1"),
+  contentVersion: z.string().regex(/^map-cn-v1\.\d+\.\d+$/),
+  packageHash: z.string().regex(/^sha256:(?:[a-f0-9]{64}|__GENERATED__)$/),
+  publishedAt: z.string().datetime(),
+  category: z.literal("地图导航类"),
+  sources: z.array(z.object({ id: z.string().min(1), title: z.string().min(1), role: z.string().min(1), url: z.string().url().optional() }).strict()).min(9),
+  questions: z.array(KnowledgeQuestionSchema).min(1),
+}).strict();
+
+export type SupplementAnswer = z.infer<typeof SupplementAnswerSchema>;
+export type KnowledgeQuestion = z.infer<typeof KnowledgeQuestionSchema>;
+export type MapKnowledgePackage = z.infer<typeof MapKnowledgePackageSchema>;

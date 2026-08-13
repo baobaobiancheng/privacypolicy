@@ -36,12 +36,12 @@ export async function renderDraftDocx(plan: DraftPlan, metadata: DraftMetadata, 
   const body = [
     ...(generatedDraft ? [] : [
       new Paragraph({ text: `${metadata.productName} 隐私政策`, heading: HeadingLevel.TITLE }),
-      new Paragraph({ children: [new TextRun({ text: "工作草稿 · 律师复核前", bold: true, color: "A45C00" })] }),
+      new Paragraph({ children: [new TextRun({ text: "待律师批准版本", bold: true, color: "A45C00" })] }),
       new Paragraph(`本政策适用于${metadata.operatorName}提供的${metadata.productName} ${metadata.productVersion}。`),
     ]),
     ...(generatedDraft
       ? [
-        new Paragraph({ children: [new TextRun({ text: "工作草稿 · 律师复核前", bold: true, color: "A45C00" })] }),
+        new Paragraph({ children: [new TextRun({ text: "待律师批准版本", bold: true, color: "A45C00" })] }),
         ...parseMarkdownBlocks(generatedDraft.markdown).map((block) => new Paragraph({
           children: [new TextRun({ text: block.text, italics: block.type === "quote" })],
           heading: block.type === "title" ? HeadingLevel.TITLE : block.type === "heading1" ? HeadingLevel.HEADING_1 : block.type === "heading2" ? HeadingLevel.HEADING_2 : undefined,
@@ -74,12 +74,12 @@ export async function renderDraftDocx(plan: DraftPlan, metadata: DraftMetadata, 
     sections: [{
       headers: {
         default: new Header({
-          children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: "知证 · 工作草稿", color: "708078", size: 16 })] })],
+          children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: "知证 · 待律师批准版本", color: "708078", size: 16 })] })],
         }),
       },
       footers: {
         default: new Footer({
-          children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "律师复核前 · 第 " }), new TextRun({ children: [PageNumber.CURRENT] }), new TextRun({ text: " 页" })] })],
+          children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "待律师批准 · 第 " }), new TextRun({ children: [PageNumber.CURRENT] }), new TextRun({ text: " 页" })] })],
         }),
       },
       children: body,
