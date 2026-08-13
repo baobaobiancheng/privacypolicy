@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { requireDevActor } from "@/src/auth/session";
+import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
 import { ensureDevUsers } from "@/src/data/dev-seed";
 import { getPrisma } from "@/src/data/prisma";
 import { authorizeProject, type ProjectAccessRecord } from "@/src/application/authorization";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (process.env.NODE_ENV !== "development") {
+  if (!isDevPersonaEnabled()) {
     return NextResponse.json({ code: "PROJECT_FORBIDDEN" }, { status: 404 });
   }
   const { id } = await params;

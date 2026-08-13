@@ -11,5 +11,8 @@ export function getDevPersona(id: string): DevPersona | null {
 }
 
 export function isDevPersonaEnabled(environment = process.env.NODE_ENV): boolean {
-  return environment === "development";
+  if (environment === "development") return true;
+  // 生产环境在接真实登录前，如需保留开发身份机制，用 ALLOW_DEV_PERSONA=1 显式放行。
+  const flag = process.env.ALLOW_DEV_PERSONA;
+  return flag === "1" || flag === "true";
 }

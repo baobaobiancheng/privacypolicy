@@ -3,6 +3,7 @@ import { z } from "zod";
 import { randomBytes } from "node:crypto";
 import { verifiedMapV1Content } from "@/src/content/map-v1/server-content";
 import { requireDevActor } from "@/src/auth/session";
+import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
 import { ensureDevUsers } from "@/src/data/dev-seed";
 import { getPrisma } from "@/src/data/prisma";
 import { isDomainError } from "@/src/domain/errors";
@@ -12,7 +13,7 @@ const CreateProjectSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV !== "development") {
+  if (!isDevPersonaEnabled()) {
     return NextResponse.json({ code: "PROJECT_FORBIDDEN" }, { status: 404 });
   }
   const actor = requireDevActor(request);
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  if (process.env.NODE_ENV !== "development") {
+  if (!isDevPersonaEnabled()) {
     return NextResponse.json({ code: "PROJECT_FORBIDDEN" }, { status: 404 });
   }
   const actor = requireDevActor(request);

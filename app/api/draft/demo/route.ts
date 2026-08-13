@@ -9,6 +9,7 @@ import { renderDraftDocx } from "@/src/documents/render-draft";
 import { FormPayloadSchema, generatePolicyDraft } from "@/src/ai/deepseek";
 import { isDomainError } from "@/src/domain/errors";
 import { requireDevActor } from "@/src/auth/session";
+import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
 import { ensureDevUsers } from "@/src/data/dev-seed";
 import { getPrisma } from "@/src/data/prisma";
 import { authorizeProject, type ProjectAccessRecord } from "@/src/application/authorization";
@@ -25,7 +26,7 @@ const DraftMetaSchema = z.object({
 type DraftResponse = { buffer: Buffer; generationId: string; filename: string; model: string; markdown: string; docxBase64: string };
 
 export async function GET() {
-  if (process.env.NODE_ENV !== "development") {
+  if (!isDevPersonaEnabled()) {
     return NextResponse.json({ code: "PROJECT_FORBIDDEN" }, { status: 404 });
   }
 
@@ -46,7 +47,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV !== "development") return NextResponse.json({ code: "PROJECT_FORBIDDEN" }, { status: 404 });
+  if (!isDevPersonaEnabled()) return NextResponse.json({ code: "PROJECT_FORBIDDEN" }, { status: 404 });
   const actor = requireDevActor(request);
 
   const body = await request.json().catch(() => null);

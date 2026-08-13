@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import { requireDevActor } from "@/src/auth/session";
+import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
 import { ensureDevUsers } from "@/src/data/dev-seed";
 import { getPrisma } from "@/src/data/prisma";
 import { authorizeProject, type ProjectAccessRecord } from "@/src/application/authorization";
@@ -24,7 +25,7 @@ async function loadAccess(id: string) {
 }
 
 export async function GET(request: Request, { params }: RouteContext) {
-  if (process.env.NODE_ENV !== "development") {
+  if (!isDevPersonaEnabled()) {
     return NextResponse.json({ code: "PROJECT_FORBIDDEN" }, { status: 404 });
   }
   const { id } = await params;
@@ -37,7 +38,7 @@ export async function GET(request: Request, { params }: RouteContext) {
 }
 
 export async function PUT(request: Request, { params }: RouteContext) {
-  if (process.env.NODE_ENV !== "development") {
+  if (!isDevPersonaEnabled()) {
     return NextResponse.json({ code: "PROJECT_FORBIDDEN" }, { status: 404 });
   }
   const { id } = await params;
