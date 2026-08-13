@@ -72,7 +72,7 @@ export async function POST(request: Request) {
   if (!readiness.ready) {
     return NextResponse.json({
       code: "FORM_NOT_READY",
-      message: "请先完成字段确认和动态补充问卷，再生成待律师批准版本。",
+      message: "请先完成字段确认和动态补充问卷，再生成隐私政策草稿。",
       diagnostics: readiness.diagnostics,
     }, { status: 422 });
   }
@@ -159,7 +159,7 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
     })),
     purpose: input.activityDetails[feature.key]?.purpose,
     retentionPeriod: input.activityDetails[feature.key]?.retention,
-    lawfulBasis: "待律师判断",
+    lawfulBasis: "待内部确认",
   })).concat(input.customFeatures.map((feature) => {
     const details = input.customDetails[feature] ?? { purpose: "", retention: "" };
     return {
@@ -192,7 +192,7 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       ],
       purpose: details.purpose,
       retentionPeriod: details.retention,
-      lawfulBasis: "待律师判断",
+      lawfulBasis: "待内部确认",
     };
   }));
   const evaluation = evaluateExportInvariants({
@@ -257,7 +257,7 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       { id: "overview", title: "政策概述", summary: "说明运营主体、产品、适用范围和版本。" },
       { id: "collection_and_use", title: "我们如何收集和使用个人信息", summary: "按处理活动说明目的、字段和使用场景。" },
       { id: "retention", title: "保存期限", summary: "披露客户填写的保存期限规则。" },
-      { id: "rights", title: "用户权利", summary: "使用客户填写的权利请求入口和响应信息，法律细节留待律师复核。" },
+      { id: "rights", title: "用户权利", summary: "使用客户填写的权利请求入口和响应信息，不补写客户未填写的承诺。" },
       { id: "third_parties", title: "委托、共享与第三方", summary: "仅在客户事实中出现时披露，不得凭参考政策推断第三方。" },
       { id: "security", title: "安全措施", summary: "只写客户确认的安全事实，不能自动承诺不存在的措施。" },
       { id: "minors", title: "未成年人信息", summary: "缺少客户事实时保留待确认项。" },

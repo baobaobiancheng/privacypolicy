@@ -23,7 +23,7 @@ export function evaluateFormalPolicyReadiness(input: FormPayload & { scopeAnswer
   const diagnostics: ReadinessDiagnostic[] = [];
   const scopeAnswers = input.scopeAnswers ?? {};
   for (const gate of ["single-product", "map-primary", "single-category", "no-cross-border"]) {
-    if (scopeAnswers[gate] !== true) diagnostics.push({ code: "OUT_OF_SCOPE", severity: "BLOCKING", target: gate, message: "当前项目未通过地图类首期范围门禁，不能生成待批准版本。" });
+    if (scopeAnswers[gate] !== true) diagnostics.push({ code: "OUT_OF_SCOPE", severity: "BLOCKING", target: gate, message: "当前项目未通过地图类首期范围门禁，不能生成隐私政策草稿。" });
   }
   for (const key of profileKeys) {
     if (!(input.profile[key] ?? "").trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `profile.${key}`, message: "通用披露信息尚未填写完整。" });
@@ -56,7 +56,6 @@ export function evaluateFormalPolicyReadiness(input: FormPayload & { scopeAnswer
     answers[question.id] = result.data;
     if (result.data.answer === "UNKNOWN") diagnostics.push({ code: "NEEDS_PRODUCT_OR_TECH", severity: "BLOCKING", target: `question.${question.id}`, message: question.unknownMessage });
     if (result.data.answer === "YES" && !result.data.detail.trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `question.${question.id}`, message: `“${question.title}”已选择“有”，请补充具体事实。` });
-    if (result.data.answer === "YES") diagnostics.push({ code: "NEEDS_LEGAL_REVIEW", severity: "WARNING", target: `question.${question.id}`, message: `“${question.title}”会在律师复核时重点核对。` });
   }
   return { ready: !diagnostics.some((item) => item.severity === "BLOCKING"), diagnostics, requiredQuestionIds: requiredQuestions.map((item) => item.id), answers };
 }
