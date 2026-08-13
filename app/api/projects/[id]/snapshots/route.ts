@@ -21,9 +21,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   authorizeProject(actor, access, "READ");
 
   const snapshots = await prisma.draftSnapshot.findMany({
-    where: { projectId: id },
+    where: { projectId: id, state: "SUCCEEDED" },
     orderBy: { createdAt: "desc" },
-    take: 50,
+    take: 1,
   });
   const items = snapshots.map((snapshot) => ({
     id: snapshot.id,

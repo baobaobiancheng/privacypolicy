@@ -282,6 +282,9 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   const warningCount = selectedScenarios.filter((scenario) => scenario.risk).length;
   const canReview = scopeConfirmed && profileComplete && data.selected.length > 0 && selectedDetailsComplete;
   const canGenerate = canReview && formalReadiness.ready;
+  const latestSuccessfulHistory = (history ?? [])
+    .filter((item) => item.state === "SUCCEEDED" && Boolean(item.markdown && item.docxBase64))
+    .slice(0, 1);
   const selectedCount = data.selected.length + data.customFeatures.length;
   const progress = activeStep === 0 ? (scopeConfirmed ? 16 : 8) : Math.min(96, activeStep * 16 + (canGenerate ? 16 : 8));
 
@@ -722,7 +725,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
               <div><span>3</span><strong>校验后提供草稿文件</strong><small>只有章节完整、事实边界清晰的文本才能预览和下载。</small></div>
             </div>
             <div className="draft-preview"><div className="draft-page"><span className="draft-watermark">隐私政策草稿</span><MarkdownPreview markdown={data.generatedMarkdown} fallback={<><h3>{data.profile.productName} 隐私政策</h3><p>完成信息填写后，系统会在这里展示可预览和下载的隐私政策草稿。</p><h4>生成范围</h4><p>已选择 {selectedCount} 项产品功能和 {processedFieldCount} 项实际处理的个人信息。</p></>} /><p className="draft-footnote">{processedFieldCount} 项实际处理信息 · {supplementQuestions.length} 项补充信息</p></div><aside className="draft-audit"><FileDoc weight="duotone" /><strong>{data.generated?.status === "GENERATING" ? "正在生成草稿" : "草稿预览"}</strong><span>{selectedCount} 项产品功能</span><span>{processedFieldCount} 项实际处理信息</span><span>{supplementQuestions.length} 项补充信息</span><span>{warningCount} 项重点核对提示</span></aside></div>
-            {data.projectId && <div className="draft-history"><div className="field-confirm-heading"><strong>生成记录</strong><span>每次生成都会保存，成功版本可随时预览和重新下载。</span></div><GenerationHistory history={history} generating={data.generated?.status === "GENERATING"} onRetry={retrySnapshot} onDownload={downloadSnapshotDocx} /></div>}
+            {latestSuccessfulHistory.length > 0 && <div className="draft-history"><div className="field-confirm-heading"><strong>生成记录</strong><span>显示最新一份成功生成的隐私政策。</span></div><GenerationHistory history={latestSuccessfulHistory} generating={false} onRetry={retrySnapshot} onDownload={downloadSnapshotDocx} /></div>}
             <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(4)}><ArrowLeft weight="bold" /> 返回补充信息</button><button type="button" className="button button-primary" disabled={data.generated?.status === "GENERATING" || (!canGenerate && data.generated?.status !== "SUCCEEDED")} onClick={handleDraftAction}>{data.generated?.status === "SUCCEEDED" ? <><DownloadSimple weight="bold" /> 下载 Word 草稿</> : <><FileDoc weight="bold" /> {data.generated?.status === "GENERATING" ? "正在生成…" : data.generated?.status === "FAILED" ? "重新生成" : "生成隐私政策草稿"}</>}</button></div>
           </section>}
         </div>
