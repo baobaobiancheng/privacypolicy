@@ -1,0 +1,146 @@
+{
+  "schemaVersion": "1",
+  "contentVersion": "map-cn-v1.1.0",
+  "packageHash": "sha256:4eea10b990a405c2c536f98d07f705038b4a454c7d76a2ff7393930ed700dd81",
+  "publishedAt": "2026-08-13T00:00:00.000Z",
+  "category": "地图导航类",
+  "sources": [
+    {
+      "id": "REG-CORE-01",
+      "title": "中华人民共和国个人信息保护法",
+      "role": "法律披露与处理规则",
+      "url": "https://www.npc.gov.cn/npc/c2/c30834/202108/t20210820_313088.html"
+    },
+    {
+      "id": "REG-CORE-02",
+      "title": "网络数据安全管理条例",
+      "role": "网络数据处理规则",
+      "url": "https://www.cac.gov.cn/2024-09/30/c_1729384452307680.htm"
+    },
+    {
+      "id": "REG-CORE-03",
+      "title": "常见类型移动互联网应用程序必要个人信息范围规定",
+      "role": "地图基本功能及必要信息边界",
+      "url": "https://www.cac.gov.cn/2021-03/22/c_1617990997054277.htm"
+    },
+    {
+      "id": "REG-CORE-04",
+      "title": "App违法违规收集使用个人信息行为认定方法",
+      "role": "收集使用行为核对",
+      "url": "https://www.cac.gov.cn/2019-12/27/c_1578986455686625.htm"
+    },
+    {
+      "id": "REG-CORE-05",
+      "title": "移动互联网应用程序信息服务管理规定",
+      "role": "应用服务管理规则",
+      "url": "https://www.cac.gov.cn/2022-06/14/c_1656821626455324.htm"
+    },
+    {
+      "id": "STD-CORE-01",
+      "title": "GB/T 44588-2024",
+      "role": "个人信息保护告知同意指南"
+    },
+    {
+      "id": "STD-CORE-02",
+      "title": "GB/T 42574-2023",
+      "role": "个人信息处理告知同意指南"
+    },
+    {
+      "id": "STD-CORE-03",
+      "title": "GB/T 45574-2025",
+      "role": "个人信息保护影响评估指南"
+    },
+    {
+      "id": "STD-CORE-04",
+      "title": "GB/T 35273-2020",
+      "role": "个人信息安全规范"
+    }
+  ],
+  "questions": [
+    {
+      "id": "device-permissions", "round": 1, "domain": "PERMISSION",
+      "title": "设备权限", "prompt": "产品是否会申请定位、相机、相册、麦克风、通知或其他设备权限？", "help": "如有，请逐项写明权限、触发功能、申请时机、拒绝影响和关闭方式。",
+      "requiredWhen": { "always": true }, "yesDetailLabel": "请逐项填写权限、触发时机、用途、拒绝影响和关闭入口", "unknownMessage": "请核对 App 权限清单和调用时机。", "riskCode": "PERMISSION_REVIEW"
+    },
+    {
+      "id": "third-party-services", "round": 1, "domain": "THIRD_PARTY",
+      "title": "SDK 与第三方服务", "prompt": "产品是否使用 SDK、云服务、统计、推送、地图或其他第三方服务？", "help": "如有，请列出 SDK/服务全称、提供方、用途、涉及信息、数据接收方式和隐私政策链接。",
+      "requiredWhen": { "always": true }, "yesDetailLabel": "请按每个 SDK/服务逐项填写完整信息", "unknownMessage": "请核对 SDK 清单、网络请求和服务端数据流。", "riskCode": "THIRD_PARTY_REVIEW"
+    },
+    {
+      "id": "storage-locations", "round": 1, "domain": "STORAGE",
+      "title": "本地与服务器存储", "prompt": "产品是否会把个人信息保存到设备本地或服务器？", "help": "如有，请按信息类型区分本地/服务器、存储地域、保存期限、删除或匿名化方式。",
+      "requiredWhen": { "always": true }, "yesDetailLabel": "请说明信息类型、存储位置、地域、期限和删除规则", "unknownMessage": "请核对本地数据库、缓存、日志和服务器存储策略。", "riskCode": "STORAGE_REVIEW"
+    },
+    {
+      "id": "account-cloud-sync", "round": 1, "domain": "DATA_FLOW",
+      "title": "账号与云端同步", "prompt": "产品是否提供账号登录、多端同步、云端收藏或历史记录同步？", "help": "如有，请说明登录方式、同步的信息、开启条件、关闭方式和删除规则。",
+      "requiredWhen": { "always": true }, "yesDetailLabel": "请填写登录方式、同步信息、开启/关闭入口和删除规则", "unknownMessage": "请核对账号系统和云同步配置。", "riskCode": "ACCOUNT_SYNC_REVIEW"
+    },
+    {
+      "id": "background-location", "round": 1, "domain": "SPECIAL_SCENE",
+      "title": "后台定位", "prompt": "用户未主动使用导航时，产品是否仍会在后台持续或定时获取位置信息？", "help": "前台导航定位与后台定位不同，请说明实际调用行为。",
+      "requiredWhen": { "selectedAny": ["navigation", "traffic"] }, "yesDetailLabel": "请说明触发条件、频率、用途、保存期限和关闭方式", "unknownMessage": "请核对定位权限、前后台任务和实际调用时机。", "riskCode": "BACKGROUND_LOCATION_REVIEW"
+    },
+    {
+      "id": "third-party-initialization", "round": 2, "domain": "THIRD_PARTY", "dependsOn": { "questionId": "third-party-services", "answer": "YES" },
+      "title": "第三方服务启动时机", "prompt": "第三方 SDK 是否会在用户使用对应功能前初始化或发送数据？", "help": "如有，请逐个说明初始化时机、首次网络请求、是否取得同意和延迟初始化方式。",
+      "requiredWhen": { "always": true }, "yesDetailLabel": "请逐个说明 SDK 启动和首次发送数据的时机", "unknownMessage": "请核对 SDK 初始化代码和首次网络请求。", "riskCode": "SDK_INIT_REVIEW"
+    },
+    {
+      "id": "history-and-favorites", "round": 2, "domain": "DATA_FLOW",
+      "title": "搜索、浏览与收藏记录", "prompt": "产品是否保存搜索、浏览、路线、收藏或常用地点记录？", "help": "如有，请说明记录类型、用途、本地/云端存储、同步和删除入口。",
+      "requiredWhen": { "selectedAny": ["discovery"] }, "yesDetailLabel": "请说明记录类型、用途、存储位置、同步和删除规则", "unknownMessage": "请核对搜索、浏览、收藏和历史路线的存储行为。", "riskCode": "HISTORY_REVIEW"
+    },
+    {
+      "id": "personalized-content", "round": 2, "domain": "SPECIAL_SCENE",
+      "title": "个性化展示、广告或排序", "prompt": "产品是否依据浏览、点击、位置或设备信息进行个性化展示、广告或排序？", "help": "如有，请说明使用的信息、目的、算法场景、非个性化选项和关闭入口。",
+      "requiredWhen": { "selectedAny": ["discovery"] }, "yesDetailLabel": "请填写所用信息、展示/推荐目的、控制入口和关闭后影响", "unknownMessage": "请核对推荐、广告和排序服务的数据输入。", "riskCode": "PERSONALIZATION_REVIEW"
+    },
+    {
+      "id": "diagnostic-logs", "round": 2, "domain": "SECURITY",
+      "title": "诊断日志与崩溃信息", "prompt": "产品是否收集崩溃日志、性能诊断信息或设备标识符以排查故障？", "help": "如有，请说明字段、触发时机、服务提供方、用途、保存期限及是否包含位置或输入内容。",
+      "requiredWhen": { "selectedAny": ["security", "support"] }, "yesDetailLabel": "请填写字段、触发时机、用途、提供方和保存规则", "unknownMessage": "请核对监控、崩溃收集和日志服务配置。", "riskCode": "DIAGNOSTIC_LOG_REVIEW"
+    },
+    {
+      "id": "notification-push", "round": 2, "domain": "DATA_FLOW",
+      "title": "消息通知与推送", "prompt": "产品是否发送导航提醒、服务通知、运营消息或营销推送？", "help": "如有，请区分服务通知与营销信息，说明使用信息、推送通道、频率和关闭入口。",
+      "requiredWhen": { "always": true }, "yesDetailLabel": "请区分通知类型并填写信息、通道、频率和关闭入口", "unknownMessage": "请核对消息推送服务和运营配置。", "riskCode": "PUSH_REVIEW"
+    },
+    {
+      "id": "customer-service-records", "round": 2, "domain": "DATA_FLOW",
+      "title": "客服、投诉与问题材料", "prompt": "客服或投诉流程是否会保存联系方式、沟通记录、截图、日志或其他问题材料？", "help": "如有，请说明身份核验、材料范围、使用目的、保存期限、查看和删除方式。",
+      "requiredWhen": { "selectedAny": ["support"] }, "yesDetailLabel": "请填写材料范围、核验方式、用途、保存期限和删除入口", "unknownMessage": "请核对客服工单、录音和问题材料存储规则。", "riskCode": "SUPPORT_RECORD_REVIEW"
+    },
+    {
+      "id": "cookies-local-storage", "round": 3, "domain": "DATA_FLOW",
+      "title": "Cookie、缓存与本地标识符", "prompt": "产品是否使用 Cookie、本地缓存、匿名标识符或类似技术记住状态、偏好或分析使用情况？", "help": "如有，请说明技术类型、用途、保存期限及用户的清除或禁用方式。",
+      "requiredWhen": { "always": true }, "yesDetailLabel": "请填写技术类型、用途、期限和清除/禁用入口", "unknownMessage": "请核对 WebView、网页、本地缓存和标识符的使用情况。", "riskCode": "COOKIE_REVIEW"
+    },
+    {
+      "id": "sensitive-information", "round": 3, "domain": "SPECIAL_SCENE",
+      "title": "敏感个人信息", "prompt": "产品是否处理精确位置、行踪轨迹、通信内容、身份证件、生物识别或其他敏感个人信息？", "help": "如有，请按类型说明必要性、对用户权益的可能影响、保护措施和是否单独征得同意。",
+      "requiredWhen": { "always": true }, "yesDetailLabel": "请逐类说明必要性、可能影响、保护措施和同意方式", "unknownMessage": "请核对精确位置、轨迹和其他敏感信息的处理行为。", "riskCode": "SENSITIVE_INFO_REVIEW"
+    },
+    {
+      "id": "user-control-paths", "round": 3, "domain": "USER_CONTROL",
+      "title": "用户查看、删除与撤回入口", "prompt": "产品是否提供查看、更正、删除、撤回同意、关闭权限或注销账号的产品内入口？", "help": "如有，请按权利类型写明完整菜单路径、身份验证方式和处理期限。",
+      "requiredWhen": { "always": true }, "yesDetailLabel": "请按查看、更正、删除、撤回、权限和注销分别填写路径", "unknownMessage": "请核对 App 中的隐私中心、权限设置和账号管理入口。", "riskCode": "RIGHTS_PATH_REVIEW"
+    },
+    {
+      "id": "sharing-transfer-public", "round": 3, "domain": "THIRD_PARTY",
+      "title": "委托、共享、转让与公开披露", "prompt": "除已填写的 SDK 外，产品是否存在委托处理、向其他主体共享、转让或公开披露个人信息的场景？", "help": "如有，请分别填写接收方、场景、目的、信息类型、处理方式和用户控制方式。",
+      "requiredWhen": { "always": true }, "yesDetailLabel": "请按委托、共享、转让、公开披露分类填写具体场景", "unknownMessage": "请核对合作方、关联方、云服务和业务转移场景。", "riskCode": "DISCLOSURE_REVIEW"
+    },
+    {
+      "id": "shutdown-data-handling", "round": 3, "domain": "STORAGE",
+      "title": "停止运营与备份删除", "prompt": "产品是否已明确停止运营、账号注销、主库删除以及备份数据清理的处理规则？", "help": "如有，请说明通知方式、停止收集时点、主库与备份删除周期及法定留存例外。",
+      "requiredWhen": { "always": true }, "yesDetailLabel": "请填写停止运营通知、停止收集、主库/备份删除和例外规则", "unknownMessage": "请核对账号注销、备份恢复和停止运营流程。", "riskCode": "SHUTDOWN_REVIEW"
+    },
+    {
+      "id": "custom-feature-data", "round": 3, "domain": "SPECIAL_SCENE",
+      "title": "自定义功能的额外信息", "prompt": "表单外新增功能是否还会处理功能卡片未列出的个人信息？", "help": "如有，请按功能说明信息、来源、目的、权限、拒绝影响、保存期限和第三方。",
+      "requiredWhen": { "hasCustomFeature": true }, "yesDetailLabel": "请按功能说明信息、来源、目的、权限、保存、用户控制和第三方", "unknownMessage": "请核对自定义功能的界面、数据库、网络请求和 SDK 调用。", "riskCode": "CUSTOM_FEATURE_REVIEW"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ describe("DeepSeek contract", () => {
   it("accepts a citation-bearing Markdown draft", () => {
     const markdown = `# 地图隐私政策\n\n${POLICY_SECTION_TITLES.map((title, index) => `## ${index + 1}. ${title}\n本章节内容待律师复核。\n<!-- assertions: ${index === 1 ? "navigation.location" : ""} -->`).join("\n\n")}`;
     const result = parsePolicyMarkdown(markdown, new Set(["navigation.location"]));
-    expect(result.markdown).toContain("## 8.");
+    expect(result.markdown).toContain("## 9.");
   });
 
   it("rejects Markdown with an incomplete section contract", () => {

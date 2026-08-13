@@ -3,31 +3,35 @@ import { DomainError } from "@/src/domain/errors";
 
 const MODEL_ENDPOINT = "https://api.deepseek.com/chat/completions";
 const DEFAULT_MODEL = "deepseek-v4-flash";
-const REQUEST_TIMEOUT_MS = 60_000;
+const REQUEST_TIMEOUT_MS = 240_000;
+const DEFAULT_MAX_OUTPUT_TOKENS = 65_536;
+export const DEFAULT_MIN_POLICY_CHARACTERS = 30_000;
 
 export const POLICY_SECTION_IDS = [
   "overview",
   "collection_and_use",
-  "retention",
-  "rights",
+  "permissions_and_cookies",
   "third_parties",
+  "retention",
   "security",
+  "rights",
   "minors",
   "updates_and_contact",
 ] as const;
 
 export const POLICY_SECTION_TITLES = [
-  "政策概述",
+  "政策说明与适用范围",
   "我们如何收集和使用个人信息",
-  "保存期限",
-  "用户权利",
-  "委托、共享与第三方",
-  "安全措施",
-  "未成年人信息",
-  "政策更新与联系我们",
+  "设备权限、Cookie及同类技术",
+  "委托处理、共享、转让、公开披露及第三方服务",
+  "个人信息的保存",
+  "个人信息安全保护",
+  "您的个人信息权利",
+  "未成年人个人信息保护",
+  "政策更新、联系我们及适用法律",
 ] as const;
 
-export const ModelMarkdownSchema = z.string().trim().min(100).max(80_000);
+export const ModelMarkdownSchema = z.string().trim().min(100).max(120_000);
 
 export type MarkdownOpenItem = { assertionId: string; reason: string };
 export type GeneratedPolicyDraft = {
@@ -99,29 +103,42 @@ export async function generatePolicyDraft(input: PolicyGenerationInput): Promise
   if ((input.pendingFacts ?? []).length > 0) {
     throw new DomainError("EXPORT_BLOCKED", "请至少勾选一项产品实际处理的个人信息。", { retryable: false });
   }
-  const response = await requestDeepSeek(apiKey, model, buildMessages({ ...input, pendingFacts: [] }));
-  const content = normalizeMarkdown(response.choices[0]?.message.content);
+  const normalizedInput = { ...input, pendingFacts: [] };
+  const response = await requestDeepSeek(apiKey, model, buildMessages(normalizedInput));
+  let content = normalizeMarkdown(response.choices[0]?.message.content);
   if (!content) {
     throw new DomainError("MODEL_OUTPUT_INVALID", "DeepSeek 未返回可解析的政策草稿。", { retryable: true });
+  }
+
+  const minimumCharacters = getMinimumPolicyCharacters();
+  if (policyVisibleCharacterCount(content) < minimumCharacters) {
+    const expansion = await requestDeepSeek(apiKey, model, buildExpansionMessages(normalizedInput, content, minimumCharacters));
+    content = normalizeMarkdown(expansion.choices[0]?.message.content);
+  }
+  if (policyVisibleCharacterCount(content) < minimumCharacters) {
+    throw new DomainError("MODEL_OUTPUT_INVALID", `生成内容不足 ${minimumCharacters.toLocaleString("zh-CN")} 字，系统未将其保存为可下载政策。`, { retryable: true });
   }
 
   const parsed = parsePolicyMarkdown(content, allowedFactKeys, [], JSON.stringify(input.form));
   return { ...parsed, model };
 }
 
-function buildMessages(input: PolicyGenerationInput) {
+function buildMessages(input: PolicyGenerationInput): Array<{ role: "system" | "user"; content: string }> {
   const system = [
     "你是中国地图导航类产品的隐私政策编排助手，不得作出合规结论。",
     "请严格输出 Markdown，不要 JSON、解释文字或代码围栏。",
-    "Markdown 必须包含一个 # 标题，随后按 1 到 8 的顺序使用八个 ## 章节标题；每个章节只能出现一次。",
-    `八个章节标题依次为：${POLICY_SECTION_TITLES.join("；")}。标题格式必须是“## 1. ${POLICY_SECTION_TITLES[0]}”这类带序号形式。`,
+    `Markdown 必须包含一个 # 标题，随后按 1 到 ${POLICY_SECTION_TITLES.length} 的顺序使用固定 ## 章节标题；每个章节只能出现一次。`,
+    `固定章节标题依次为：${POLICY_SECTION_TITLES.join("；")}。标题格式必须是“## 1. ${POLICY_SECTION_TITLES[0]}”这类带序号形式。`,
+    `正文可见中文字符不少于 ${getMinimumPolicyCharacters()} 字，建议控制在 30000 至 45000 字。不得通过重复句子、空洞口号或改写同一段凑字数。`,
+    "第2章必须按客户已选功能分设 ### 小节，在已有事实支持的范围内写明触发场景、信息类型、来源、目的、处理方式、拒绝影响、保存和用户控制方式。",
+    "对法律通用规则可使用清晰易懂的政策语言展开，但不得把通用规则写成客户已实际采取的技术、管理措施或数据流。",
     "只可使用 FORM_JSON 中的客户事实；本请求在发送前已经完成客户确认。不要编造名称、期限、第三方、权限、法律依据或不存在的功能。",
     "CONFIRMED_FACT_KEYS 才是可以作为确定事实写入正文的字段。不要输出任何 [[待确认:...]]、内部编号、断言说明、复核附录或技术元数据。",
     "本地规则包和行业结构仅用于确定章节结构、遗漏提示和表达质量，不能证明客户产品事实；不得提及、复制或暗示任何参考产品。",
     "FORM_JSON.activityDetails 和 customDetails 中非空的处理目的、保存期限均为客户已确认事实，必须按功能分别使用，不得改写为待确认。",
     "除 PENDING_FACTS 明确列出的字段外，不得自行新增任何 [[待确认:…]] 占位符。",
     "不得把局部第三方信息扩写成全面承诺。除非 FORM_JSON 明确写明，否则禁止生成“不向第三方共享、不会出售、仅与某方共享”等否定或排他性表述。",
-    "如果 THIRD_PARTY_FACTS_STATUS 为 NO_CONFIRMED_FACTS，第 5 章只写中性规则：具体委托处理、共享及第三方服务以产品实际配置和另行披露为准；不要承诺不存在第三方处理。",
+    "如果 THIRD_PARTY_FACTS_STATUS 为 NO_CONFIRMED_FACTS，第 4 章只写中性规则：具体委托处理、共享及第三方服务以产品实际配置和另行披露为准；不要承诺不存在第三方处理。",
     "每个涉及客户事实的段落后必须紧跟 HTML 注释 <!-- assertions: 字段键1, 字段键2 -->；静态段落可使用 <!-- assertions: -->。注释仅作服务端溯源，绝不在客户版可见。",
   ].join("\n");
   const user = [
@@ -144,7 +161,20 @@ function buildMessages(input: PolicyGenerationInput) {
   ];
 }
 
-async function requestDeepSeek(apiKey: string, model: string, messages: ReturnType<typeof buildMessages>) {
+function buildExpansionMessages(input: PolicyGenerationInput, draft: string, minimumCharacters: number) {
+  return [
+    { role: "system" as const, content: buildMessages(input)[0].content },
+    { role: "user" as const, content: [
+      `下面的隐私政策已通过初步结构生成，但可见正文不足 ${minimumCharacters} 字。请重写并完整输出全文。`,
+      "保留固定章节顺序、所有已有事实和 assertions 注释；通过补齐通用处理规则、用户权利程序、各场景的清晰解释增加完整度。不得新增客户事实，不得复制、重复或凑字。",
+      "FORM_JSON:", JSON.stringify(input.form),
+      "ALLOWED_FACT_KEYS:", JSON.stringify(input.allowedFactKeys),
+      "CURRENT_DRAFT:", draft,
+    ].join("\n") },
+  ];
+}
+
+async function requestDeepSeek(apiKey: string, model: string, messages: Array<{ role: "system" | "user"; content: string }>) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
@@ -156,7 +186,7 @@ async function requestDeepSeek(apiKey: string, model: string, messages: ReturnTy
         messages,
         thinking: { type: "disabled" },
         temperature: 0.2,
-        max_tokens: 8_192,
+        max_tokens: getMaxOutputTokens(),
         stream: false,
       }),
       signal: controller.signal,
@@ -206,6 +236,24 @@ async function requestDeepSeek(apiKey: string, model: string, messages: ReturnTy
   }
 }
 
+function getMaxOutputTokens() {
+  const configured = Number(process.env.DEEPSEEK_MAX_TOKENS);
+  return Number.isInteger(configured) && configured >= 8_192 && configured <= 393_216 ? configured : DEFAULT_MAX_OUTPUT_TOKENS;
+}
+
+function getMinimumPolicyCharacters() {
+  const configured = Number(process.env.POLICY_MIN_VISIBLE_CHARACTERS);
+  return Number.isInteger(configured) && configured >= 100 ? configured : DEFAULT_MIN_POLICY_CHARACTERS;
+}
+
+export function policyVisibleCharacterCount(markdown: string) {
+  return markdown
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/[\s*_`>#\-\[\]()]/g, "")
+    .length;
+}
+
 function normalizeMarkdown(content: string | Array<{ text?: string }> | null | undefined): string {
   const text = typeof content === "string" ? content : Array.isArray(content) ? content.map((part) => part.text || "").join("") : "";
   return text.replace(/^\s*```(?:markdown|md)?\s*\n/i, "").replace(/\n\s*```\s*$/i, "").trim();
@@ -224,7 +272,7 @@ export function parsePolicyMarkdown(
   const headingNumbers = headings.map((match) => Number(match[1]));
   const headingTitles = headings.map((match) => match[2].trim());
   if (headingNumbers.length !== POLICY_SECTION_TITLES.length || headingNumbers.some((number, index) => number !== index + 1)) {
-    throw new DomainError("MODEL_OUTPUT_INVALID", "DeepSeek 返回的 Markdown 未覆盖完整的八个政策章节。", { retryable: true });
+    throw new DomainError("MODEL_OUTPUT_INVALID", `DeepSeek 返回的 Markdown 未覆盖完整的 ${POLICY_SECTION_TITLES.length} 个政策章节。`, { retryable: true });
   }
   // 只校验序号会放过「编号正确但标题写错」的章节，这里同时校验标题是否匹配约定。
   const normalizeTitle = (title: string) => title.replace(/[\s，。、（）()「」【】"'":：;；,./]/g, "");

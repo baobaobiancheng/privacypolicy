@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { generatePolicyDraft, type PolicyGenerationInput } from "@/src/ai/deepseek";
+import { generatePolicyDraft, POLICY_SECTION_TITLES, type PolicyGenerationInput } from "@/src/ai/deepseek";
 
 const input: PolicyGenerationInput = {
   form: {
@@ -32,22 +32,24 @@ const input: PolicyGenerationInput = {
   allowedFactKeys: ["navigation.location", "operatorName"],
 };
 
-const completeMarkdown = `# 地图隐私政策\n\n${["政策概述", "我们如何收集和使用个人信息", "保存期限", "用户权利", "委托、共享与第三方", "安全措施", "未成年人信息", "政策更新与联系我们"].map((title, index) => `## ${index + 1}. ${title}\n待律师复核。\n<!-- assertions: ${index === 1 ? "navigation.location" : ""} -->`).join("\n\n")}`;
+const completeMarkdown = `# 地图隐私政策\n\n${POLICY_SECTION_TITLES.map((title, index) => `## ${index + 1}. ${title}\n本章节基于已填写事实生成，供法务继续编辑使用。\n<!-- assertions: ${index === 1 ? "navigation.location" : ""} -->`).join("\n\n")}`;
 
 describe("DeepSeek adapter", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     delete process.env.DEEPSEEK_API_KEY;
+    delete process.env.POLICY_MIN_VISIBLE_CHARACTERS;
   });
 
   it("requests Markdown and returns the validated document", async () => {
     process.env.DEEPSEEK_API_KEY = "test-key";
+    process.env.POLICY_MIN_VISIBLE_CHARACTERS = "100";
     const fetchMock = vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: completeMarkdown } }] }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
     const result = await generatePolicyDraft(input);
 
-    expect(result.markdown).toContain("## 8.");
+    expect(result.markdown).toContain("## 9.");
     expect(fetchMock).toHaveBeenCalledWith("https://api.deepseek.com/chat/completions", expect.objectContaining({
       method: "POST",
       headers: expect.objectContaining({ Authorization: "Bearer test-key" }),
@@ -56,6 +58,24 @@ describe("DeepSeek adapter", () => {
     const requestCall = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     const requestBody = JSON.parse(requestCall[1].body as string) as { messages: Array<{ content: string }> };
     expect(requestBody.messages[1].content).toContain("THIRD_PARTY_FACTS_STATUS:\nCUSTOMER_TEXT_PROVIDED");
+  });
+
+  it("expands a short first draft and only returns a policy above the configured floor", async () => {
+    process.env.DEEPSEEK_API_KEY = "test-key";
+    process.env.POLICY_MIN_VISIBLE_CHARACTERS = "1000";
+    const expandedMarkdown = completeMarkdown.replace(
+      "本章节基于已填写事实生成，供法务继续编辑使用。",
+      `本章节基于已填写事实生成，供法务继续编辑使用。${"补充说明".repeat(320)}`,
+    );
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: completeMarkdown } }] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: expandedMarkdown } }] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await generatePolicyDraft(input);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.markdown.length).toBeGreaterThan(1000);
   });
 
   it("classifies an aborted response body as a service timeout instead of invalid model output", async () => {

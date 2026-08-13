@@ -266,7 +266,15 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     return Boolean(detail?.purpose.trim() && detail.retention.trim());
   });
   const profileComplete = profileFields.every(([key]) => Boolean(data.profile[key]?.trim()));
-  const supplementQuestions = getRequiredSupplementQuestions({ selected: data.selected, customFeatures: data.customFeatures });
+  const supplementQuestions = getRequiredSupplementQuestions({ selected: data.selected, customFeatures: data.customFeatures, supplementAnswers: data.supplementAnswers });
+  const isSupplementComplete = (question: (typeof supplementQuestions)[number]) => {
+    const answer = data.supplementAnswers[question.id];
+    return Boolean(answer && answer.answer !== "UNKNOWN" && (answer.answer !== "YES" || answer.detail.trim()));
+  };
+  const completedSupplementCount = supplementQuestions.filter(isSupplementComplete).length;
+  const activeSupplementRound = supplementQuestions.find((question) => !isSupplementComplete(question))?.round
+    ?? Math.max(1, ...supplementQuestions.map((question) => question.round));
+  const visibleSupplementRounds = [1, 2, 3].filter((round) => round <= activeSupplementRound && supplementQuestions.some((question) => question.round === round));
   const formalReadiness = evaluateFormalPolicyReadiness({
     profile: data.profile as unknown as FormPayload["profile"],
     selected: data.selected,
@@ -695,8 +703,11 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
 
           {activeStep === 4 && <section className="workspace-panel panel-enter">
             <div className="panel-heading"><p>补充信息</p><h2>根据已选功能补齐容易遗漏的产品情况。</h2><span>请按产品实际情况选择“有”或“没有”；暂时不清楚时可选“不确定”，补齐后即可继续。</span></div>
+            <div className="supplement-progress" aria-label="补充信息进度"><div><span>当前轮次</span><strong>{activeSupplementRound} / 3</strong></div><div><span>已完成</span><strong>{completedSupplementCount} / {supplementQuestions.length}</strong></div><div className="supplement-progress-line"><span style={{ width: `${supplementQuestions.length ? Math.round(completedSupplementCount / supplementQuestions.length * 100) : 100}%` }} /></div></div>
             <div className="supplement-question-list">
-              {supplementQuestions.map((question) => {
+              {visibleSupplementRounds.map((round) => <section className="supplement-round" key={round} data-active={round === activeSupplementRound}>
+                <div className="supplement-round-heading"><span>第 {round} 轮</span><strong>{round === 1 ? "先核对权限、存储和基础数据流" : round === 2 ? "再检查 SDK、日志和扩展功能" : "最后补齐用户控制和特殊场景"}</strong></div>
+                {supplementQuestions.filter((question) => question.round === round).map((question) => {
                 const answer = data.supplementAnswers[question.id];
                 return <article className="supplement-question" key={question.id} data-answer={answer?.answer ?? "EMPTY"}>
                   <div><strong>{question.title}</strong><p>{question.prompt}</p><small>{question.help}</small></div>
@@ -706,7 +717,8 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
                   {answer?.answer === "YES" ? <label className="supplement-detail"><span>{question.yesDetailLabel}</span><textarea value={answer.detail} onChange={(event) => updateSupplement(question.id, { detail: event.target.value })} placeholder="仅填写本产品的实际配置和处理方式" /></label> : null}
                   {answer?.answer === "UNKNOWN" ? <p className="supplement-unknown"><WarningCircle weight="fill" /> {question.unknownMessage}</p> : null}
                 </article>;
-              })}
+                })}
+              </section>)}
             </div>
             <label className="additional-notes"><span>其他补充说明（可选）</span><small>可补充以上问题未覆盖的实际处理情况。内容会以客户原文送入生成流程，不会被自动改写成未经确认的事实。</small><textarea value={data.additionalNotes} onChange={(event) => commit({ additionalNotes: event.target.value }, "补充说明已保存")} placeholder="例如：用户主动开启云端同步后，才同步收藏地点；用户可在设置中关闭。" /></label>
             {formalReadiness.diagnostics.length > 0 ? <div className="warning-callout"><Warning weight="fill" /><div><strong>生成前还有待完成事项</strong><span>{formalReadiness.diagnostics.filter((item) => item.severity === "BLOCKING").map((item) => item.message).join("；") || "已完成客户侧事实确认。"}</span></div></div> : null}

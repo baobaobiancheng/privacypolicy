@@ -8,6 +8,11 @@ const RequirementSchema = z.object({
   hasCustomFeature: z.boolean().optional(),
 }).strict().refine((value) => Boolean(value.always || value.selectedAny?.length || value.hasCustomFeature), "至少定义一个触发条件");
 
+const AnswerDependencySchema = z.object({
+  questionId: StableId,
+  answer: z.enum(["YES", "NO"]),
+}).strict();
+
 export const SupplementAnswerSchema = z.object({
   answer: z.enum(["YES", "NO", "UNKNOWN"]),
   detail: z.string().trim().max(4_000).default(""),
@@ -16,6 +21,8 @@ export const SupplementAnswerSchema = z.object({
 
 export const KnowledgeQuestionSchema = z.object({
   id: StableId,
+  round: z.number().int().min(1).max(3),
+  domain: z.enum(["DATA_FLOW", "PERMISSION", "STORAGE", "THIRD_PARTY", "USER_CONTROL", "SECURITY", "SPECIAL_SCENE"]),
   title: z.string().min(1),
   prompt: z.string().min(1),
   help: z.string().min(1),
@@ -23,6 +30,7 @@ export const KnowledgeQuestionSchema = z.object({
   yesDetailLabel: z.string().min(1),
   unknownMessage: z.string().min(1),
   riskCode: z.string().min(1),
+  dependsOn: AnswerDependencySchema.optional(),
 }).strict();
 
 export const MapKnowledgePackageSchema = z.object({

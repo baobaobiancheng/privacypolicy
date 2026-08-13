@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { POLICY_SECTION_TITLES, parsePolicyMarkdown } from "@/src/ai/deepseek";
 
 function policyWithThirdPartyParagraph(paragraph: string) {
-  return `# 行迹地图隐私政策\n\n${POLICY_SECTION_TITLES.map((title, index) => `## ${index + 1}. ${title}\n${index === 4 ? paragraph : "本章节内容待律师复核。"}\n<!-- assertions: ${index === 4 ? "additionalNotes" : ""} -->`).join("\n\n")}`;
+  return `# 行迹地图隐私政策\n\n${POLICY_SECTION_TITLES.map((title, index) => `## ${index + 1}. ${title}\n${index === 3 ? paragraph : "本章节内容待律师复核。"}\n<!-- assertions: ${index === 3 ? "additionalNotes" : ""} -->`).join("\n\n")}`;
 }
 
 describe("DeepSeek 未经确认的全面承诺", () => {

@@ -1,16 +1,22 @@
 import type { MarkdownOpenItem } from "@/src/ai/deepseek";
 
 export type MarkdownBlock =
-  | { type: "title" | "heading1" | "heading2" | "paragraph" | "quote" | "bullet"; text: string };
+  | { type: "title" | "heading1" | "heading2" | "paragraph" | "quote" | "bullet"; text: string; markdown: string };
 
 /** Remove trace comments and turn the small Markdown subset into safe blocks. */
 export function parseMarkdownBlocks(markdown: string): MarkdownBlock[] {
   const blocks: MarkdownBlock[] = [];
   let paragraph: string[] = [];
   const flush = () => {
-    const text = cleanMarkdownText(paragraph.join(" "));
-    if (text) blocks.push({ type: "paragraph", text });
+    const markdownText = paragraph.join(" ").trim();
+    const text = cleanMarkdownText(markdownText);
+    if (text) blocks.push({ type: "paragraph", text, markdown: markdownText });
     paragraph = [];
+  };
+
+  const pushBlock = (type: MarkdownBlock["type"], markdownText: string) => {
+    const text = cleanMarkdownText(markdownText);
+    if (text) blocks.push({ type, text, markdown: markdownText });
   };
 
   for (const rawLine of markdown.replace(/\r\n?/g, "\n").split("\n")) {
@@ -26,19 +32,19 @@ export function parseMarkdownBlocks(markdown: string): MarkdownBlock[] {
     }
     if (/^###\s+/.test(withoutComments)) {
       flush();
-      blocks.push({ type: "heading2", text: cleanMarkdownText(withoutComments.replace(/^###\s+/, "")) });
+      pushBlock("heading2", withoutComments.replace(/^###\s+/, ""));
     } else if (/^##\s+/.test(withoutComments)) {
       flush();
-      blocks.push({ type: "heading1", text: cleanMarkdownText(withoutComments.replace(/^##\s+/, "")) });
+      pushBlock("heading1", withoutComments.replace(/^##\s+/, ""));
     } else if (/^#\s+/.test(withoutComments)) {
       flush();
-      blocks.push({ type: "title", text: cleanMarkdownText(withoutComments.replace(/^#\s+/, "")) });
+      pushBlock("title", withoutComments.replace(/^#\s+/, ""));
     } else if (/^(?:[-*]|\d+\.)\s+/.test(withoutComments)) {
       flush();
-      blocks.push({ type: "bullet", text: cleanMarkdownText(withoutComments.replace(/^(?:[-*]|\d+\.)\s+/, "")) });
+      pushBlock("bullet", withoutComments.replace(/^(?:[-*]|\d+\.)\s+/, ""));
     } else if (/^>\s?/.test(withoutComments)) {
       flush();
-      blocks.push({ type: "quote", text: cleanMarkdownText(withoutComments.replace(/^>\s?/, "")) });
+      pushBlock("quote", withoutComments.replace(/^>\s?/, ""));
     } else {
       paragraph.push(withoutComments);
     }

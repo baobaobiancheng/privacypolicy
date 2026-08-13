@@ -14,22 +14,27 @@ const base = FormPayloadSchema.parse({
   activityDetails: { navigation: { purpose: "提供定位和路线规划", retention: "导航结束后删除或去标识化" } },
   confirmedFields: ["navigation.0", "navigation.1", "navigation.2"], additionalNotes: "",
   scopeAnswers: { "single-product": true, "map-primary": true, "single-category": true, "no-cross-border": true },
-  supplementAnswers: {
-    "third-party-services": { answer: "NO", detail: "" },
-    "background-location": { answer: "NO", detail: "" },
-  },
+  supplementAnswers: Object.fromEntries(getRequiredSupplementQuestions({ selected: ["navigation"], customFeatures: [] })
+    .map((question) => [question.id, { answer: "NO" as const, detail: "" }])),
 });
 
 describe("map local knowledge readiness", () => {
   it("uses a versioned map knowledge package with the reviewed primary source scope", () => {
-    expect(mapCnKnowledgePackage.contentVersion).toBe("map-cn-v1.0.0");
+    expect(mapCnKnowledgePackage.contentVersion).toBe("map-cn-v1.1.0");
     expect(mapCnKnowledgePackage.sources).toHaveLength(9);
     expect(mapCnKnowledgePackage.sources.map((item) => item.id)).toContain("REG-CORE-03");
   });
 
   it("triggers neutral supplemental questions from selected functionality", () => {
-    expect(getRequiredSupplementQuestions({ selected: ["navigation"], customFeatures: [] }).map((item) => item.id)).toEqual(["third-party-services", "background-location"]);
-    expect(getRequiredSupplementQuestions({ selected: ["discovery"], customFeatures: [] }).map((item) => item.id)).toEqual(["third-party-services", "history-and-favorites", "personalized-content"]);
+    const navigation = getRequiredSupplementQuestions({ selected: ["navigation"], customFeatures: [] });
+    expect(navigation.map((item) => item.id)).toEqual(expect.arrayContaining(["device-permissions", "third-party-services", "background-location", "user-control-paths"]));
+    expect(new Set(navigation.map((item) => item.round))).toEqual(new Set([1, 2, 3]));
+    const withThirdParty = getRequiredSupplementQuestions({
+      selected: ["navigation"],
+      customFeatures: [],
+      supplementAnswers: { "third-party-services": { answer: "YES", detail: "示例 SDK" } },
+    });
+    expect(withThirdParty.map((item) => item.id)).toContain("third-party-initialization");
   });
 
   it("treats unchecked information as omitted but still blocks an unknown supplemental answer", () => {

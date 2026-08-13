@@ -256,14 +256,15 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
     ],
     pendingFacts: [],
     referenceStructure: [
-      { id: "overview", title: "政策概述", summary: "说明运营主体、产品、适用范围和版本。" },
+      { id: "overview", title: "政策说明与适用范围", summary: "说明运营主体、产品、适用范围、生效日期和政策版本。" },
       { id: "collection_and_use", title: "我们如何收集和使用个人信息", summary: "按处理活动说明目的、字段和使用场景。" },
-      { id: "retention", title: "保存期限", summary: "披露客户填写的保存期限规则。" },
-      { id: "rights", title: "用户权利", summary: "使用客户填写的权利请求入口和响应信息，不补写客户未填写的承诺。" },
-      { id: "third_parties", title: "委托、共享与第三方", summary: "仅在客户事实中出现时披露，不得凭参考政策推断第三方。" },
-      { id: "security", title: "安全措施", summary: "只写客户确认的安全事实，不能自动承诺不存在的措施。" },
-      { id: "minors", title: "未成年人信息", summary: "缺少客户事实时保留待确认项。" },
-      { id: "updates_and_contact", title: "政策更新与联系我们", summary: "使用客户填写的联系和更新信息。" },
+      { id: "permissions_and_cookies", title: "设备权限、Cookie及同类技术", summary: "根据补充问卷披露权限调用、本地存储及类似技术。" },
+      { id: "third_parties", title: "委托处理、共享、转让、公开披露及第三方服务", summary: "仅使用客户填写的真实第三方与数据流，不从参考政策推断。" },
+      { id: "retention", title: "个人信息的保存", summary: "按处理活动披露期限、地点、到期处理及产品停止运营后的安排。" },
+      { id: "security", title: "个人信息安全保护", summary: "只写客户确认的安全措施和事件通知渠道。" },
+      { id: "rights", title: "您的个人信息权利", summary: "使用客户填写的权利请求入口、操作路径和响应期限。" },
+      { id: "minors", title: "未成年人个人信息保护", summary: "按照客户填写的实际业务情形披露。" },
+      { id: "updates_and_contact", title: "政策更新、联系我们及适用法律", summary: "披露更新通知方式、联系渠道、争议处理和适用法律。" },
     ],
   });
   const buffer = await renderDraftDocx(plan, {
