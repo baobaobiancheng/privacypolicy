@@ -25,26 +25,12 @@ export type DraftMetadata = {
 export async function renderDraftDocx(plan: DraftPlan, metadata: DraftMetadata, generatedDraft?: GeneratedPolicyDraft): Promise<Buffer> {
   const generatedAppendix = generatedDraft
     ? [
-      ...generatedDraft.assertionIds.map((assertionId) => new Paragraph({
-        children: [
-          new TextRun({ text: "Markdown 溯源：", bold: true, color: "A45C00" }),
-          new TextRun({ text: `断言：${assertionId}；待律师复核`, color: "6D756F" }),
-        ],
-      })),
       ...generatedDraft.openItems.map((item) => new Paragraph({
         children: [
-          new TextRun({ text: `模型待办：${item.assertionId}；`, bold: true, color: "A45C00" }),
+          new TextRun({ text: "待确认项：", bold: true, color: "A45C00" }),
           new TextRun({ text: item.reason, color: "6D756F" }),
         ],
       })),
-      ...(generatedDraft.unmatchedReferences.length > 0
-        ? [new Paragraph({
-          children: [
-            new TextRun({ text: "未匹配的模型溯源标记：", bold: true, color: "A45C00" }),
-            new TextRun({ text: `${generatedDraft.unmatchedReferences.join("、")}；请律师复核正文事实。`, color: "6D756F" }),
-          ],
-        })]
-        : []),
     ]
     : [];
   const body = [
@@ -55,7 +41,7 @@ export async function renderDraftDocx(plan: DraftPlan, metadata: DraftMetadata, 
     ]),
     ...(generatedDraft
       ? [
-        new Paragraph({ children: [new TextRun({ text: "AI 辅助生成 · Markdown · 待律师复核", bold: true, color: "A45C00" })] }),
+        new Paragraph({ children: [new TextRun({ text: "工作草稿 · 律师复核前", bold: true, color: "A45C00" })] }),
         ...parseMarkdownBlocks(generatedDraft.markdown).map((block) => new Paragraph({
           children: [new TextRun({ text: block.text, italics: block.type === "quote" })],
           heading: block.type === "title" ? HeadingLevel.TITLE : block.type === "heading1" ? HeadingLevel.HEADING_1 : block.type === "heading2" ? HeadingLevel.HEADING_2 : undefined,
@@ -75,14 +61,13 @@ export async function renderDraftDocx(plan: DraftPlan, metadata: DraftMetadata, 
     ...(plan.reviewAppendix.length > 0
       ? plan.reviewAppendix.map((node) => new Paragraph({
         children: [
-          new TextRun({ text: `${node.text} `, bold: true, color: "A45C00" }),
-          new TextRun({ text: `断言：${node.assertionId}；证据：${node.evidenceIds.join(",") || "待补充"}`, color: "6D756F" }),
+          new TextRun({ text: `待确认项：${node.text} `, bold: true, color: "A45C00" }),
+          new TextRun({ text: "请由客户补充事实，并交由律师复核。", color: "6D756F" }),
         ],
       }))
       : []),
     ...generatedAppendix,
     ...(plan.reviewAppendix.length === 0 && generatedAppendix.length === 0 ? [new Paragraph("当前没有待复核占位符。")] : []),
-    new Paragraph({ text: `内容版本：${metadata.contentVersion} · ${metadata.contentHash}${metadata.model ? ` · 模型：${metadata.model}` : ""}`, style: "Caption" }),
   ];
 
   const document = new Document({

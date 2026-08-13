@@ -50,8 +50,25 @@ describe("DeepSeek adapter", () => {
     expect(fetchMock).toHaveBeenCalledWith("https://api.deepseek.com/chat/completions", expect.objectContaining({
       method: "POST",
       headers: expect.objectContaining({ Authorization: "Bearer test-key" }),
-      body: expect.not.stringContaining('"response_format"'),
+      body: expect.stringContaining('"thinking":{"type":"disabled"}'),
     }));
+    const requestCall = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    const requestBody = JSON.parse(requestCall[1].body as string) as { messages: Array<{ content: string }> };
+    expect(requestBody.messages[1].content).toContain("THIRD_PARTY_FACTS_STATUS:\nCUSTOMER_TEXT_PROVIDED");
+  });
+
+  it("classifies an aborted response body as a service timeout instead of invalid model output", async () => {
+    process.env.DEEPSEEK_API_KEY = "test-key";
+    vi.stubGlobal("fetch", vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => { throw new DOMException("aborted", "AbortError"); },
+    })));
+
+    await expect(generatePolicyDraft(input)).rejects.toMatchObject({
+      code: "MODEL_REQUEST_FAILED",
+      message: expect.stringContaining("超时"),
+    });
   });
 
   it("quarantines a model citation that is not in the form field allowlist", async () => {
@@ -60,5 +77,23 @@ describe("DeepSeek adapter", () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: invalid } }] }), { status: 200 })));
 
     await expect(generatePolicyDraft(input)).resolves.toMatchObject({ unmatchedReferences: ["invented-field"] });
+  });
+
+  it("adds pending facts deterministically instead of asking the model to maintain placeholders", async () => {
+    process.env.DEEPSEEK_API_KEY = "test-key";
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: completeMarkdown } }] }), { status: 200 })));
+
+    const result = await generatePolicyDraft({
+      ...input,
+      allowedFactKeys: [...input.allowedFactKeys, "navigation.origin"],
+      pendingFacts: [{ key: "navigation.origin", label: "出发地" }],
+      selectedFeatures: [{
+        ...input.selectedFeatures[0],
+        fields: [...input.selectedFeatures[0].fields, { key: "origin", label: "出发地", confirmed: false }],
+      }],
+    });
+
+    expect(result.markdown).toContain("[[待确认:出发地]]");
+    expect(result.openItems).toContainEqual({ assertionId: "navigation.origin", reason: "请确认产品是否处理「出发地」" });
   });
 });

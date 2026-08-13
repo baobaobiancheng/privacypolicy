@@ -97,16 +97,16 @@ function projectStorageKey(projectId?: string) {
 
 const failureMessages: Record<string, { title: string; detail: string }> = {
   MODEL_OUTPUT_INVALID: {
-    title: "模型内容未通过校验",
-    detail: "模型返回的章节、事实引用或待确认标记不符合生成规则。系统已阻止生成 Word，客户表单没有丢失。",
+    title: "本次草稿不完整",
+    detail: "生成结果缺少必要章节，或包含表单中未确认的内容，因此没有保存为可下载文件。本次填写内容已保存，可直接重新生成。",
   },
   MODEL_REQUEST_FAILED: {
-    title: "模型服务暂时不可用",
-    detail: "请求超时或模型服务返回异常。本次没有生成 Word，可直接使用同一份表单重试。",
+    title: "生成服务暂时繁忙",
+    detail: "本次等待超时或服务暂时无法连接。填写内容已保存，请稍后直接重新生成。",
   },
   DOCX_GENERATION_FAILED: {
-    title: "Word 文件生成失败",
-    detail: "Markdown 处理或 Word 渲染阶段发生异常。本次没有可下载文件，请重试或联系技术人员。",
+    title: "文件制作未完成",
+    detail: "草稿转换为 Word 文件时发生异常。请重新生成；如果问题持续出现，请联系系统管理员。",
   },
 };
 
@@ -141,11 +141,11 @@ function GenerationHistory({
       <div className="generation-record-content">
         <div className="generation-record-heading">
           <div><strong>{succeeded ? "草稿已生成" : "草稿生成失败"}</strong><span>{new Date(item.createdAt).toLocaleString("zh-CN", { hour12: false })}</span></div>
-          <p>{succeeded ? "Markdown 与 Word 已生成，可预览或下载。" : "模型返回内容未通过事实与格式校验，未生成 Word 文件。"}</p>
+          <p>{succeeded ? "隐私政策草稿已生成，可在线预览或下载 Word。" : "本次未形成可用草稿，填写内容已完整保存。"}</p>
         </div>
         <div className="generation-record-actions">
           {succeeded ? <>
-            <button type="button" className="history-action" aria-expanded={activeView === "markdown"} onClick={() => toggle(item.id, "markdown")}><Eye weight="bold" /> 预览 Markdown</button>
+            <button type="button" className="history-action" aria-expanded={activeView === "markdown"} onClick={() => toggle(item.id, "markdown")}><Eye weight="bold" /> 预览草稿</button>
             <button type="button" className="history-action history-action-primary" onClick={() => onDownload(item)}><DownloadSimple weight="bold" /> 下载 Word</button>
           </> : <>
             <button type="button" className="history-action history-action-primary" disabled={generating} onClick={() => onRetry(item)}><ArrowClockwise weight="bold" /> 重新生成</button>
@@ -154,11 +154,33 @@ function GenerationHistory({
           </>}
         </div>
         {activeView === "markdown" && item.markdown ? <div className="generation-record-detail markdown-detail"><MarkdownPreview markdown={item.markdown} fallback={null} /></div> : null}
-        {activeView === "failure" ? <div className="generation-record-detail failure-detail"><strong>{failure.title}</strong><p>{failure.detail}</p>{item.failureCode ? <code>{item.failureCode}</code> : null}</div> : null}
-        {activeView === "form" ? <div className="generation-record-detail form-detail">{item.inputJson ? <><div><strong>本次生成使用的表单 JSON</strong><span>这是生成时冻结的输入副本，不会随当前项目修改而变化。</span></div><pre>{JSON.stringify(item.inputJson, null, 2)}</pre></> : <p>该记录生成于表单快照功能启用前，没有保存输入副本。请使用当前表单重新生成。</p>}</div> : null}
+        {activeView === "failure" ? <div className="generation-record-detail failure-detail"><strong>{failure.title}</strong><p>{failure.detail}</p></div> : null}
+        {activeView === "form" ? <div className="generation-record-detail form-detail">{item.inputJson ? <FormSnapshotSummary input={item.inputJson} /> : <p>该记录生成于表单留存功能启用前，没有保存当次填写内容。请使用当前表单重新生成。</p>}</div> : null}
       </div>
     </article>;
   })}</div>;
+}
+
+function FormSnapshotSummary({ input }: { input: DraftFormInput }) {
+  const featureNames = [
+    ...input.selected.map((key) => scenarios.find((scenario) => scenario.id === key)?.title ?? key),
+    ...input.customFeatures,
+  ];
+  const activities = [
+    ...input.selected.map((key) => ({ name: scenarios.find((scenario) => scenario.id === key)?.title ?? key, detail: input.activityDetails[key] })),
+    ...input.customFeatures.map((name) => ({ name, detail: input.customDetails[name] })),
+  ];
+  return <div className="form-snapshot-summary">
+    <div><strong>本次填写摘要</strong><span>以下是生成当时的内容，不会随项目后续修改而变化。</span></div>
+    <dl>
+      <div><dt>运营主体</dt><dd>{input.profile.operatorName || "未填写"}</dd></div>
+      <div><dt>产品</dt><dd>{[input.profile.productName, input.profile.productVersion].filter(Boolean).join(" ") || "未填写"}</dd></div>
+      <div><dt>已选功能</dt><dd>{featureNames.join("、") || "未选择"}</dd></div>
+      <div><dt>已确认信息项</dt><dd>{input.confirmedFields.length} 项</dd></div>
+    </dl>
+    <div className="form-snapshot-activities">{activities.map(({ name, detail }) => <div key={name}><strong>{name}</strong><span>处理目的：{detail?.purpose || "未填写"}</span><span>保存期限：{detail?.retention || "未填写"}</span></div>)}</div>
+    {input.additionalNotes ? <div className="form-snapshot-note"><strong>表单外补充</strong><p>{input.additionalNotes}</p></div> : null}
+  </div>;
 }
 
 export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspaceProps) {
@@ -500,7 +522,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   }
 
   async function runDraftGeneration(id: string, generationId: string, input: DraftFormInput) {
-    commit({ generated: { status: "GENERATING", generationId, createdAt: new Date().toISOString() } }, "正在提交表单 JSON 并生成工作草稿");
+    commit({ generated: { status: "GENERATING", generationId, createdAt: new Date().toISOString() } }, "正在整理已确认信息并生成隐私政策草稿");
     try {
       const response = await fetch("/api/draft/demo", {
         method: "POST",
@@ -509,16 +531,17 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       });
       if (!response.ok) {
         const errorPayload = await response.json().catch(() => null) as { message?: string; code?: string } | null;
-        throw new Error(errorPayload?.message || errorPayload?.code || "草稿生成失败");
+        const publicFailure = failureMessages[errorPayload?.code ?? ""];
+        throw new Error(publicFailure?.title || "本次生成未完成，请稍后重试");
       }
       const payload = await response.json() as { markdown?: string; docxBase64?: string };
-      if (!payload.markdown || !payload.docxBase64) throw new Error("服务端未返回 Markdown 或 Word 文件");
+      if (!payload.markdown || !payload.docxBase64) throw new Error("生成结果不完整，请重新生成");
       const binary = window.atob(payload.docxBase64);
       const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
       const blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
       setDownloadUrl(URL.createObjectURL(blob));
       setData((current) => ({ ...current, generated: { status: "SUCCEEDED", generationId, createdAt: new Date().toISOString() }, generatedMarkdown: payload.markdown }));
-      setStatusMessage("Markdown 草稿已生成，可预览或下载 Word");
+      setStatusMessage("隐私政策草稿已生成，可在线预览或下载 Word");
     } catch (error) {
       const message = error instanceof Error ? error.message : "生成失败，可使用同一份表单重试";
       setData((current) => ({ ...current, generated: { status: "FAILED", generationId, createdAt: new Date().toISOString(), message } }));
@@ -610,7 +633,21 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
 
           {activeStep === 3 && <section className="workspace-panel panel-enter"><div className="panel-heading"><p>处理活动总览</p><h2>先解决阻断项，再生成工作草稿。</h2><span>客户确认事实，律师判断必要性和处理依据。</span></div><div className="review-summary-grid"><div><span>已选功能</span><strong>{selectedCount}</strong></div><div><span>客户已确认字段</span><strong>{confirmedFieldCount} / {selectedFieldItems.length}</strong></div><div><span>待确认字段</span><strong>{selectedFieldItems.length - confirmedFieldCount}</strong></div><div data-warning={warningCount > 0}><span>律师复核</span><strong>{warningCount}</strong></div></div><div className="field-confirm-list" aria-label="字段级事实确认"><div className="field-confirm-heading"><strong>字段级事实确认</strong><span>只确认产品实际处理什么，不确认法律必要性。</span></div>{draftFields.map((field) => <label key={field.id} className="field-confirm-item"><input type="checkbox" checked={field.confirmed} onChange={() => toggleField(field.id)} /><span className="custom-checkbox"><Check weight="bold" /></span><span><strong>{field.label}</strong><small>{field.feature}</small></span></label>)}</div><div className="review-table" role="table" aria-label="处理活动总览"><div className="review-row review-head" role="row"><span>处理活动</span><span>来源</span><span>状态</span></div>{selectedScenarios.map((item) => { const fields = selectedFieldItems.filter((field) => field.featureId === item.id); const complete = fields.length > 0 && fields.every((field) => confirmedFieldSet.has(field.id)); return <div className="review-row" role="row" key={item.id}><span><strong>{item.title}</strong><small>{item.fields.join("、")}</small></span><span>{item.source}</span><span className={item.risk ? "status-warning" : complete ? "status-complete" : "status-pending"}>{item.risk ? "待律师复核" : complete ? "客户已确认" : "待客户确认"}</span></div>; })}{selectedCustomFeatures.map((item) => <div className="review-row" role="row" key={item}><span><strong>{item}</strong><small>客户自定义功能</small></span><span>客户填写</span><span className={data.customDetails[item]?.purpose && data.customDetails[item]?.retention ? "status-complete" : "status-pending"}>{data.customDetails[item]?.purpose && data.customDetails[item]?.retention ? "客户已确认" : "待客户确认"}</span></div>)}</div>{warningCount > 0 && <div className="warning-callout"><Warning weight="fill" /><div><strong>存在律师复核提示</strong><span>风险活动会进入复核附录，不会被系统自动判断为合规。</span></div></div>}<div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(2)}><ArrowLeft weight="bold" /> 返回修改</button><button type="button" className="button button-primary" disabled={!canReview} onClick={() => goToStep(4)}>预览草稿 <ArrowRight weight="bold" /></button></div></section>}
 
-          {activeStep === 4 && <section className="workspace-panel draft-panel panel-enter"><div className="panel-heading"><p>工作草稿</p><h2>{data.generated?.status === "SUCCEEDED" ? "Markdown 草稿已生成，可直接预览。" : "准备生成 Markdown 工作草稿。"}</h2><span>模型输出 Markdown，页面实时渲染；下载按钮会获取同一份内容对应的 Word 文件。文件会标注“工作草稿，未经律师批准”。{pendingFieldCount > 0 ? ` ${pendingFieldCount} 个未确认字段会以占位符进入律师复核附录。` : ""}{data.generated?.status === "FAILED" ? ` ${data.generated.message}` : ""}</span></div><div className="draft-preview"><div className="draft-page"><span className="draft-watermark">工作草稿 · 律师复核前</span><MarkdownPreview markdown={data.generatedMarkdown} fallback={<><h3>{data.profile.productName || "未填写产品名称"} 隐私政策</h3><p>本政策适用于{data.profile.operatorName || "[[待确认:运营主体]]"}提供的{data.profile.productName || "[[待确认:产品名称]]"} {data.profile.productVersion || "[[待确认:产品版本]]"}。</p><h4>我们如何收集和使用个人信息</h4><p>为提供{[...selectedScenarios.map((scenario) => scenario.title), ...selectedCustomFeatures].join("、") || "[[待确认:产品功能]]"}，本产品可能处理以下信息：</p><p>{draftFields.map((field) => field.confirmed ? field.label : `[[待确认:${field.label}]]`).join("、") || "[[待确认:个人信息字段]]"}。</p></>} /><p className="draft-footnote">当前项目修订号：{data.revision} · {confirmedFieldCount} 个字段已确认</p></div><aside className="draft-audit"><FileDoc weight="duotone" /><strong>{data.generated?.status === "GENERATING" ? "正在生成 Markdown" : "Markdown 预览"}</strong><span>内容版本 {mapV1Content.contentVersion}</span><span>{selectedCount} 项处理活动</span><span>{pendingFieldCount} 个待确认字段</span><span>{warningCount} 项律师复核提示</span></aside></div>{data.projectId && <div className="draft-history"><div className="field-confirm-heading"><strong>生成历史记录</strong><span>历次生成都会持久化到服务器，可随时重新下载 Word。</span></div><GenerationHistory history={history} generating={data.generated?.status === "GENERATING"} onRetry={retrySnapshot} onDownload={downloadSnapshotDocx} /></div>}<div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(3)}><ArrowLeft weight="bold" /> 返回总览</button><button type="button" className="button button-primary" disabled={data.generated?.status === "GENERATING" || (!canGenerate && data.generated?.status !== "SUCCEEDED")} onClick={handleDraftAction}>{data.generated?.status === "SUCCEEDED" ? <><DownloadSimple weight="bold" /> 下载 Word 工作草稿</> : <><FileDoc weight="bold" /> {data.generated?.status === "GENERATING" ? "正在生成…" : data.generated?.status === "FAILED" ? "使用同一份表单重试" : "生成 Markdown 草稿"}</>}</button></div></section>}
+          {activeStep === 4 && <section className="workspace-panel draft-panel panel-enter">
+            <div className="panel-heading">
+              <p>隐私政策草稿</p>
+              <h2>{data.generated?.status === "SUCCEEDED" ? "草稿已生成，请预览并交由律师复核。" : data.generated?.status === "GENERATING" ? "正在生成隐私政策草稿。" : data.generated?.status === "FAILED" ? "本次生成未完成，填写内容已保存。" : "确认信息后，生成隐私政策草稿。"}</h2>
+              <span>{data.generated?.status === "FAILED" ? "可在生成记录中查看原因和当次填写内容，然后直接重新生成。" : "系统会根据已确认的产品信息组织完整草稿，并提供 Word 文件供律师修订。"}{pendingFieldCount > 0 ? ` 仍有 ${pendingFieldCount} 项信息待确认，草稿中会明确标注。` : ""}</span>
+            </div>
+            <div className="generation-process" aria-label="草稿生成流程">
+              <div><span>1</span><strong>整理填写内容</strong><small>汇总通用信息、功能、信息项和表单外补充。</small></div>
+              <div><span>2</span><strong>生成完整草稿</strong><small>按隐私政策结构组织内容，不擅自补写客户事实。</small></div>
+              <div><span>3</span><strong>检查后提供文件</strong><small>只有章节完整、事实边界清晰的草稿才能预览和下载。</small></div>
+            </div>
+            <div className="draft-preview"><div className="draft-page"><span className="draft-watermark">工作草稿 · 律师复核前</span><MarkdownPreview markdown={data.generatedMarkdown} fallback={<><h3>{data.profile.productName || "未填写产品名称"} 隐私政策</h3><p>本政策适用于{data.profile.operatorName || "[[待确认:运营主体]]"}提供的{data.profile.productName || "[[待确认:产品名称]]"} {data.profile.productVersion || "[[待确认:产品版本]]"}。</p><h4>我们如何收集和使用个人信息</h4><p>为提供{[...selectedScenarios.map((scenario) => scenario.title), ...selectedCustomFeatures].join("、") || "[[待确认:产品功能]]"}，本产品可能处理以下信息：</p><p>{draftFields.map((field) => field.confirmed ? field.label : `[[待确认:${field.label}]]`).join("、") || "[[待确认:个人信息字段]]"}。</p></>} /><p className="draft-footnote">{confirmedFieldCount} 项信息已确认 · {pendingFieldCount} 项待确认</p></div><aside className="draft-audit"><FileDoc weight="duotone" /><strong>{data.generated?.status === "GENERATING" ? "正在生成草稿" : "草稿预览"}</strong><span>{selectedCount} 项产品功能</span><span>{confirmedFieldCount} 项已确认信息</span><span>{pendingFieldCount} 项待确认信息</span><span>{warningCount} 项律师复核提示</span></aside></div>
+            {data.projectId && <div className="draft-history"><div className="field-confirm-heading"><strong>生成记录</strong><span>每次生成都会保存，成功草稿可随时预览和重新下载。</span></div><GenerationHistory history={history} generating={data.generated?.status === "GENERATING"} onRetry={retrySnapshot} onDownload={downloadSnapshotDocx} /></div>}
+            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(3)}><ArrowLeft weight="bold" /> 返回总览</button><button type="button" className="button button-primary" disabled={data.generated?.status === "GENERATING" || (!canGenerate && data.generated?.status !== "SUCCEEDED")} onClick={handleDraftAction}>{data.generated?.status === "SUCCEEDED" ? <><DownloadSimple weight="bold" /> 下载 Word 草稿</> : <><FileDoc weight="bold" /> {data.generated?.status === "GENERATING" ? "正在生成…" : data.generated?.status === "FAILED" ? "重新生成" : "生成隐私政策草稿"}</>}</button></div>
+          </section>}
         </div>
       </div>
     </main>

@@ -21,4 +21,9 @@ describe("DeepSeek 待确认事实边界", () => {
     const markdown = completeMarkdown("是否处理崩溃日志仍待确认：[[待确认:security.crash_log]]。\n<!-- assertions: security.crash_log -->");
     expect(parsePolicyMarkdown(markdown, allowed, pending).openItems).toEqual([]);
   });
+
+  it("拒绝将表单中已填写或不存在的内容误标为待确认", () => {
+    const markdown = completeMarkdown("保存期限 [[待确认:保存期限]]。\n<!-- assertions: -->");
+    expect(() => parsePolicyMarkdown(markdown, allowed, pending)).toThrow(/误标为待确认/);
+  });
 });

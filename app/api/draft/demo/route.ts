@@ -212,6 +212,8 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
     })),
     allowedFactKeys: [
       ...selectedFeatures.flatMap((feature) => feature.fields.map((field) => `${feature.key}.${field.key}`)),
+      ...input.selected.flatMap((key) => [`activityDetails.${key}.purpose`, `activityDetails.${key}.retention`]),
+      ...input.customFeatures.flatMap((key) => [`customDetails.${key}.purpose`, `customDetails.${key}.retention`]),
       ...Object.keys(input.profile),
       ...Object.keys(input.profile).map((key) => `profile.${key}`),
       ...verifiedMapV1Content.payload.commonDisclosureFields.map((field) => field.key),
@@ -220,6 +222,8 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
     ],
     confirmedFactKeys: [
       ...selectedFeatures.flatMap((feature) => feature.fields.flatMap((field, index) => confirmed.has(`${feature.key}.${index}`) ? [`${feature.key}.${field.key}`] : [])),
+      ...input.selected.flatMap((key) => [`activityDetails.${key}.purpose`, `activityDetails.${key}.retention`]),
+      ...input.customFeatures.flatMap((key) => [`customDetails.${key}.purpose`, `customDetails.${key}.retention`]),
       ...Object.keys(input.profile),
       ...Object.keys(input.profile).map((key) => `profile.${key}`),
       "additionalNotes",
