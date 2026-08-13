@@ -32,11 +32,11 @@ describe("map local knowledge readiness", () => {
     expect(getRequiredSupplementQuestions({ selected: ["discovery"], customFeatures: [] }).map((item) => item.id)).toEqual(["third-party-services", "history-and-favorites", "personalized-content"]);
   });
 
-  it("blocks generation when a customer fact is unconfirmed or a technical answer is unknown", () => {
+  it("treats unchecked information as omitted but still blocks an unknown supplemental answer", () => {
     expect(evaluateFormalPolicyReadiness(base).ready).toBe(true);
-    const unconfirmed = evaluateFormalPolicyReadiness({ ...base, confirmedFields: ["navigation.0"] });
-    expect(unconfirmed.ready).toBe(false);
-    expect(unconfirmed.diagnostics.some((item) => item.target === "field.navigation.origin")).toBe(true);
+    const partiallySelected = evaluateFormalPolicyReadiness({ ...base, confirmedFields: ["navigation.0"] });
+    expect(partiallySelected.ready).toBe(true);
+    expect(partiallySelected.diagnostics.some((item) => item.target?.startsWith("field."))).toBe(false);
     const unknown = evaluateFormalPolicyReadiness({ ...base, supplementAnswers: { ...base.supplementAnswers, "background-location": { answer: "UNKNOWN", detail: "" } } });
     expect(unknown.ready).toBe(false);
     expect(unknown.diagnostics.some((item) => item.code === "NEEDS_PRODUCT_OR_TECH")).toBe(true);

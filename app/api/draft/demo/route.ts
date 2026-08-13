@@ -73,7 +73,7 @@ export async function POST(request: Request) {
   if (!readiness.ready) {
     return NextResponse.json({
       code: "FORM_NOT_READY",
-      message: "请先完成字段确认和动态补充问卷，再生成隐私政策草稿。",
+      message: "请先完成信息选择和必填补充项，再生成隐私政策草稿。",
       diagnostics: readiness.diagnostics,
     }, { status: 422 });
   }

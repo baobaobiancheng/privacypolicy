@@ -97,7 +97,7 @@ export async function generatePolicyDraft(input: PolicyGenerationInput): Promise
   const model = process.env.DEEPSEEK_MODEL?.trim() || DEFAULT_MODEL;
   const allowedFactKeys = new Set(input.allowedFactKeys);
   if ((input.pendingFacts ?? []).length > 0) {
-    throw new DomainError("EXPORT_BLOCKED", "隐私政策草稿只能使用已确认事实，请先完成字段确认。", { retryable: false });
+    throw new DomainError("EXPORT_BLOCKED", "请至少勾选一项产品实际处理的个人信息。", { retryable: false });
   }
   const response = await requestDeepSeek(apiKey, model, buildMessages({ ...input, pendingFacts: [] }));
   const content = normalizeMarkdown(response.choices[0]?.message.content);

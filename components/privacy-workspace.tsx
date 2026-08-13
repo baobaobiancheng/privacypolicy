@@ -29,7 +29,7 @@ import { evaluateFormalPolicyReadiness, resolveFieldAnswer, type FieldAnswer } f
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
 import type { FormPayload } from "@/src/ai/deepseek";
 
-const steps = ["适用范围", "通用信息", "功能与信息", "字段确认", "补充确认", "生成政策"];
+const steps = ["适用范围", "通用信息", "功能与信息", "信息选择", "补充信息", "生成政策"];
 const stepRoutes = ["scope", "profile", "features", "review", "supplement", "draft"] as const;
 const CLIENT_PERSONA_ID = "client-editor";
 const profileFields = [
@@ -187,7 +187,7 @@ function FormSnapshotSummary({ input }: { input: DraftFormInput }) {
       <div><dt>运营主体</dt><dd>{input.profile.operatorName || "未填写"}</dd></div>
       <div><dt>产品</dt><dd>{[input.profile.productName, input.profile.productVersion].filter(Boolean).join(" ") || "未填写"}</dd></div>
       <div><dt>已选功能</dt><dd>{featureNames.join("、") || "未选择"}</dd></div>
-      <div><dt>已确认信息项</dt><dd>{input.confirmedFields.length} 项</dd></div>
+      <div><dt>已选信息项</dt><dd>{input.confirmedFields.length} 项</dd></div>
     </dl>
     <div className="form-snapshot-activities">{activities.map(({ name, detail }) => <div key={name}><strong>{name}</strong><span>处理目的：{detail?.purpose || "未填写"}</span><span>保存期限：{detail?.retention || "未填写"}</span></div>)}</div>
     {input.additionalNotes ? <div className="form-snapshot-note"><strong>表单外补充</strong><p>{input.additionalNotes}</p></div> : null}
@@ -258,7 +258,6 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   const selectedFieldItems = selectedScenarios.flatMap((scenario) => scenario.fields.map((field, index) => ({ id: `${scenario.id}.${index}`, featureId: scenario.id, feature: scenario.title, label: field })));
   const fieldAnswer = (fieldId: string) => resolveFieldAnswer(data, fieldId);
   const processedFieldCount = selectedFieldItems.filter((field) => fieldAnswer(field.id) === "PROCESS").length;
-  const resolvedFieldCount = selectedFieldItems.filter((field) => Boolean(fieldAnswer(field.id))).length;
   const selectedDetailsComplete = selectedScenarios.every((scenario) => {
     const detail = data.activityDetails[scenario.id];
     return Boolean(detail?.purpose.trim() && detail.retention.trim());
@@ -282,8 +281,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   });
   const warningCount = selectedScenarios.filter((scenario) => scenario.risk).length;
   const canReview = scopeConfirmed && profileComplete && data.selected.length > 0 && selectedDetailsComplete;
-  const pendingFieldCount = selectedFieldItems.length - resolvedFieldCount;
-  const canGenerate = canReview && pendingFieldCount === 0 && formalReadiness.ready;
+  const canGenerate = canReview && formalReadiness.ready;
   const selectedCount = data.selected.length + data.customFeatures.length;
   const progress = activeStep === 0 ? (scopeConfirmed ? 16 : 8) : Math.min(96, activeStep * 16 + (canGenerate ? 16 : 8));
 
@@ -317,10 +315,8 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
           && serverData.customFeatures.every((feature) => Boolean(serverData.customDetails[feature]?.purpose.trim() && serverData.customDetails[feature]?.retention.trim()));
         const serverScopeConfirmed = mapV1Content.payload.scopeGates.every((gate) => serverData.scopeAnswers[gate.id] === true);
         const serverProfileComplete = profileFields.every(([key]) => Boolean(serverData.profile[key]?.trim()));
-        const serverFields = scenarios.filter((scenario) => serverData.selected.includes(scenario.id)).flatMap((scenario) => scenario.fields.map((_, index) => `${scenario.id}.${index}`));
-        const serverFieldsConfirmed = serverFields.every((field) => Boolean(resolveFieldAnswer(serverData, field)));
         const serverReadiness = evaluateFormalPolicyReadiness({ profile: serverData.profile as unknown as FormPayload["profile"], selected: serverData.selected, customFeatures: serverData.customFeatures, customDetails: serverData.customDetails, activityDetails: serverData.activityDetails, confirmedFields: serverData.confirmedFields, additionalNotes: serverData.additionalNotes, scopeAnswers: serverData.scopeAnswers, supplementAnswers: serverData.supplementAnswers });
-        const firstIncomplete: StepIndex = !serverScopeConfirmed ? 0 : !serverProfileComplete ? 1 : !serverData.selected.length || !detailsComplete ? 2 : !serverFieldsConfirmed ? 3 : !serverReadiness.ready ? 4 : 5;
+        const firstIncomplete: StepIndex = !serverScopeConfirmed ? 0 : !serverProfileComplete ? 1 : !serverData.selected.length || !detailsComplete ? 2 : !serverReadiness.ready ? 4 : 5;
         setActiveStep(initialStep > firstIncomplete ? firstIncomplete : initialStep);
         setHydrated(true);
       });
@@ -366,9 +362,9 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
 
   useEffect(() => {
     if (!hydrated) return;
-    const firstIncomplete: StepIndex = !scopeConfirmed ? 0 : !profileComplete ? 1 : !data.selected.length || !selectedDetailsComplete ? 2 : pendingFieldCount > 0 ? 3 : !formalReadiness.ready ? 4 : 5;
+    const firstIncomplete: StepIndex = !scopeConfirmed ? 0 : !profileComplete ? 1 : !data.selected.length || !selectedDetailsComplete ? 2 : !formalReadiness.ready ? 4 : 5;
     if (initialStep > firstIncomplete) setActiveStep(firstIncomplete);
-  }, [data.selected.length, hydrated, initialStep, profileComplete, scopeConfirmed, selectedDetailsComplete, pendingFieldCount, formalReadiness.ready]);
+  }, [data.selected.length, hydrated, initialStep, profileComplete, scopeConfirmed, selectedDetailsComplete, formalReadiness.ready]);
 
   useEffect(() => () => {
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
@@ -466,13 +462,8 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       setActiveStep(2);
       return;
     }
-    if (step > 3 && pendingFieldCount > 0) {
-      setStatusMessage("请先逐项确认产品实际处理的信息");
-      setActiveStep(3);
-      return;
-    }
     if (step > 4 && !formalReadiness.ready) {
-      setStatusMessage("请先完成动态补充确认中的阻断项");
+      setStatusMessage("请先补齐必填的产品信息");
       setActiveStep(4);
       return;
     }
@@ -554,18 +545,22 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     setCustomOpen(false);
   }
 
-  function setFieldAnswer(fieldId: string, answer: FieldAnswer) {
-    const confirmedFields = answer === "PROCESS" ? [...new Set([...data.confirmedFields, fieldId])] : data.confirmedFields.filter((item) => item !== fieldId);
-    commit({ fieldAnswers: { ...data.fieldAnswers, [fieldId]: answer }, confirmedFields }, "字段处理结论已保存");
+  function toggleField(fieldId: string) {
+    const selected = fieldAnswer(fieldId) === "PROCESS";
+    const confirmedFields = selected ? data.confirmedFields.filter((item) => item !== fieldId) : [...new Set([...data.confirmedFields, fieldId])];
+    const fieldAnswers = { ...data.fieldAnswers };
+    if (selected) delete fieldAnswers[fieldId];
+    else fieldAnswers[fieldId] = "PROCESS";
+    commit({ fieldAnswers, confirmedFields }, selected ? "已取消该信息项" : "信息项已选择");
   }
 
   function updateSupplement(questionId: string, patch: Partial<SupplementAnswer>) {
     const current = data.supplementAnswers[questionId] ?? { answer: "UNKNOWN" as const, detail: "" };
-    commit({ supplementAnswers: { ...data.supplementAnswers, [questionId]: { ...current, ...patch, updatedAt: new Date().toISOString() } } }, "补充确认已保存");
+    commit({ supplementAnswers: { ...data.supplementAnswers, [questionId]: { ...current, ...patch, updatedAt: new Date().toISOString() } } }, "补充信息已保存");
   }
 
   async function runDraftGeneration(id: string, generationId: string, input: DraftFormInput) {
-    commit({ generated: { status: "GENERATING", generationId, createdAt: new Date().toISOString() } }, "正在整理已确认信息并生成隐私政策草稿");
+    commit({ generated: { status: "GENERATING", generationId, createdAt: new Date().toISOString() } }, "正在整理已填信息并生成隐私政策草稿");
     try {
       const response = await fetch("/api/draft/demo", {
         method: "POST",
@@ -627,7 +622,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       return;
     }
     if (!canGenerate) {
-      setStatusMessage("请完成字段确认和动态补充问卷后再生成隐私政策草稿");
+      setStatusMessage("请完成信息选择和必填补充项后再生成隐私政策草稿");
       return;
     }
 
@@ -653,13 +648,13 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     });
   }
 
-  const draftFields = useMemo(() => selectedFieldItems.map((field) => ({ ...field, answer: fieldAnswer(field.id) })), [selectedFieldItems, data.fieldAnswers, data.confirmedFields]);
+  const draftFields = useMemo(() => selectedFieldItems.map((field) => ({ ...field, selected: fieldAnswer(field.id) === "PROCESS" })), [selectedFieldItems, data.fieldAnswers, data.confirmedFields]);
 
   return (
     <main className="workspace-page workspace-section w-full max-w-full overflow-x-hidden bg-paper-light text-ink">
       <div className="workspace-shell">
         <aside className="workspace-sidebar">
-          <div className="workspace-project"><span className="project-icon"><MapPin weight="fill" /></span><div><strong>{data.profile.productName || "新地图项目"}</strong><span>客户信息填写与确认</span></div></div>
+          <div className="workspace-project"><span className="project-icon"><MapPin weight="fill" /></span><div><strong>{data.profile.productName || "新地图项目"}</strong><span>隐私政策信息填写</span></div></div>
           <ol className="step-list">
             {steps.map((step, index) => <li key={step}><button type="button" data-active={activeStep === index} data-complete={index < activeStep} onClick={() => goToStep(index as StepIndex)}><span>{index < activeStep ? <Check weight="bold" /> : index + 1}</span>{step}</button></li>)}
           </ol>
@@ -684,20 +679,19 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
             {customOpen ? <div className="custom-form"><input autoFocus value={customName} onChange={(event) => setCustomName(event.target.value)} placeholder="例如：收藏常用地点" onKeyDown={(event) => event.key === "Enter" && addCustomFeature()} /><button type="button" onClick={addCustomFeature}>添加</button><button type="button" onClick={() => setCustomOpen(false)}>取消</button></div> : <button type="button" className="add-feature" onClick={() => setCustomOpen(true)}><Plus weight="bold" /> 添加表单中没有的功能</button>}
             <label className="additional-notes"><span>表单外补充信息（可选）</span><small>把表单没有覆盖、但产品实际存在的功能、SDK、第三方或处理规则写在这里。模型只会将其作为客户原文，不会自动变成未经确认的事实。</small><textarea value={data.additionalNotes} onChange={(event) => commit({ additionalNotes: event.target.value }, "补充信息已保存")} placeholder="例如：使用定位 SDK，仅在用户点击开始导航后获取前台定位；不做后台持续定位。" /></label>
             {(selectedScenarios.length > 0 || selectedCustomFeatures.length > 0) && <div className="activity-details"><div className="field-confirm-heading"><strong>处理活动详情</strong><span>这些内容必须来自客户实际产品，不能由参考政策代填。</span></div>{selectedScenarios.map((scenario) => <div className="activity-detail-card" key={scenario.id}><div><strong>{scenario.title}</strong><small>{scenario.fields.join("、")}</small></div><label><span>实际处理目的</span><input value={data.activityDetails[scenario.id]?.purpose ?? ""} onChange={(event) => updateActivityDetail(scenario.id, "purpose", event.target.value)} placeholder="例如：提供路线规划" /></label><label><span>保存期限规则</span><input value={data.activityDetails[scenario.id]?.retention ?? ""} onChange={(event) => updateActivityDetail(scenario.id, "retention", event.target.value)} placeholder="例如：导航结束后删除或去标识化" /></label></div>)}{selectedCustomFeatures.map((feature) => <div className="activity-detail-card" key={feature}><div><strong>{feature}</strong><small>客户自定义功能 · 至少填写实际目的和保存期限</small></div><label><span>实际处理目的</span><input value={data.customDetails[feature]?.purpose ?? ""} onChange={(event) => commit({ customDetails: { ...data.customDetails, [feature]: { purpose: event.target.value, retention: data.customDetails[feature]?.retention ?? "" } } }, "自定义功能目的已保存")} placeholder="例如：收藏常用地点" /></label><label><span>保存期限规则</span><input value={data.customDetails[feature]?.retention ?? ""} onChange={(event) => commit({ customDetails: { ...data.customDetails, [feature]: { purpose: data.customDetails[feature]?.purpose ?? "", retention: event.target.value } } }, "自定义功能保存期限已保存")} placeholder="例如：用户删除后清除" /></label></div>)}</div>}
-            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(1)}><ArrowLeft weight="bold" /> 返回</button><button type="button" className="button button-primary" disabled={!selectedCount || !selectedDetailsComplete} onClick={() => goToStep(3)}>进入字段确认 <ArrowRight weight="bold" /></button></div>
+            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(1)}><ArrowLeft weight="bold" /> 返回</button><button type="button" className="button button-primary" disabled={!selectedCount || !selectedDetailsComplete} onClick={() => goToStep(3)}>选择个人信息 <ArrowRight weight="bold" /></button></div>
           </section>}
 
           {activeStep === 3 && <section className="workspace-panel panel-enter">
-            <div className="panel-heading"><p>处理活动总览</p><h2>确认产品事实，再生成隐私政策草稿。</h2><span>请根据产品实际处理行为完成每一项确认。</span></div>
-            <div className="review-summary-grid"><div><span>已选功能</span><strong>{selectedCount}</strong></div><div><span>已完成结论</span><strong>{resolvedFieldCount} / {selectedFieldItems.length}</strong></div><div><span>实际处理信息</span><strong>{processedFieldCount}</strong></div><div data-warning={warningCount > 0}><span>重点核对</span><strong>{warningCount}</strong></div></div>
-            <div className="field-confirm-list" aria-label="字段级事实确认"><div className="field-confirm-heading"><strong>字段级事实确认</strong><span>请对每项候选信息明确选择“处理”或“不处理”。未处理的信息不会写入草稿。</span></div>{draftFields.map((field) => <div key={field.id} className="field-confirm-item" data-answer={field.answer ?? "UNANSWERED"}><span><strong>{field.label}</strong><small>{field.feature}</small></span><div className="field-answer-actions"><button type="button" className={field.answer === "PROCESS" ? "selected" : ""} onClick={() => setFieldAnswer(field.id, "PROCESS")}>处理</button><button type="button" className={field.answer === "NOT_PROCESS" ? "selected" : ""} onClick={() => setFieldAnswer(field.id, "NOT_PROCESS")}>不处理</button></div></div>)}</div>
-            <div className="review-table" role="table" aria-label="处理活动总览"><div className="review-row review-head" role="row"><span>处理活动</span><span>来源</span><span>状态</span></div>{selectedScenarios.map((item) => { const fields = selectedFieldItems.filter((field) => field.featureId === item.id); const complete = fields.length > 0 && fields.every((field) => Boolean(fieldAnswer(field.id))); return <div className="review-row" role="row" key={item.id}><span><strong>{item.title}</strong><small>{item.fields.join("、")}</small></span><span>{item.source}</span><span className={item.risk ? "status-warning" : complete ? "status-complete" : "status-pending"}>{item.risk ? "重点核对" : complete ? "已完成确认" : "待客户确认"}</span></div>; })}{selectedCustomFeatures.map((item) => <div className="review-row" role="row" key={item}><span><strong>{item}</strong><small>客户自定义功能</small></span><span>客户填写</span><span className={data.customDetails[item]?.purpose && data.customDetails[item]?.retention ? "status-complete" : "status-pending"}>{data.customDetails[item]?.purpose && data.customDetails[item]?.retention ? "客户已确认" : "待客户确认"}</span></div>)}</div>
-            {warningCount > 0 && <div className="warning-callout"><Warning weight="fill" /><div><strong>存在重点核对项</strong><span>请结合产品实际配置确认处理方式；系统不会自动作出法律结论。</span></div></div>}
-            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(2)}><ArrowLeft weight="bold" /> 返回修改</button><button type="button" className="button button-primary" disabled={!canReview || pendingFieldCount > 0} onClick={() => goToStep(4)}>进入补充确认 <ArrowRight weight="bold" /></button></div>
+            <div className="panel-heading"><p>信息选择</p><h2>勾选产品实际处理的信息。</h2><span>已勾选的信息会写入隐私政策草稿；未勾选的信息不会写入。</span></div>
+            <div className="review-summary-grid"><div><span>已选功能</span><strong>{selectedCount}</strong></div><div><span>已勾选信息</span><strong>{processedFieldCount}</strong></div><div data-warning={warningCount > 0}><span>重点提示</span><strong>{warningCount}</strong></div></div>
+            <div className="field-confirm-list" aria-label="个人信息选择"><div className="field-confirm-heading"><strong>个人信息</strong><span>按产品实际情况勾选即可。</span></div>{draftFields.map((field) => <label key={field.id} className="field-confirm-item"><input type="checkbox" checked={field.selected} onChange={() => toggleField(field.id)} /><span className="custom-checkbox"><Check weight="bold" /></span><span><strong>{field.label}</strong><small>{field.feature}</small></span></label>)}</div>
+            {warningCount > 0 && <div className="warning-callout"><Warning weight="fill" /><div><strong>请留意高敏感或非核心场景</strong><span>请结合产品实际配置选择信息项；系统不会自动作出法律结论。</span></div></div>}
+            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(2)}><ArrowLeft weight="bold" /> 返回修改</button><button type="button" className="button button-primary" disabled={!canReview || processedFieldCount === 0} onClick={() => goToStep(4)}>进入补充信息 <ArrowRight weight="bold" /></button></div>
           </section>}
 
           {activeStep === 4 && <section className="workspace-panel panel-enter">
-            <div className="panel-heading"><p>动态补充确认</p><h2>根据已选功能补齐容易遗漏的事实。</h2><span>问题来自本地审核的地图类规则和行业场景，不展示或引用任何参考产品。选择“有”时请说明实际情况；“不确定”会提示产品或技术负责人确认。</span></div>
+            <div className="panel-heading"><p>补充信息</p><h2>根据已选功能补齐容易遗漏的产品情况。</h2><span>请按产品实际情况选择“有”或“没有”；暂时不清楚时可选“不确定”，补齐后即可继续。</span></div>
             <div className="supplement-question-list">
               {supplementQuestions.map((question) => {
                 const answer = data.supplementAnswers[question.id];
@@ -713,13 +707,13 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
             </div>
             <label className="additional-notes"><span>其他补充说明（可选）</span><small>可补充以上问题未覆盖的实际处理情况。内容会以客户原文送入生成流程，不会被自动改写成未经确认的事实。</small><textarea value={data.additionalNotes} onChange={(event) => commit({ additionalNotes: event.target.value }, "补充说明已保存")} placeholder="例如：用户主动开启云端同步后，才同步收藏地点；用户可在设置中关闭。" /></label>
             {formalReadiness.diagnostics.length > 0 ? <div className="warning-callout"><Warning weight="fill" /><div><strong>生成前还有待完成事项</strong><span>{formalReadiness.diagnostics.filter((item) => item.severity === "BLOCKING").map((item) => item.message).join("；") || "已完成客户侧事实确认。"}</span></div></div> : null}
-            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(3)}><ArrowLeft weight="bold" /> 返回字段确认</button><button type="button" className="button button-primary" disabled={!formalReadiness.ready} onClick={() => goToStep(5)}>进入政策生成 <ArrowRight weight="bold" /></button></div>
+            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(3)}><ArrowLeft weight="bold" /> 返回信息选择</button><button type="button" className="button button-primary" disabled={!formalReadiness.ready} onClick={() => goToStep(5)}>进入政策生成 <ArrowRight weight="bold" /></button></div>
           </section>}
 
           {activeStep === 5 && <section className="workspace-panel draft-panel panel-enter">
             <div className="panel-heading">
               <p>隐私政策草稿</p>
-              <h2>{data.generated?.status === "SUCCEEDED" ? "草稿已生成，可直接预览、编辑或下载。" : data.generated?.status === "GENERATING" ? "正在生成隐私政策草稿。" : data.generated?.status === "FAILED" ? "本次生成未完成，填写内容已保存。" : "确认事实后，生成隐私政策草稿。"}</h2>
+              <h2>{data.generated?.status === "SUCCEEDED" ? "草稿已生成，可直接预览、编辑或下载。" : data.generated?.status === "GENERATING" ? "正在生成隐私政策草稿。" : data.generated?.status === "FAILED" ? "本次生成未完成，填写内容已保存。" : "完成填写后，生成隐私政策草稿。"}</h2>
               <span>{data.generated?.status === "FAILED" ? "可在生成记录中查看原因和当次填写内容，然后直接重新生成。" : "系统仅使用客户确认的事实生成草稿，不作合规结论。"}</span>
             </div>
             <div className="generation-process" aria-label="隐私政策草稿生成流程">
@@ -727,9 +721,9 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
               <div><span>2</span><strong>生成正式政策文本</strong><small>按隐私政策结构组织内容，不擅自补写客户事实。</small></div>
               <div><span>3</span><strong>校验后提供草稿文件</strong><small>只有章节完整、事实边界清晰的文本才能预览和下载。</small></div>
             </div>
-            <div className="draft-preview"><div className="draft-page"><span className="draft-watermark">隐私政策草稿</span><MarkdownPreview markdown={data.generatedMarkdown} fallback={<><h3>{data.profile.productName} 隐私政策</h3><p>完成事实确认后，系统会在这里展示可编辑的隐私政策草稿。</p><h4>生成范围</h4><p>已确认 {selectedCount} 项产品功能和 {processedFieldCount} 项实际处理的个人信息。</p></>} /><p className="draft-footnote">{processedFieldCount} 项实际处理信息 · {supplementQuestions.length} 项补充事实已核对</p></div><aside className="draft-audit"><FileDoc weight="duotone" /><strong>{data.generated?.status === "GENERATING" ? "正在生成草稿" : "草稿预览"}</strong><span>{selectedCount} 项产品功能</span><span>{processedFieldCount} 项实际处理信息</span><span>{supplementQuestions.length} 项补充确认</span><span>{warningCount} 项重点核对提示</span></aside></div>
+            <div className="draft-preview"><div className="draft-page"><span className="draft-watermark">隐私政策草稿</span><MarkdownPreview markdown={data.generatedMarkdown} fallback={<><h3>{data.profile.productName} 隐私政策</h3><p>完成信息填写后，系统会在这里展示可预览和下载的隐私政策草稿。</p><h4>生成范围</h4><p>已选择 {selectedCount} 项产品功能和 {processedFieldCount} 项实际处理的个人信息。</p></>} /><p className="draft-footnote">{processedFieldCount} 项实际处理信息 · {supplementQuestions.length} 项补充信息</p></div><aside className="draft-audit"><FileDoc weight="duotone" /><strong>{data.generated?.status === "GENERATING" ? "正在生成草稿" : "草稿预览"}</strong><span>{selectedCount} 项产品功能</span><span>{processedFieldCount} 项实际处理信息</span><span>{supplementQuestions.length} 项补充信息</span><span>{warningCount} 项重点核对提示</span></aside></div>
             {data.projectId && <div className="draft-history"><div className="field-confirm-heading"><strong>生成记录</strong><span>每次生成都会保存，成功版本可随时预览和重新下载。</span></div><GenerationHistory history={history} generating={data.generated?.status === "GENERATING"} onRetry={retrySnapshot} onDownload={downloadSnapshotDocx} /></div>}
-            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(4)}><ArrowLeft weight="bold" /> 返回补充确认</button><button type="button" className="button button-primary" disabled={data.generated?.status === "GENERATING" || (!canGenerate && data.generated?.status !== "SUCCEEDED")} onClick={handleDraftAction}>{data.generated?.status === "SUCCEEDED" ? <><DownloadSimple weight="bold" /> 下载 Word 草稿</> : <><FileDoc weight="bold" /> {data.generated?.status === "GENERATING" ? "正在生成…" : data.generated?.status === "FAILED" ? "重新生成" : "生成隐私政策草稿"}</>}</button></div>
+            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(4)}><ArrowLeft weight="bold" /> 返回补充信息</button><button type="button" className="button button-primary" disabled={data.generated?.status === "GENERATING" || (!canGenerate && data.generated?.status !== "SUCCEEDED")} onClick={handleDraftAction}>{data.generated?.status === "SUCCEEDED" ? <><DownloadSimple weight="bold" /> 下载 Word 草稿</> : <><FileDoc weight="bold" /> {data.generated?.status === "GENERATING" ? "正在生成…" : data.generated?.status === "FAILED" ? "重新生成" : "生成隐私政策草稿"}</>}</button></div>
           </section>}
         </div>
       </div>

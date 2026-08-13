@@ -1,7 +1,6 @@
 import type { FormPayload } from "@/src/ai/deepseek";
 import { getRequiredSupplementQuestions } from "./map-cn";
 import { SupplementAnswerSchema, type SupplementAnswer } from "./map-cn/schema";
-import { mapV1Content } from "@/src/content/map-v1";
 
 export type ReadinessDiagnostic = {
   code: "OUT_OF_SCOPE" | "NEEDS_CUSTOMER_INPUT" | "NEEDS_PRODUCT_OR_TECH" | "NEEDS_LEGAL_REVIEW";
@@ -42,13 +41,6 @@ export function evaluateFormalPolicyReadiness(input: FormPayload & { scopeAnswer
   for (const feature of input.selected) {
     const detail = input.activityDetails[feature];
     if (!detail?.purpose?.trim() || !detail.retention?.trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `activity.${feature}`, message: "每个已选功能都需要填写实际处理目的和保存期限。" });
-  }
-  for (const feature of mapV1Content.payload.features.filter((item) => input.selected.includes(item.key))) {
-    feature.fields.forEach((field, index) => {
-      if (!resolveFieldAnswer(input, `${feature.key}.${index}`)) {
-        diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `field.${feature.key}.${field.key}`, message: `请确认“${feature.title}”实际处理的“${field.label}”。` });
-      }
-    });
   }
   for (const feature of input.customFeatures) {
     const detail = input.customDetails[feature];

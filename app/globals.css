@@ -2578,22 +2578,6 @@ input:focus-visible {
 .supplement-detail textarea { min-height: 104px; padding: 12px; resize: vertical; border: 1px solid var(--line); font: inherit; font-weight: 400; line-height: 1.6; }
 .supplement-unknown { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; margin: 0; color: #a35c00; font-size: 14px; }
 
-.field-confirm-item {
-  align-items: center;
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.field-answer-actions { display: flex; gap: 8px; }
-.field-answer-actions button {
-  min-width: 62px;
-  padding: 7px 10px;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-}
-.field-answer-actions button.selected { border-color: var(--ink); background: var(--acid); color: var(--ink); }
-.field-confirm-item[data-answer="NOT_PROCESS"] { opacity: .78; }
 
 @media (max-width: 680px) {
   .site-nav {
@@ -2771,7 +2755,6 @@ input:focus-visible {
 
   .supplement-question { grid-template-columns: 1fr; }
   .supplement-answer-options { flex-wrap: wrap; }
-  .field-confirm-item { grid-template-columns: 1fr; gap: 10px; }
 
   .generation-process > div {
     border-right: 0;
