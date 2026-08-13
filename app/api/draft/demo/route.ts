@@ -13,7 +13,7 @@ import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
 import { ensureDevUsers } from "@/src/data/dev-seed";
 import { getPrisma } from "@/src/data/prisma";
 import { authorizeProject, type ProjectAccessRecord } from "@/src/application/authorization";
-import { evaluateFormalPolicyReadiness } from "@/src/knowledge/readiness";
+import { evaluateFormalPolicyReadiness, resolveFieldAnswer } from "@/src/knowledge/readiness";
 import { mapCnKnowledgePackage } from "@/src/knowledge/map-cn";
 
 export const runtime = "nodejs";
@@ -37,6 +37,7 @@ export async function GET() {
       profile: { operatorName: "演示主体", operatorContact: "杭州市西湖区示例地址", productName: "地图导航示例", productVersion: "本地演示", contactEmail: "demo@example.com", rightsEntry: "App 内隐私中心", rightsResponsePeriod: "15 个工作日内回复", minorProcessing: "不面向未成年人，发现后删除", securityMeasures: "访问控制和传输加密", incidentChannel: "隐私联系邮箱", policyEffectiveDate: "2026-08-10", policyUpdateNotice: "App 内公告" },
       selected: ["navigation"],
       confirmedFields: ["navigation.0", "navigation.1", "navigation.2"],
+      fieldAnswers: { "navigation.0": "PROCESS", "navigation.1": "PROCESS", "navigation.2": "PROCESS" },
       customFeatures: [],
       customDetails: {},
       activityDetails: { navigation: { purpose: "提供定位和路线规划", retention: "导航结束后删除或去标识化" } },
@@ -139,7 +140,7 @@ function modelErrorResponse(error: unknown) {
 async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, generationId: string): Promise<DraftResponse> {
   const selectedFeatures = verifiedMapV1Content.payload.features.filter((feature) => input.selected.includes(feature.key));
 
-  const confirmed = new Set(input.confirmedFields);
+  const fieldAnswer = (featureKey: string, index: number) => resolveFieldAnswer(input, `${featureKey}.${index}`);
   const activities: ActivityFacts[] = selectedFeatures.map((feature) => ({
     activityKey: `activity-${feature.key}`,
     featureKey: feature.key,
@@ -153,7 +154,7 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       fieldKey: field.key,
       value: field.label,
       originType: "CLIENT_ORIGINAL" as const,
-      factVerification: confirmed.has(`${feature.key}.${index}`) ? "CLIENT_CONFIRMED" as const : field.required ? "UNCONFIRMED" as const : "EXCLUDED" as const,
+      factVerification: fieldAnswer(feature.key, index) === "PROCESS" ? "CLIENT_CONFIRMED" as const : fieldAnswer(feature.key, index) === "NOT_PROCESS" ? "EXCLUDED" as const : "UNCONFIRMED" as const,
       legalReview: "NOT_REQUIRED" as const,
       current: true,
     })),
@@ -215,6 +216,7 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       customDetails: input.customDetails,
       activityDetails: input.activityDetails,
       confirmedFields: input.confirmedFields,
+      fieldAnswers: input.fieldAnswers,
       additionalNotes: input.additionalNotes,
       scopeAnswers: input.scopeAnswers,
       supplementAnswers: input.supplementAnswers,
@@ -230,10 +232,10 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       key: feature.key,
       title: feature.title,
       summary: feature.summary,
-      fields: feature.fields.map((field, index) => ({ key: field.key, label: field.label, confirmed: confirmed.has(`${feature.key}.${index}`) })),
+      fields: feature.fields.filter((_, index) => fieldAnswer(feature.key, index) === "PROCESS").map((field) => ({ key: field.key, label: field.label, confirmed: true })),
     })),
     allowedFactKeys: [
-      ...selectedFeatures.flatMap((feature) => feature.fields.map((field) => `${feature.key}.${field.key}`)),
+      ...selectedFeatures.flatMap((feature) => feature.fields.filter((_, index) => fieldAnswer(feature.key, index) === "PROCESS").map((field) => `${feature.key}.${field.key}`)),
       ...input.selected.flatMap((key) => [`activityDetails.${key}.purpose`, `activityDetails.${key}.retention`]),
       ...input.customFeatures.flatMap((key) => [`customDetails.${key}.purpose`, `customDetails.${key}.retention`]),
       ...Object.keys(input.profile),
@@ -244,7 +246,7 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       "additionalNotes",
     ],
     confirmedFactKeys: [
-      ...selectedFeatures.flatMap((feature) => feature.fields.flatMap((field, index) => confirmed.has(`${feature.key}.${index}`) ? [`${feature.key}.${field.key}`] : [])),
+      ...selectedFeatures.flatMap((feature) => feature.fields.flatMap((field, index) => fieldAnswer(feature.key, index) === "PROCESS" ? [`${feature.key}.${field.key}`] : [])),
       ...input.selected.flatMap((key) => [`activityDetails.${key}.purpose`, `activityDetails.${key}.retention`]),
       ...input.customFeatures.flatMap((key) => [`customDetails.${key}.purpose`, `customDetails.${key}.retention`]),
       ...Object.keys(input.profile),

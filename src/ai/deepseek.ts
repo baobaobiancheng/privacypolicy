@@ -58,6 +58,7 @@ export const FormPayloadSchema = z.object({
   customDetails: z.record(z.string(), z.object({ purpose: z.string().trim().min(1).max(1_000), retention: z.string().trim().min(1).max(500) })),
   activityDetails: z.record(z.string(), z.object({ purpose: z.string().trim().min(1).max(1_000), retention: z.string().trim().min(1).max(500) })),
   confirmedFields: z.array(z.string().trim().min(1).max(160)),
+  fieldAnswers: z.record(z.string(), z.enum(["PROCESS", "NOT_PROCESS"])).default({}),
   additionalNotes: z.string().max(10_000),
   scopeAnswers: z.record(z.string(), z.boolean()).default({}),
   supplementAnswers: z.record(z.string(), z.object({
@@ -287,6 +288,10 @@ export function parsePolicyMarkdown(
       continue;
     }
     openItems.push({ assertionId, reason: comment[2].trim() });
+  }
+
+  if (unmatchedReferences.length > 0) {
+    throw new DomainError("MODEL_OUTPUT_INVALID", `生成内容引用了未授权的事实字段：${unmatchedReferences.join("、")}。`, { retryable: true });
   }
 
   return { markdown: parsed.data, assertionIds, openItems, unmatchedReferences };

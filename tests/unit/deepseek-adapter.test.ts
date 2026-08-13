@@ -72,12 +72,12 @@ describe("DeepSeek adapter", () => {
     });
   });
 
-  it("quarantines a model citation that is not in the form field allowlist", async () => {
+  it("rejects a model citation that is not in the form field allowlist", async () => {
     process.env.DEEPSEEK_API_KEY = "test-key";
     const invalid = completeMarkdown.replace("<!-- assertions:  -->", "<!-- assertions: invented-field -->");
     vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: invalid } }] }), { status: 200 })));
 
-    await expect(generatePolicyDraft(input)).resolves.toMatchObject({ unmatchedReferences: ["invented-field"] });
+    await expect(generatePolicyDraft(input)).rejects.toMatchObject({ code: "MODEL_OUTPUT_INVALID" });
   });
 
   it("rejects pending facts so a formal candidate cannot contain placeholders", async () => {

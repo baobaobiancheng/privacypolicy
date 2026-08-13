@@ -17,6 +17,17 @@ export type FormalPolicyReadiness = {
   answers: Record<string, SupplementAnswer>;
 };
 
+export type FieldAnswer = "PROCESS" | "NOT_PROCESS";
+
+/**
+ * Older projects only stored a checked field list. A historical check means
+ * “process”; all new decisions are explicit so “does not process” cannot be
+ * mistaken for an incomplete answer.
+ */
+export function resolveFieldAnswer(input: { fieldAnswers?: Record<string, FieldAnswer>; confirmedFields: string[] }, fieldId: string): FieldAnswer | undefined {
+  return input.fieldAnswers?.[fieldId] ?? (input.confirmedFields.includes(fieldId) ? "PROCESS" : undefined);
+}
+
 const profileKeys = ["operatorName", "operatorContact", "productName", "productVersion", "contactEmail", "rightsEntry", "rightsResponsePeriod", "minorProcessing", "securityMeasures", "incidentChannel", "policyEffectiveDate", "policyUpdateNotice"] as const;
 
 export function evaluateFormalPolicyReadiness(input: FormPayload & { scopeAnswers?: Record<string, boolean>; supplementAnswers?: Record<string, SupplementAnswer> }): FormalPolicyReadiness {
@@ -32,10 +43,9 @@ export function evaluateFormalPolicyReadiness(input: FormPayload & { scopeAnswer
     const detail = input.activityDetails[feature];
     if (!detail?.purpose?.trim() || !detail.retention?.trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `activity.${feature}`, message: "每个已选功能都需要填写实际处理目的和保存期限。" });
   }
-  const confirmed = new Set(input.confirmedFields);
   for (const feature of mapV1Content.payload.features.filter((item) => input.selected.includes(item.key))) {
     feature.fields.forEach((field, index) => {
-      if (!confirmed.has(`${feature.key}.${index}`)) {
+      if (!resolveFieldAnswer(input, `${feature.key}.${index}`)) {
         diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `field.${feature.key}.${field.key}`, message: `请确认“${feature.title}”实际处理的“${field.label}”。` });
       }
     });

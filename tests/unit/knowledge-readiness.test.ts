@@ -41,4 +41,14 @@ describe("map local knowledge readiness", () => {
     expect(unknown.ready).toBe(false);
     expect(unknown.diagnostics.some((item) => item.code === "NEEDS_PRODUCT_OR_TECH")).toBe(true);
   });
+
+  it("accepts an explicit no-processing decision and never treats it as an unanswered field", () => {
+    const result = evaluateFormalPolicyReadiness({
+      ...base,
+      confirmedFields: ["navigation.0", "navigation.2"],
+      fieldAnswers: { "navigation.0": "PROCESS", "navigation.1": "NOT_PROCESS", "navigation.2": "PROCESS" },
+    });
+    expect(result.ready).toBe(true);
+    expect(result.diagnostics.some((item) => item.target === "field.navigation.origin")).toBe(false);
+  });
 });
