@@ -6,7 +6,6 @@ const sections = new Map<string, 0 | 1 | 2 | 3 | 4 | 5>([
   ["profile", 1],
   ["features", 2],
   ["activities", 2],
-  ["tasks", 3],
   ["review", 3],
   ["supplement", 4],
   ["draft", 5],

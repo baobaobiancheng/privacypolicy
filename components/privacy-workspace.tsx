@@ -21,7 +21,6 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
-import { DEV_PERSONAS } from "@/src/auth/dev-personas";
 import { mapV1Content } from "@/src/content/map-v1";
 import { scenarios } from "@/src/content/map-v1/ui-content";
 import { MarkdownPreview } from "@/components/markdown-preview";
@@ -32,6 +31,7 @@ import type { FormPayload } from "@/src/ai/deepseek";
 
 const steps = ["适用范围", "通用信息", "功能与信息", "字段确认", "补充确认", "生成政策"];
 const stepRoutes = ["scope", "profile", "features", "review", "supplement", "draft"] as const;
+const CLIENT_PERSONA_ID = "client-editor";
 const profileFields = [
   ["operatorName", "运营主体全称", "例如：杭州行迹科技有限公司"],
   ["operatorContact", "运营主体联系信息", "例如：浙江省杭州市西湖区××路××号"],
@@ -202,7 +202,6 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   const [statusMessage, setStatusMessage] = useState("所有操作会保留在当前项目表单中");
   const [customOpen, setCustomOpen] = useState(false);
   const [customName, setCustomName] = useState("");
-  const [personaId, setPersonaId] = useState<string>(DEV_PERSONAS[0].id);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [history, setHistory] = useState<SnapshotItem[] | null>(null);
@@ -228,7 +227,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
 
   async function loadProjectFromServer(id: string): Promise<{ formData: Partial<ProjectData>; revision: number } | null> {
     try {
-      const res = await fetch(`/api/projects/${id}`, { headers: { "x-persona-id": personaId } });
+      const res = await fetch(`/api/projects/${id}`, { headers: { "x-persona-id": CLIENT_PERSONA_ID } });
       if (!res.ok) return null;
       const payload = await res.json() as { formData: Partial<ProjectData> | null; revision: number };
       if (!payload.formData) return null;
@@ -359,7 +358,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     return () => {
       cancelled = true;
     };
-  }, [projectId, storageKey, personaId]);
+  }, [projectId, storageKey]);
 
   useEffect(() => {
     setActiveStep(initialStep);
@@ -385,7 +384,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       try {
         const res = await fetch(`/api/projects/${projectId}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json", "x-persona-id": personaId },
+          headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
           body: JSON.stringify({ expectedRevision: data.revision, formData: data }),
         });
         if (res.status === 409) {
@@ -409,19 +408,19 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     }, 400);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formKey, hydrated, data.projectId, data.revision, personaId]);
+  }, [formKey, hydrated, data.projectId, data.revision]);
 
   // 最后一步加载生成历史记录。
   useEffect(() => {
     if (activeStep !== 5 || !data.projectId) return;
-    fetch(`/api/projects/${data.projectId}/snapshots`, { headers: { "x-persona-id": personaId } })
+    fetch(`/api/projects/${data.projectId}/snapshots`, { headers: { "x-persona-id": CLIENT_PERSONA_ID } })
       .then(async (res) => {
         if (!res.ok) return { snapshots: [] };
         return (await res.json()) as { snapshots: SnapshotItem[] };
       })
       .then((payload) => setHistory(payload.snapshots))
       .catch(() => setHistory([]));
-  }, [activeStep, data.projectId, personaId, data.generated?.status]);
+  }, [activeStep, data.projectId, data.generated?.status]);
 
   function commit(next: Partial<ProjectData>, message = "已保存") {
     const touchesGenerated = "generated" in next;
@@ -438,7 +437,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     if (data.projectId) return data.projectId;
     const res = await fetch("/api/projects", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-persona-id": personaId },
+      headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
       body: JSON.stringify({ formData: data }),
     });
     if (!res.ok) {
@@ -570,7 +569,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     try {
       const response = await fetch("/api/draft/demo", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-persona-id": personaId },
+        headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
         body: JSON.stringify({ projectId: id, expectedRevision: data.revision, generationId, ...input }),
       });
       if (!response.ok) {
@@ -660,7 +659,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     <main className="workspace-page workspace-section w-full max-w-full overflow-x-hidden bg-paper-light text-ink">
       <div className="workspace-shell">
         <aside className="workspace-sidebar">
-          <div className="workspace-project"><span className="project-icon"><MapPin weight="fill" /></span><div><strong>{data.profile.productName || "新地图项目"}</strong><span>客户法务填写 · 产品与技术补充</span></div></div>
+          <div className="workspace-project"><span className="project-icon"><MapPin weight="fill" /></span><div><strong>{data.profile.productName || "新地图项目"}</strong><span>客户信息填写与确认</span></div></div>
           <ol className="step-list">
             {steps.map((step, index) => <li key={step}><button type="button" data-active={activeStep === index} data-complete={index < activeStep} onClick={() => goToStep(index as StepIndex)}><span>{index < activeStep ? <Check weight="bold" /> : index + 1}</span>{step}</button></li>)}
           </ol>
@@ -671,7 +670,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
           <div className="workspace-toolbar">
             <div><span>项目完成度</span><strong>{progress}%</strong></div>
             <div className="progress-line"><span style={{ width: `${progress}%` }} /></div>
-            <div className="workspace-toolbar-actions"><label><span className="sr-only">开发身份</span><select value={personaId} onChange={(event) => { setPersonaId(event.target.value); setStatusMessage("开发身份已切换（仅本地演示）"); }} aria-label="开发身份"><option value={DEV_PERSONAS[0].id}>客户法务</option><option value={DEV_PERSONAS[1].id}>产品与技术</option></select></label>{saveState === "saving" ? <span className="status-pending">保存中…</span> : saveState === "saved" ? <span className="status-complete">已保存到服务器</span> : null}<button type="button" onClick={handleSaveAndExit}>保存并退出</button></div>
+            <div className="workspace-toolbar-actions">{saveState === "saving" ? <span className="status-pending">保存中…</span> : saveState === "saved" ? <span className="status-complete">已保存到服务器</span> : null}<button type="button" onClick={handleSaveAndExit}>保存并退出</button></div>
           </div>
           <div className="workspace-status" role="status" aria-live="polite">{statusMessage}</div>
 
@@ -689,11 +688,11 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
           </section>}
 
           {activeStep === 3 && <section className="workspace-panel panel-enter">
-            <div className="panel-heading"><p>处理活动总览</p><h2>确认产品事实，再生成隐私政策草稿。</h2><span>客户法务确认事实，产品与技术人员协助核实实际处理行为。</span></div>
+            <div className="panel-heading"><p>处理活动总览</p><h2>确认产品事实，再生成隐私政策草稿。</h2><span>请根据产品实际处理行为完成每一项确认。</span></div>
             <div className="review-summary-grid"><div><span>已选功能</span><strong>{selectedCount}</strong></div><div><span>已完成结论</span><strong>{resolvedFieldCount} / {selectedFieldItems.length}</strong></div><div><span>实际处理信息</span><strong>{processedFieldCount}</strong></div><div data-warning={warningCount > 0}><span>重点核对</span><strong>{warningCount}</strong></div></div>
             <div className="field-confirm-list" aria-label="字段级事实确认"><div className="field-confirm-heading"><strong>字段级事实确认</strong><span>请对每项候选信息明确选择“处理”或“不处理”。未处理的信息不会写入草稿。</span></div>{draftFields.map((field) => <div key={field.id} className="field-confirm-item" data-answer={field.answer ?? "UNANSWERED"}><span><strong>{field.label}</strong><small>{field.feature}</small></span><div className="field-answer-actions"><button type="button" className={field.answer === "PROCESS" ? "selected" : ""} onClick={() => setFieldAnswer(field.id, "PROCESS")}>处理</button><button type="button" className={field.answer === "NOT_PROCESS" ? "selected" : ""} onClick={() => setFieldAnswer(field.id, "NOT_PROCESS")}>不处理</button></div></div>)}</div>
             <div className="review-table" role="table" aria-label="处理活动总览"><div className="review-row review-head" role="row"><span>处理活动</span><span>来源</span><span>状态</span></div>{selectedScenarios.map((item) => { const fields = selectedFieldItems.filter((field) => field.featureId === item.id); const complete = fields.length > 0 && fields.every((field) => Boolean(fieldAnswer(field.id))); return <div className="review-row" role="row" key={item.id}><span><strong>{item.title}</strong><small>{item.fields.join("、")}</small></span><span>{item.source}</span><span className={item.risk ? "status-warning" : complete ? "status-complete" : "status-pending"}>{item.risk ? "重点核对" : complete ? "已完成确认" : "待客户确认"}</span></div>; })}{selectedCustomFeatures.map((item) => <div className="review-row" role="row" key={item}><span><strong>{item}</strong><small>客户自定义功能</small></span><span>客户填写</span><span className={data.customDetails[item]?.purpose && data.customDetails[item]?.retention ? "status-complete" : "status-pending"}>{data.customDetails[item]?.purpose && data.customDetails[item]?.retention ? "客户已确认" : "待客户确认"}</span></div>)}</div>
-            {warningCount > 0 && <div className="warning-callout"><Warning weight="fill" /><div><strong>存在重点核对项</strong><span>请由客户法务与产品、技术人员共同确认实际处理方式；系统不会自动作出法律结论。</span></div></div>}
+            {warningCount > 0 && <div className="warning-callout"><Warning weight="fill" /><div><strong>存在重点核对项</strong><span>请结合产品实际配置确认处理方式；系统不会自动作出法律结论。</span></div></div>}
             <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(2)}><ArrowLeft weight="bold" /> 返回修改</button><button type="button" className="button button-primary" disabled={!canReview || pendingFieldCount > 0} onClick={() => goToStep(4)}>进入补充确认 <ArrowRight weight="bold" /></button></div>
           </section>}
 
@@ -721,7 +720,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
             <div className="panel-heading">
               <p>隐私政策草稿</p>
               <h2>{data.generated?.status === "SUCCEEDED" ? "草稿已生成，可直接预览、编辑或下载。" : data.generated?.status === "GENERATING" ? "正在生成隐私政策草稿。" : data.generated?.status === "FAILED" ? "本次生成未完成，填写内容已保存。" : "确认事实后，生成隐私政策草稿。"}</h2>
-              <span>{data.generated?.status === "FAILED" ? "可在生成记录中查看原因和当次填写内容，然后直接重新生成。" : "系统仅使用客户法务和产品、技术人员确认的事实生成草稿，不作合规结论。"}</span>
+              <span>{data.generated?.status === "FAILED" ? "可在生成记录中查看原因和当次填写内容，然后直接重新生成。" : "系统仅使用客户确认的事实生成草稿，不作合规结论。"}</span>
             </div>
             <div className="generation-process" aria-label="隐私政策草稿生成流程">
               <div><span>1</span><strong>整理填写内容</strong><small>汇总通用信息、功能、信息项和表单外补充。</small></div>
