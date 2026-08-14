@@ -1,0 +1,26 @@
+{
+  "project": "privacy-policy-evidence-workspace",
+  "url": "http://127.0.0.1:3000/projects/map-msslvjx6c580b4/draft",
+  "date": "2026-08-14",
+  "before": {
+    "score": 92,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0
+  },
+  "after": {
+    "score": 100,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0
+  },
+  "verified": {
+    "firstRegenerationMs": 59248,
+    "secondRegenerationMs": 43564,
+    "consoleErrors": 0,
+    "docxIntegrity": "PASS",
+    "mobileViewport": "390x844"
+  }
+}
