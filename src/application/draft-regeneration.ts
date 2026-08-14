@@ -6,6 +6,17 @@ export function canReuseSuccessfulFactReview(currentInputHash: string, successfu
   return successfulInputHashes.includes(currentInputHash);
 }
 
+export function resolveAcknowledgedReviewToken(
+  reviewToken: string | null,
+  blockingFingerprints: string[],
+  acknowledgedFingerprints: string[],
+) {
+  if (!reviewToken || blockingFingerprints.length === 0) return undefined;
+  return blockingFingerprints.every((fingerprint) => acknowledgedFingerprints.includes(fingerprint))
+    ? reviewToken
+    : undefined;
+}
+
 export function haveEquivalentDraftInput(current: unknown, candidates: unknown[]) {
   const normalizedCurrent = canonicalJson(current);
   return candidates.some((candidate) => canonicalJson(candidate) === normalizedCurrent);

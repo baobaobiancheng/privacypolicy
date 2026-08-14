@@ -26,7 +26,7 @@ import { scenarios } from "@/src/content/map-v1/ui-content";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import { getRequiredSupplementQuestions, getSlotScenario } from "@/src/knowledge/map-cn";
 import { evaluateFormalPolicyReadiness, resolveFieldAnswer, type FieldAnswer } from "@/src/knowledge/readiness";
-import { createGenerationId } from "@/src/application/draft-regeneration";
+import { createGenerationId, resolveAcknowledgedReviewToken } from "@/src/application/draft-regeneration";
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
 import type { FormPayload, PreflightIssue } from "@/src/ai/deepseek";
 
@@ -626,9 +626,11 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   }
 
   async function runDraftGeneration(id: string, generationId: string, input: DraftFormInput) {
-    const allBlockingIssuesAcknowledged = preflightIssues
-      .filter((issue) => issue.severity === "BLOCKING")
-      .every((issue) => acknowledgedPreflightIssues.includes(issue.fingerprint));
+    const acknowledgedPreflightReviewToken = resolveAcknowledgedReviewToken(
+      preflightReviewToken,
+      preflightIssues.filter((issue) => issue.severity === "BLOCKING").map((issue) => issue.fingerprint),
+      acknowledgedPreflightIssues,
+    );
     commit({ generated: { status: "GENERATING", generationId, createdAt: new Date().toISOString() } }, "正在检查填写内容并准备法规关键词查询");
     try {
       const response = await fetch("/api/draft/demo", {
@@ -638,7 +640,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
           projectId: id,
           expectedRevision: data.revision,
           generationId,
-          acknowledgedPreflightReviewToken: allBlockingIssuesAcknowledged ? preflightReviewToken : undefined,
+          acknowledgedPreflightReviewToken,
           ...input,
         }),
       });
