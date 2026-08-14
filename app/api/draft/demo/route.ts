@@ -6,7 +6,7 @@ import { verifiedMapV1Content } from "@/src/content/map-v1/server-content";
 import { buildDraftPlan } from "@/src/domain/draft/export-plan";
 import { evaluateExportInvariants, type ActivityFacts } from "@/src/domain/rules";
 import { renderDraftDocx } from "@/src/documents/render-draft";
-import { FormPayloadSchema, generatePolicyDraft } from "@/src/ai/deepseek";
+import { analyzeFormBeforeGeneration, FormPayloadSchema, generatePolicyDraft } from "@/src/ai/deepseek";
 import { isDomainError } from "@/src/domain/errors";
 import { requireDevActor } from "@/src/auth/session";
 import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
@@ -15,6 +15,7 @@ import { getPrisma } from "@/src/data/prisma";
 import { authorizeProject, type ProjectAccessRecord } from "@/src/application/authorization";
 import { evaluateFormalPolicyReadiness, resolveFieldAnswer } from "@/src/knowledge/readiness";
 import { getSlotScenario, mapCnKnowledgePackage } from "@/src/knowledge/map-cn";
+import { searchLawsByKeywords, type LawKeywordSearchResult } from "@/src/law/baijian";
 
 export const runtime = "nodejs";
 
@@ -23,6 +24,7 @@ const DraftMetaSchema = z.object({
   projectId: z.string().min(1),
   expectedRevision: z.number().int().nonnegative(),
   generationId: z.string().min(1).max(48),
+  acknowledgedPreflightReviewToken: z.string().regex(/^sha256:[a-f0-9]{64}$/).optional(),
 });
 
 type DraftResponse = { buffer: Buffer; generationId: string; filename: string; model: string; markdown: string; docxBase64: string };
@@ -95,6 +97,23 @@ export async function POST(request: Request) {
   }
 
   try {
+    const preflight = await analyzeFormBeforeGeneration(parsed.data);
+    const inputHash = createHash("sha256").update(JSON.stringify(parsed.data)).digest("hex");
+    const reviewToken = `sha256:${inputHash}`;
+    const issuesWithFingerprint = preflight.issues.map((issue) => ({ ...issue, fingerprint: preflightIssueFingerprint(inputHash, issue) }));
+    // 模型的措辞和 relatedPaths 可能在相同输入下轻微变化，因此不能把逐条模型输出
+    // 当作稳定确认主键。确认令牌绑定完整表单哈希：表单一改，确认自然失效。
+    const currentFormReviewed = meta.data.acknowledgedPreflightReviewToken === reviewToken;
+    const blockingIssues = currentFormReviewed ? [] : issuesWithFingerprint.filter((issue) => issue.severity === "BLOCKING");
+    if (blockingIssues.length > 0) {
+      return NextResponse.json({
+        code: "FORM_SEMANTIC_REVIEW_REQUIRED",
+        message: "生成前发现需要核对的产品事实，请修改后重新检查。",
+        issues: issuesWithFingerprint,
+        reviewToken,
+      }, { status: 422, headers: { "Cache-Control": "no-store" } });
+    }
+    const legalSearchResults = await searchLawsByKeywords(preflight.lawKeywords);
     const claim = await claimSnapshot(prisma, {
       projectId,
       expectedRevision,
@@ -114,7 +133,7 @@ export async function POST(request: Request) {
     if (claim.kind === "IN_PROGRESS") {
       return NextResponse.json({ code: "GENERATION_IN_PROGRESS", message: "同一份表单正在生成，请勿重复提交。", retryable: true }, { status: 409 });
     }
-    const { buffer, ...rest } = await renderDraftResponse(parsed.data, generationId);
+    const { buffer, ...rest } = await renderDraftResponse(parsed.data, generationId, legalSearchResults);
     await persistSnapshot(prisma, {
       projectId, expectedRevision, generationId, input: parsed.data,
       state: "SUCCEEDED", markdown: rest.markdown, docx: buffer,
@@ -131,15 +150,20 @@ export async function POST(request: Request) {
 
 function modelErrorResponse(error: unknown) {
   if (isDomainError(error)) {
-    const status = error.code === "MODEL_NOT_CONFIGURED" ? 503 : error.code === "PROJECT_FORBIDDEN" ? 403 : error.code === "FORM_NOT_READY" || error.code === "EXPORT_BLOCKED" ? 422 : 502;
+    const status = error.code === "MODEL_NOT_CONFIGURED" ? 503 : error.code === "PROJECT_FORBIDDEN" ? 403 : error.code === "FORM_NOT_READY" || error.code === "EXPORT_BLOCKED" || error.code === "FORM_SEMANTIC_REVIEW_REQUIRED" ? 422 : 502;
     return NextResponse.json({ code: error.code, message: error.message, retryable: error.retryable }, { status });
   }
   return NextResponse.json({ code: "DOCX_GENERATION_FAILED", message: "草稿生成失败，请使用同一份表单重新生成。", retryable: true }, { status: 502 });
 }
 
-async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, generationId: string): Promise<DraftResponse> {
+async function renderDraftResponse(
+  input: z.infer<typeof DraftInputSchema>,
+  generationId: string,
+  legalSearchResults: LawKeywordSearchResult[] = [],
+): Promise<DraftResponse> {
   const selectedFeatures = verifiedMapV1Content.payload.features.filter((feature) => input.selected.includes(feature.key));
   const confirmedSupplementFactKeys = Object.entries(input.supplementAnswers).flatMap(([questionId, answer]) => [
+    ...(answer.answer !== "UNKNOWN" ? [`supplementAnswers.${questionId}`, `supplementAnswers.${questionId}.answer`] : []),
     ...(!getSlotScenario(questionId) && answer.answer === "YES" && answer.detail
       ? [`supplementAnswers.${questionId}.detail`]
       : []),
@@ -248,10 +272,12 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       ...input.customFeatures.flatMap((key) => [`customDetails.${key}.purpose`, `customDetails.${key}.retention`]),
       ...Object.keys(input.profile),
       ...Object.keys(input.profile).map((key) => `profile.${key}`),
+      ...Object.keys(input.scopeAnswers).map((key) => `scopeAnswers.${key}`),
       ...confirmedSupplementFactKeys,
       ...verifiedMapV1Content.payload.commonDisclosureFields.map((field) => field.key),
       ...input.customFeatures,
       "additionalNotes",
+      "THIRD_PARTY_FACTS_STATUS",
     ],
     confirmedFactKeys: [
       ...selectedFeatures.flatMap((feature) => feature.fields.flatMap((field, index) => fieldAnswer(feature.key, index) === "PROCESS" ? [`${feature.key}.${field.key}`] : [])),
@@ -259,10 +285,13 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       ...input.customFeatures.flatMap((key) => [`customDetails.${key}.purpose`, `customDetails.${key}.retention`]),
       ...Object.keys(input.profile),
       ...Object.keys(input.profile).map((key) => `profile.${key}`),
+      ...Object.keys(input.scopeAnswers).map((key) => `scopeAnswers.${key}`),
       ...confirmedSupplementFactKeys,
       "additionalNotes",
+      "THIRD_PARTY_FACTS_STATUS",
     ],
     pendingFacts: [],
+    legalSearchResults,
     referenceStructure: [
       { id: "overview", title: "政策说明与适用范围", summary: "说明运营主体、产品、适用范围、生效日期和政策版本。" },
       { id: "collection_and_use", title: "我们如何收集和使用个人信息", summary: "按处理活动说明目的、字段和使用场景。" },
@@ -281,6 +310,8 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
     productVersion: input.profile.productVersion || "[[待确认:产品版本]]",
     contentVersion: verifiedMapV1Content.contentVersion,
     contentHash: verifiedMapV1Content.contentHash,
+    policyEffectiveDate: input.profile.policyEffectiveDate,
+    generatedAt: new Date().toISOString().slice(0, 10),
     model: generatedDraft.model,
   }, generatedDraft);
 
@@ -387,4 +418,9 @@ async function claimSnapshot(prisma: PrismaClient, args: {
 
 function fieldEvidence(fields: Array<{ key: string; sourceRefs: string[] }>, fieldKey: string): string[] {
   return fields.find((field) => field.key === fieldKey)?.sourceRefs ?? [];
+}
+
+function preflightIssueFingerprint(inputHash: string, issue: { category: string; relatedPaths: string[] }) {
+  const identity = [inputHash, issue.category, ...[...issue.relatedPaths].sort()].join("|");
+  return `sha256:${createHash("sha256").update(identity).digest("hex")}`;
 }

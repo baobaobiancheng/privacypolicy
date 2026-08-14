@@ -27,7 +27,7 @@ import { MarkdownPreview } from "@/components/markdown-preview";
 import { getRequiredSupplementQuestions, getSlotScenario } from "@/src/knowledge/map-cn";
 import { evaluateFormalPolicyReadiness, resolveFieldAnswer, type FieldAnswer } from "@/src/knowledge/readiness";
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
-import type { FormPayload } from "@/src/ai/deepseek";
+import type { FormPayload, PreflightIssue } from "@/src/ai/deepseek";
 
 const steps = ["适用范围", "通用信息", "功能与信息", "信息选择", "补充信息", "生成政策"];
 const stepRoutes = ["scope", "profile", "features", "review", "supplement", "draft"] as const;
@@ -49,6 +49,7 @@ const profileFields = [
 
 type StepIndex = 0 | 1 | 2 | 3 | 4 | 5;
 type GeneratedState = { status: "PENDING" | "GENERATING" | "FAILED" | "SUCCEEDED"; generationId: string; message?: string; createdAt: string };
+type DisplayPreflightIssue = PreflightIssue & { fingerprint: string };
 type ActivityDetail = { purpose: string; retention: string };
 type DraftFormInput = {
   profile: Record<string, string>;
@@ -118,6 +119,10 @@ const failureMessages: Record<string, { title: string; detail: string }> = {
   DOCX_GENERATION_FAILED: {
     title: "文件制作未完成",
     detail: "草稿转换为 Word 文件时发生异常。请重新生成；如果问题持续出现，请联系系统管理员。",
+  },
+  LAW_SEARCH_FAILED: {
+    title: "法规资料查询未完成",
+    detail: "生成前未能取得法规关键词查询结果，因此没有继续生成。填写内容已保存，可稍后重新生成。",
   },
 };
 
@@ -206,6 +211,9 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [history, setHistory] = useState<SnapshotItem[] | null>(null);
   const [extractingQuestionId, setExtractingQuestionId] = useState<string | null>(null);
+  const [preflightIssues, setPreflightIssues] = useState<DisplayPreflightIssue[]>([]);
+  const [acknowledgedPreflightIssues, setAcknowledgedPreflightIssues] = useState<string[]>([]);
+  const [preflightReviewToken, setPreflightReviewToken] = useState<string | null>(null);
   const lastSavedKeyRef = useRef<string | null>(null);
 
   function computeFormKey(project: Partial<ProjectData>) {
@@ -593,7 +601,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       return;
     }
     setExtractingQuestionId(questionId);
-      setStatusMessage("正在从描述中整理可填写内容");
+    setStatusMessage("正在从描述中整理可填写内容");
     try {
       const response = await fetch("/api/knowledge/extract-slots", {
         method: "POST",
@@ -617,15 +625,32 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   }
 
   async function runDraftGeneration(id: string, generationId: string, input: DraftFormInput) {
-    commit({ generated: { status: "GENERATING", generationId, createdAt: new Date().toISOString() } }, "正在整理已填信息并生成隐私政策草稿");
+    const allBlockingIssuesAcknowledged = preflightIssues
+      .filter((issue) => issue.severity === "BLOCKING")
+      .every((issue) => acknowledgedPreflightIssues.includes(issue.fingerprint));
+    commit({ generated: { status: "GENERATING", generationId, createdAt: new Date().toISOString() } }, "正在检查填写内容并准备法规关键词查询");
     try {
       const response = await fetch("/api/draft/demo", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
-        body: JSON.stringify({ projectId: id, expectedRevision: data.revision, generationId, ...input }),
+        body: JSON.stringify({
+          projectId: id,
+          expectedRevision: data.revision,
+          generationId,
+          acknowledgedPreflightReviewToken: allBlockingIssuesAcknowledged ? preflightReviewToken : undefined,
+          ...input,
+        }),
       });
       if (!response.ok) {
-        const errorPayload = await response.json().catch(() => null) as { message?: string; code?: string } | null;
+        const errorPayload = await response.json().catch(() => null) as { message?: string; code?: string; issues?: DisplayPreflightIssue[]; reviewToken?: string } | null;
+        if (errorPayload?.code === "FORM_SEMANTIC_REVIEW_REQUIRED" && errorPayload.issues?.length) {
+          setPreflightIssues(errorPayload.issues);
+          setPreflightReviewToken(errorPayload.reviewToken ?? null);
+          setAcknowledgedPreflightIssues([]);
+          setData((current) => ({ ...current, generated: { status: "PENDING", generationId, createdAt: new Date().toISOString() } }));
+          setStatusMessage("生成前发现需要核对的内容，请修改后重新生成");
+          return;
+        }
         const publicFailure = failureMessages[errorPayload?.code ?? ""];
         throw new Error(publicFailure?.title || "本次生成未完成，请稍后重试");
       }
@@ -635,6 +660,9 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
       const blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
       setDownloadUrl(URL.createObjectURL(blob));
+      setPreflightIssues([]);
+      setPreflightReviewToken(null);
+      setAcknowledgedPreflightIssues([]);
       setData((current) => ({ ...current, generated: { status: "SUCCEEDED", generationId, createdAt: new Date().toISOString() }, generatedMarkdown: payload.markdown }));
       setStatusMessage("隐私政策草稿已生成，可在线预览或下载 Word");
     } catch (error) {
@@ -642,6 +670,17 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       setData((current) => ({ ...current, generated: { status: "FAILED", generationId, createdAt: new Date().toISOString(), message } }));
       setStatusMessage(message);
     }
+  }
+
+  function editPreflightIssue(issue: PreflightIssue) {
+    const target: StepIndex = issue.targetStep === "profile" ? 1 : issue.targetStep === "features" ? 2 : issue.targetStep === "review" ? 3 : 4;
+    goToStep(target);
+    setStatusMessage(issue.questionForUser);
+  }
+
+  function acknowledgePreflightIssue(issue: DisplayPreflightIssue) {
+    setAcknowledgedPreflightIssues((current) => [...new Set([...current, issue.fingerprint])].slice(-20));
+    setStatusMessage("已保留当前填写。该选择只对当前表单版本有效，请重新生成");
   }
 
   function retrySnapshot(item: SnapshotItem) {
@@ -796,10 +835,17 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
               <h2>{data.generated?.status === "SUCCEEDED" ? "草稿已生成，可直接预览、编辑或下载。" : data.generated?.status === "GENERATING" ? "正在生成隐私政策草稿。" : data.generated?.status === "FAILED" ? "本次生成未完成，填写内容已保存。" : "完成填写后，生成隐私政策草稿。"}</h2>
               <span>{data.generated?.status === "FAILED" ? "可在生成记录中查看原因和当次填写内容，然后直接重新生成。" : "系统仅使用客户确认的事实生成草稿，不作合规结论。"}</span>
             </div>
+            {preflightIssues.length > 0 ? <section className="preflight-review" aria-live="polite">
+              <div className="preflight-review-heading"><WarningCircle weight="fill" /><div><strong>生成前请先核对 {preflightIssues.length} 项产品事实</strong><span>系统没有替您修改答案。请回到对应表单补充或修正后，再重新生成。</span></div></div>
+              <div className="preflight-issue-list">{preflightIssues.map((issue) => <article key={issue.fingerprint} data-acknowledged={acknowledgedPreflightIssues.includes(issue.fingerprint)}>
+                <div><span>{issue.severity === "WARNING" ? "优化建议" : issue.category === "THIRD_PARTY" ? "第三方信息" : issue.category === "CONTRADICTION" ? "内容矛盾" : issue.category === "IMPLAUSIBLE" ? "信息异常" : "信息待补充"}</span><strong>{issue.title}</strong><p>{issue.description}</p><small>{issue.questionForUser}</small></div>
+                <div className="preflight-issue-actions"><button type="button" onClick={() => editPreflightIssue(issue)}>返回修改 <ArrowRight weight="bold" /></button>{issue.severity === "BLOCKING" ? <button type="button" className="preflight-keep" disabled={acknowledgedPreflightIssues.includes(issue.fingerprint)} onClick={() => acknowledgePreflightIssue(issue)}>{acknowledgedPreflightIssues.includes(issue.fingerprint) ? "已保留当前填写" : "信息无误，保留当前填写"}</button> : null}</div>
+              </article>)}</div>
+            </section> : null}
             <div className="generation-process" aria-label="隐私政策草稿生成流程">
-              <div><span>1</span><strong>整理填写内容</strong><small>汇总通用信息、功能、信息项和表单外补充。</small></div>
-              <div><span>2</span><strong>生成正式政策文本</strong><small>按隐私政策结构组织内容，不擅自补写客户事实。</small></div>
-              <div><span>3</span><strong>校验后提供草稿文件</strong><small>只有章节完整、事实边界清晰的文本才能预览和下载。</small></div>
+              <div><span>1</span><strong>检查产品事实</strong><small>发现矛盾或明显不可用信息时，先返回给您修改。</small></div>
+              <div><span>2</span><strong>关键词查询法规</strong><small>根据当前产品场景生成关键词，只调用法规快捷查询。</small></div>
+              <div><span>3</span><strong>生成并制作 Word</strong><small>按固定结构生成政策，并加入目录、表格和正式排版。</small></div>
             </div>
             <div className="draft-preview"><div className="draft-page"><span className="draft-watermark">隐私政策草稿</span><MarkdownPreview markdown={data.generatedMarkdown} fallback={<><h3>{data.profile.productName} 隐私政策</h3><p>完成信息填写后，系统会在这里展示可预览和下载的隐私政策草稿。</p><h4>生成范围</h4><p>已选择 {selectedCount} 项产品功能和 {processedFieldCount} 项实际处理的个人信息。</p></>} /><p className="draft-footnote">{processedFieldCount} 项实际处理信息 · {supplementQuestions.length} 项补充信息</p></div><aside className="draft-audit"><FileDoc weight="duotone" /><strong>{data.generated?.status === "GENERATING" ? "正在生成草稿" : "草稿预览"}</strong><span>{selectedCount} 项产品功能</span><span>{processedFieldCount} 项实际处理信息</span><span>{supplementQuestions.length} 项补充信息</span><span>{warningCount} 项重点核对提示</span></aside></div>
             {latestSuccessfulHistory.length > 0 && <div className="draft-history"><div className="field-confirm-heading"><strong>生成记录</strong><span>显示最新一份成功生成的隐私政策。</span></div><GenerationHistory history={latestSuccessfulHistory} generating={false} onRetry={retrySnapshot} onDownload={downloadSnapshotDocx} /></div>}

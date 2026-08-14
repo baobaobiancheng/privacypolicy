@@ -22,7 +22,7 @@ const sourceLabel: Record<string, string> = {
 export const scenarios: Scenario[] = mapV1Content.payload.features.map((feature) => ({
   id: feature.key,
   title: feature.title,
-  group: feature.group,
+  group: feature.key === "navigation" ? "基本功能 · 必要信息基线" : `扩展功能 · ${feature.group}`,
   summary: feature.summary,
   source: feature.sourceRefs.map((ref) => sourceLabel[ref] ?? ref).join(" + "),
   fields: feature.fields.map((field) => field.label),

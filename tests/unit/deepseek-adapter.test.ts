@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { extractSupplementSlots, generatePolicyDraft, POLICY_SECTION_TITLES, type PolicyGenerationInput } from "@/src/ai/deepseek";
+import { analyzeFormBeforeGeneration, extractSupplementSlots, generatePolicyDraft, POLICY_SECTION_TITLES, type PolicyGenerationInput } from "@/src/ai/deepseek";
 
 const input: PolicyGenerationInput = {
   form: {
@@ -32,7 +32,7 @@ const input: PolicyGenerationInput = {
   allowedFactKeys: ["navigation.location", "operatorName"],
 };
 
-const completeMarkdown = `# 地图隐私政策\n\n${POLICY_SECTION_TITLES.map((title, index) => `## ${index + 1}. ${title}\n本章节基于已填写事实生成，供法务继续编辑使用。\n<!-- assertions: ${index === 1 ? "navigation.location" : ""} -->`).join("\n\n")}`;
+const completeMarkdown = `# 地图隐私政策\n\n| 功能 | 信息 | 目的 |\n| --- | --- | --- |\n| 定位导航 | 位置信息 | 路线规划 |\n\n${POLICY_SECTION_TITLES.map((title, index) => `## ${index + 1}. ${title}\n本章节基于已填写事实生成，供法务继续编辑使用。\n<!-- assertions: ${index === 1 ? "navigation.location" : ""} -->`).join("\n\n")}`;
 
 describe("DeepSeek adapter", () => {
   afterEach(() => {
@@ -68,7 +68,8 @@ describe("DeepSeek adapter", () => {
     const result = await generatePolicyDraft(input);
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(result.markdown).toBe(completeMarkdown);
+    expect(result.markdown).not.toContain("<!-- assertions:");
+    expect(result.markdown).toContain("## 9. 政策更新、联系我们及适用法律");
   });
 
   it("classifies an aborted response body as a service timeout instead of invalid model output", async () => {
@@ -126,5 +127,31 @@ describe("DeepSeek adapter", () => {
     const requestBody = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string) as { messages: Array<{ content: string }> };
     const prompt = requestBody.messages.map((message) => message.content).join("\n");
     expect(prompt).not.toMatch(/sourceRefs|REF-MAP-AMAP|REF-MAP-BAIDU|高德|百度/);
+  });
+
+  it("uses a separate model preflight to expose semantic conflicts and bounded law keywords", async () => {
+    process.env.DEEPSEEK_API_KEY = "test-key";
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({
+      issues: [{
+        id: "retention-conflict",
+        severity: "BLOCKING",
+        category: "CONTRADICTION",
+        title: "保存期限冲突",
+        description: "同一类日志出现两个保存期限。",
+        targetStep: "supplement",
+        relatedPaths: ["supplementAnswers.storage-locations"],
+        questionForUser: "请区分日志类型并确认期限。",
+      }],
+      lawKeywords: ["个人信息保护法", "地图导航 必要个人信息"],
+    }) } }] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await analyzeFormBeforeGeneration(input.form);
+
+    expect(result.issues[0]).toMatchObject({ severity: "BLOCKING", targetStep: "supplement" });
+    expect(result.lawKeywords).toEqual(["个人信息保护法", "地图导航 必要个人信息"]);
+    const requestBody = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string) as { max_tokens: number; messages: Array<{ content: string }> };
+    expect(requestBody.max_tokens).toBe(8_192);
+    expect(requestBody.messages[0].content).toContain("不修改客户答案");
   });
 });
