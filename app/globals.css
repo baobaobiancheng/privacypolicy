@@ -2610,6 +2610,24 @@ input:focus-visible {
 .supplement-answer-options button.selected { border-color: var(--ink); color: var(--ink); background: var(--acid); }
 .supplement-detail { grid-column: 1 / -1; display: grid; gap: 8px; font-size: 14px; font-weight: 700; }
 .supplement-detail textarea { min-height: 104px; padding: 12px; resize: vertical; border: 1px solid var(--line); font: inherit; font-weight: 400; line-height: 1.6; }
+.slot-workspace { grid-column: 1 / -1; display: grid; gap: 16px; padding: 18px; border: 1px solid var(--ink); background: white; }
+.slot-workspace-heading { display: flex; gap: 18px; align-items: flex-start; justify-content: space-between; }
+.slot-workspace-heading > div { display: grid; gap: 5px; }
+.slot-workspace-heading strong { font-size: 15px; }
+.slot-workspace-heading span { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.slot-extract-button { display: inline-flex; flex: 0 0 auto; gap: 7px; align-items: center; padding: 9px 12px; border: 1px solid var(--ink); background: var(--ink); color: white; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.slot-extract-button:disabled { cursor: not-allowed; opacity: .38; }
+.slot-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.slot-field { display: grid; align-content: start; gap: 7px; padding: 12px; border: 1px solid var(--line); background: #fbfaf6; }
+.slot-field[data-status="CANDIDATE"] { border-color: #c98520; background: #fff8e8; }
+.slot-field[data-status="CONFIRMED"] { border-color: #8da747; }
+.slot-field > span { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.slot-field > span strong { font-size: 11px; }
+.slot-field > span em { color: var(--muted); font-size: 9px; font-style: normal; font-weight: 700; }
+.slot-field input,
+.slot-field textarea { width: 100%; min-height: 42px; padding: 9px 10px; border: 1px solid var(--line); background: white; color: var(--ink); font: inherit; font-size: 11px; line-height: 1.55; }
+.slot-field textarea { min-height: 76px; resize: vertical; }
+.slot-field > button { justify-self: start; padding: 7px 9px; border: 1px solid var(--ink); background: var(--acid); color: var(--ink); font: inherit; font-size: 10px; font-weight: 700; cursor: pointer; }
 .supplement-unknown { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; margin: 0; color: #a35c00; font-size: 14px; }
 
 
@@ -2789,6 +2807,8 @@ input:focus-visible {
 
   .supplement-question { grid-template-columns: 1fr; }
   .supplement-answer-options { flex-wrap: wrap; }
+  .slot-workspace-heading { display: grid; }
+  .slot-fields { grid-template-columns: 1fr; }
   .supplement-progress { grid-template-columns: 1fr 1fr; }
   .supplement-progress-line { grid-column: 1 / -1; }
 

@@ -24,7 +24,7 @@ import { useRouter } from "next/navigation";
 import { mapV1Content } from "@/src/content/map-v1";
 import { scenarios } from "@/src/content/map-v1/ui-content";
 import { MarkdownPreview } from "@/components/markdown-preview";
-import { getRequiredSupplementQuestions } from "@/src/knowledge/map-cn";
+import { getRequiredSupplementQuestions, getSlotScenario } from "@/src/knowledge/map-cn";
 import { evaluateFormalPolicyReadiness, resolveFieldAnswer, type FieldAnswer } from "@/src/knowledge/readiness";
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
 import type { FormPayload } from "@/src/ai/deepseek";
@@ -205,6 +205,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [history, setHistory] = useState<SnapshotItem[] | null>(null);
+  const [extractingQuestionId, setExtractingQuestionId] = useState<string | null>(null);
   const lastSavedKeyRef = useRef<string | null>(null);
 
   function computeFormKey(project: Partial<ProjectData>) {
@@ -269,7 +270,14 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   const supplementQuestions = getRequiredSupplementQuestions({ selected: data.selected, customFeatures: data.customFeatures, supplementAnswers: data.supplementAnswers });
   const isSupplementComplete = (question: (typeof supplementQuestions)[number]) => {
     const answer = data.supplementAnswers[question.id];
-    return Boolean(answer && answer.answer !== "UNKNOWN" && (answer.answer !== "YES" || answer.detail.trim()));
+    if (!answer || answer.answer === "UNKNOWN") return false;
+    if (answer.answer === "NO") return true;
+    const slotScenario = getSlotScenario(question.id);
+    if (!slotScenario) return Boolean(answer.detail.trim());
+    return slotScenario.slots.filter((slot) => slot.required).every((slot) => {
+      const value = answer.slots?.[slot.id];
+      return Boolean(value?.value.trim() && value.status === "CONFIRMED");
+    });
   };
   const completedSupplementCount = supplementQuestions.filter(isSupplementComplete).length;
   const activeSupplementRound = supplementQuestions.find((question) => !isSupplementComplete(question))?.round
@@ -566,8 +574,46 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   }
 
   function updateSupplement(questionId: string, patch: Partial<SupplementAnswer>) {
-    const current = data.supplementAnswers[questionId] ?? { answer: "UNKNOWN" as const, detail: "" };
+    const current = data.supplementAnswers[questionId] ?? { answer: "UNKNOWN" as const, detail: "", slots: {} };
     commit({ supplementAnswers: { ...data.supplementAnswers, [questionId]: { ...current, ...patch, updatedAt: new Date().toISOString() } } }, "补充信息已保存");
+  }
+
+  function updateSupplementSlot(questionId: string, slotId: string, value: string, status: "CANDIDATE" | "CONFIRMED" = "CONFIRMED", evidenceText?: string) {
+    const current = data.supplementAnswers[questionId] ?? { answer: "YES" as const, detail: "", slots: {} };
+    const slots = { ...(current.slots ?? {}) };
+    if (!value.trim()) delete slots[slotId];
+    else slots[slotId] = { value, status, evidenceText, updatedAt: new Date().toISOString() };
+    updateSupplement(questionId, { slots });
+  }
+
+  async function extractSupplementSlots(questionId: string) {
+    const answer = data.supplementAnswers[questionId];
+    if (!answer?.detail.trim()) {
+      setStatusMessage("请先用一段话描述产品实际情况，再使用智能整理");
+      return;
+    }
+    setExtractingQuestionId(questionId);
+      setStatusMessage("正在从描述中整理可填写内容");
+    try {
+      const response = await fetch("/api/knowledge/extract-slots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
+        body: JSON.stringify({ questionId, detail: answer.detail }),
+      });
+      const payload = await response.json().catch(() => null) as { message?: string; candidates?: Array<{ slotId: string; value: string; evidenceText: string }> } | null;
+      if (!response.ok) throw new Error(payload?.message || "智能整理暂时不可用，请直接填写下方字段");
+      const slots = { ...(answer.slots ?? {}) };
+      for (const candidate of payload?.candidates ?? []) {
+        if (slots[candidate.slotId]?.status === "CONFIRMED") continue;
+        slots[candidate.slotId] = { value: candidate.value, status: "CANDIDATE", evidenceText: candidate.evidenceText, updatedAt: new Date().toISOString() };
+      }
+      updateSupplement(questionId, { slots });
+      setStatusMessage((payload?.candidates?.length ?? 0) > 0 ? "已整理出可填写内容，请核对后采用或修改" : "描述中没有足够明确的事实，请直接填写下方字段");
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : "智能整理暂时不可用，请直接填写下方字段");
+    } finally {
+      setExtractingQuestionId(null);
+    }
   }
 
   async function runDraftGeneration(id: string, generationId: string, input: DraftFormInput) {
@@ -709,12 +755,31 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
                 <div className="supplement-round-heading"><span>第 {round} 轮</span><strong>{round === 1 ? "先核对权限、存储和基础数据流" : round === 2 ? "再检查 SDK、日志和扩展功能" : "最后补齐用户控制和特殊场景"}</strong></div>
                 {supplementQuestions.filter((question) => question.round === round).map((question) => {
                 const answer = data.supplementAnswers[question.id];
+                const slotScenario = getSlotScenario(question.id);
                 return <article className="supplement-question" key={question.id} data-answer={answer?.answer ?? "EMPTY"}>
                   <div><strong>{question.title}</strong><p>{question.prompt}</p><small>{question.help}</small></div>
                   <div className="supplement-answer-options" role="group" aria-label={question.title}>
-                    {(["YES", "NO", "UNKNOWN"] as const).map((value) => <button key={value} type="button" className={answer?.answer === value ? "selected" : ""} onClick={() => updateSupplement(question.id, { answer: value, detail: value === "YES" ? answer?.detail ?? "" : "" })}>{value === "YES" ? "有" : value === "NO" ? "没有" : "不确定"}</button>)}
+                    {(["YES", "NO", "UNKNOWN"] as const).map((value) => <button key={value} type="button" className={answer?.answer === value ? "selected" : ""} onClick={() => updateSupplement(question.id, { answer: value, detail: value === "YES" ? answer?.detail ?? "" : "", slots: value === "YES" ? answer?.slots ?? {} : {} })}>{value === "YES" ? "有" : value === "NO" ? "没有" : "不确定"}</button>)}
                   </div>
-                  {answer?.answer === "YES" ? <label className="supplement-detail"><span>{question.yesDetailLabel}</span><textarea value={answer.detail} onChange={(event) => updateSupplement(question.id, { detail: event.target.value })} placeholder="仅填写本产品的实际配置和处理方式" /></label> : null}
+                  {answer?.answer === "YES" ? <>
+                    <label className="supplement-detail"><span>{slotScenario ? "先用一段话描述产品实际情况（可选）" : question.yesDetailLabel}</span><textarea value={answer.detail} onChange={(event) => updateSupplement(question.id, { detail: event.target.value })} placeholder="仅填写本产品的实际配置和处理方式" /></label>
+                    {slotScenario ? <div className="slot-workspace">
+                      <div className="slot-workspace-heading">
+                        <div><strong>{slotScenario.title}</strong><span>下列问题来自固定题库。您可以直接填写，也可以让系统从上方描述中预填。</span></div>
+                        <button type="button" className="slot-extract-button" disabled={extractingQuestionId === question.id || !answer.detail.trim()} onClick={() => void extractSupplementSlots(question.id)}><BracketsCurly weight="bold" /> {extractingQuestionId === question.id ? "正在整理…" : "智能整理描述"}</button>
+                      </div>
+                      <div className="slot-fields">{slotScenario.slots.map((slot) => {
+                        const slotAnswer = answer.slots?.[slot.id];
+                        return <label className="slot-field" data-status={slotAnswer?.status ?? "EMPTY"} key={slot.id}>
+                          <span><strong>{slot.label}{slot.required ? " *" : ""}</strong>{slotAnswer?.status === "CANDIDATE" ? <em>待核对</em> : slotAnswer?.status === "CONFIRMED" ? <em>已填写</em> : null}</span>
+                          {slot.inputType === "textarea"
+                            ? <textarea value={slotAnswer?.value ?? ""} onChange={(event) => updateSupplementSlot(question.id, slot.id, event.target.value)} placeholder={slot.prompt} />
+                            : <input type={slot.inputType === "url" ? "url" : "text"} value={slotAnswer?.value ?? ""} onChange={(event) => updateSupplementSlot(question.id, slot.id, event.target.value)} placeholder={slot.prompt} />}
+                          {slotAnswer?.status === "CANDIDATE" ? <button type="button" onClick={() => updateSupplementSlot(question.id, slot.id, slotAnswer.value, "CONFIRMED", slotAnswer.evidenceText)}><Check weight="bold" /> 采用此内容</button> : null}
+                        </label>;
+                      })}</div>
+                    </div> : null}
+                  </> : null}
                   {answer?.answer === "UNKNOWN" ? <p className="supplement-unknown"><WarningCircle weight="fill" /> {question.unknownMessage}</p> : null}
                 </article>;
                 })}

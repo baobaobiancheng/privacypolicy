@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "1",
+  "contentVersion": "map-slot-v1.0.0",
+  "publishedAt": "2026-08-14T00:00:00.000Z",
+  "scenarios": [
+    {
+      "scenarioId": "third-party-service",
+      "questionId": "third-party-services",
+      "title": "SDK 与第三方服务详情",
+      "status": "PUBLISHED",
+      "sourceRefs": ["REF-MAP-AMAP:module-6-7", "REF-MAP-BAIDU:module-6-7"],
+      "slots": [
+        { "id": "service-name", "label": "SDK或服务名称", "prompt": "请填写SDK或第三方服务的完整名称。", "inputType": "text", "required": true },
+        { "id": "provider-name", "label": "提供方", "prompt": "请填写提供该SDK或服务的公司全称。", "inputType": "text", "required": true },
+        { "id": "purpose", "label": "使用目的", "prompt": "该SDK或服务在本产品中用于什么具体功能？", "inputType": "textarea", "required": true },
+        { "id": "data-types", "label": "涉及的信息", "prompt": "请列出该服务可能处理的个人信息或设备信息。", "inputType": "textarea", "required": true },
+        { "id": "initialization-timing", "label": "启动与发送时机", "prompt": "何时初始化，何时首次向第三方发送信息？", "inputType": "textarea", "required": true },
+        { "id": "privacy-policy-url", "label": "第三方隐私政策链接", "prompt": "请填写第三方公开的隐私政策链接。", "inputType": "url", "required": true }
+      ]
+    },
+    {
+      "scenarioId": "storage",
+      "questionId": "storage-locations",
+      "title": "本地与服务器存储详情",
+      "status": "PUBLISHED",
+      "sourceRefs": ["REF-MAP-AMAP:chapter-5", "REF-MAP-BAIDU:chapter-4"],
+      "slots": [
+        { "id": "data-types", "label": "存储的信息", "prompt": "哪些个人信息会被保存？", "inputType": "textarea", "required": true },
+        { "id": "storage-location", "label": "存储位置与地域", "prompt": "信息保存在设备本地还是服务器，服务器位于哪个国家或地区？", "inputType": "textarea", "required": true },
+        { "id": "retention", "label": "保存期限", "prompt": "请按信息类型说明保存期限或确定期限的规则。", "inputType": "textarea", "required": true },
+        { "id": "deletion-method", "label": "到期处理", "prompt": "期限届满后如何删除、匿名化或清理备份？", "inputType": "textarea", "required": true }
+      ]
+    },
+    {
+      "scenarioId": "account-sync",
+      "questionId": "account-cloud-sync",
+      "title": "账号与云端同步详情",
+      "status": "PUBLISHED",
+      "sourceRefs": ["REF-MAP-AMAP:record-3", "REF-MAP-BAIDU:record-2"],
+      "slots": [
+        { "id": "login-method", "label": "登录方式", "prompt": "产品支持手机号、第三方账号或其他哪种登录方式？", "inputType": "textarea", "required": true },
+        { "id": "sync-data", "label": "同步内容", "prompt": "会同步哪些账号资料、收藏、历史路线或其他信息？", "inputType": "textarea", "required": true },
+        { "id": "activation-condition", "label": "开启条件", "prompt": "同步默认开启，还是由用户主动开启？", "inputType": "textarea", "required": true },
+        { "id": "disable-path", "label": "关闭入口", "prompt": "用户在哪里关闭同步？关闭后有什么影响？", "inputType": "textarea", "required": true },
+        { "id": "deletion-rule", "label": "删除规则", "prompt": "用户如何删除云端数据，注销账号后如何处理？", "inputType": "textarea", "required": true }
+      ]
+    },
+    {
+      "scenarioId": "background-location",
+      "questionId": "background-location",
+      "title": "后台定位详情",
+      "status": "PUBLISHED",
+      "sourceRefs": ["REF-MAP-AMAP:record-1-4", "REF-MAP-BAIDU:record-17"],
+      "slots": [
+        { "id": "trigger", "label": "触发条件", "prompt": "什么操作会开始后台定位？", "inputType": "textarea", "required": true },
+        { "id": "screen-state", "label": "后台或锁屏行为", "prompt": "切换到后台或锁屏后是否继续获取位置？退出导航后何时停止？", "inputType": "textarea", "required": true },
+        { "id": "frequency", "label": "获取频率", "prompt": "是实时连续、定时还是按需获取？", "inputType": "textarea", "required": true },
+        { "id": "purpose", "label": "使用目的", "prompt": "后台定位用于持续导航、路况、提醒还是其他功能？", "inputType": "textarea", "required": true },
+        { "id": "retention", "label": "保存期限", "prompt": "后台定位数据和相关日志保存多久？", "inputType": "textarea", "required": true },
+        { "id": "disable-path", "label": "关闭入口与影响", "prompt": "用户在哪里关闭后台定位，关闭后哪些功能不可用？", "inputType": "textarea", "required": true }
+      ]
+    },
+    {
+      "scenarioId": "personalization",
+      "questionId": "personalized-content",
+      "title": "个性化展示详情",
+      "status": "PUBLISHED",
+      "sourceRefs": ["REF-MAP-AMAP:module-4", "REF-MAP-BAIDU:record-20"],
+      "slots": [
+        { "id": "input-data", "label": "使用的信息", "prompt": "个性化展示使用哪些位置、浏览、点击或设备信息？", "inputType": "textarea", "required": true },
+        { "id": "purpose", "label": "处理目的", "prompt": "用于内容推荐、路线排序、广告还是其他目的？", "inputType": "textarea", "required": true },
+        { "id": "output-scene", "label": "展示场景", "prompt": "个性化结果会出现在哪些页面或功能中？", "inputType": "textarea", "required": true },
+        { "id": "opt-out-path", "label": "关闭入口", "prompt": "用户在哪里关闭个性化展示或选择非个性化内容？", "inputType": "textarea", "required": true },
+        { "id": "opt-out-impact", "label": "关闭后的影响", "prompt": "关闭后是否仍可使用基本功能，展示内容会发生什么变化？", "inputType": "textarea", "required": true }
+      ]
+    }
+  ]
+}

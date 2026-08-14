@@ -14,7 +14,7 @@ import { ensureDevUsers } from "@/src/data/dev-seed";
 import { getPrisma } from "@/src/data/prisma";
 import { authorizeProject, type ProjectAccessRecord } from "@/src/application/authorization";
 import { evaluateFormalPolicyReadiness, resolveFieldAnswer } from "@/src/knowledge/readiness";
-import { mapCnKnowledgePackage } from "@/src/knowledge/map-cn";
+import { getSlotScenario, mapCnKnowledgePackage } from "@/src/knowledge/map-cn";
 
 export const runtime = "nodejs";
 
@@ -44,8 +44,8 @@ export async function GET() {
       additionalNotes: "",
       scopeAnswers: { "single-product": true, "map-primary": true, "single-category": true, "no-cross-border": true },
       supplementAnswers: {
-        "third-party-services": { answer: "NO", detail: "" },
-        "background-location": { answer: "NO", detail: "" },
+        "third-party-services": { answer: "NO", detail: "", slots: {} },
+        "background-location": { answer: "NO", detail: "", slots: {} },
       },
     }, `generation-demo-${Date.now().toString(36)}`);
     return NextResponse.json(rest);
@@ -139,6 +139,14 @@ function modelErrorResponse(error: unknown) {
 
 async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, generationId: string): Promise<DraftResponse> {
   const selectedFeatures = verifiedMapV1Content.payload.features.filter((feature) => input.selected.includes(feature.key));
+  const confirmedSupplementFactKeys = Object.entries(input.supplementAnswers).flatMap(([questionId, answer]) => [
+    ...(!getSlotScenario(questionId) && answer.answer === "YES" && answer.detail
+      ? [`supplementAnswers.${questionId}.detail`]
+      : []),
+    ...Object.entries(answer.slots ?? {}).flatMap(([slotId, slot]) => slot.status === "CONFIRMED" && slot.value
+      ? [`supplementAnswers.${questionId}.slots.${slotId}.value`]
+      : []),
+  ]);
 
   const fieldAnswer = (featureKey: string, index: number) => resolveFieldAnswer(input, `${featureKey}.${index}`);
   const activities: ActivityFacts[] = selectedFeatures.map((feature) => ({
@@ -240,7 +248,7 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       ...input.customFeatures.flatMap((key) => [`customDetails.${key}.purpose`, `customDetails.${key}.retention`]),
       ...Object.keys(input.profile),
       ...Object.keys(input.profile).map((key) => `profile.${key}`),
-      ...Object.keys(input.supplementAnswers).map((key) => `supplementAnswers.${key}.detail`),
+      ...confirmedSupplementFactKeys,
       ...verifiedMapV1Content.payload.commonDisclosureFields.map((field) => field.key),
       ...input.customFeatures,
       "additionalNotes",
@@ -251,7 +259,7 @@ async function renderDraftResponse(input: z.infer<typeof DraftInputSchema>, gene
       ...input.customFeatures.flatMap((key) => [`customDetails.${key}.purpose`, `customDetails.${key}.retention`]),
       ...Object.keys(input.profile),
       ...Object.keys(input.profile).map((key) => `profile.${key}`),
-      ...Object.entries(input.supplementAnswers).flatMap(([key, answer]) => answer.answer === "YES" && answer.detail ? [`supplementAnswers.${key}.detail`] : []),
+      ...confirmedSupplementFactKeys,
       "additionalNotes",
     ],
     pendingFacts: [],

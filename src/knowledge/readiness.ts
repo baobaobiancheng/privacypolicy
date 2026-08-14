@@ -1,5 +1,5 @@
 import type { FormPayload } from "@/src/ai/deepseek";
-import { getRequiredSupplementQuestions } from "./map-cn";
+import { getRequiredSupplementQuestions, getSlotScenario } from "./map-cn";
 import { SupplementAnswerSchema, type SupplementAnswer } from "./map-cn/schema";
 
 export type ReadinessDiagnostic = {
@@ -57,7 +57,41 @@ export function evaluateFormalPolicyReadiness(input: FormPayload & { scopeAnswer
     }
     answers[question.id] = result.data;
     if (result.data.answer === "UNKNOWN") diagnostics.push({ code: "NEEDS_PRODUCT_OR_TECH", severity: "BLOCKING", target: `question.${question.id}`, message: question.unknownMessage });
-    if (result.data.answer === "YES" && !result.data.detail.trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `question.${question.id}`, message: `“${question.title}”已选择“有”，请补充具体事实。` });
+    if (result.data.answer === "YES") {
+      const slotScenario = getSlotScenario(question.id);
+      if (!slotScenario && !result.data.detail.trim()) {
+        diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `question.${question.id}`, message: `“${question.title}”已选择“有”，请补充具体事实。` });
+      }
+      for (const slot of slotScenario?.slots.filter((item) => item.required) ?? []) {
+        const value = result.data.slots[slot.id];
+        if (!value?.value.trim() || value.status !== "CONFIRMED") {
+          diagnostics.push({
+            code: "NEEDS_CUSTOMER_INPUT",
+            severity: "BLOCKING",
+            target: `question.${question.id}.slot.${slot.id}`,
+            message: `请确认“${question.title}”中的“${slot.label}”。`,
+          });
+          continue;
+        }
+        if (slot.inputType === "url" && !isPublicHttpUrl(value.value)) {
+          diagnostics.push({
+            code: "NEEDS_CUSTOMER_INPUT",
+            severity: "BLOCKING",
+            target: `question.${question.id}.slot.${slot.id}`,
+            message: `“${question.title}”中的“${slot.label}”需要填写完整的 http 或 https 链接。`,
+          });
+        }
+      }
+    }
   }
   return { ready: !diagnostics.some((item) => item.severity === "BLOCKING"), diagnostics, requiredQuestionIds: requiredQuestions.map((item) => item.id), answers };
+}
+
+function isPublicHttpUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
 }

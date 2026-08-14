@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { generatePolicyDraft, POLICY_SECTION_TITLES, type PolicyGenerationInput } from "@/src/ai/deepseek";
+import { extractSupplementSlots, generatePolicyDraft, POLICY_SECTION_TITLES, type PolicyGenerationInput } from "@/src/ai/deepseek";
 
 const input: PolicyGenerationInput = {
   form: {
@@ -38,12 +38,10 @@ describe("DeepSeek adapter", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     delete process.env.DEEPSEEK_API_KEY;
-    delete process.env.POLICY_MIN_VISIBLE_CHARACTERS;
   });
 
   it("requests Markdown and returns the validated document", async () => {
     process.env.DEEPSEEK_API_KEY = "test-key";
-    process.env.POLICY_MIN_VISIBLE_CHARACTERS = "100";
     const fetchMock = vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: completeMarkdown } }] }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -56,26 +54,21 @@ describe("DeepSeek adapter", () => {
       body: expect.stringContaining('"thinking":{"type":"disabled"}'),
     }));
     const requestCall = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
-    const requestBody = JSON.parse(requestCall[1].body as string) as { messages: Array<{ content: string }> };
-    expect(requestBody.messages[1].content).toContain("THIRD_PARTY_FACTS_STATUS:\nCUSTOMER_TEXT_PROVIDED");
+    const requestBody = JSON.parse(requestCall[1].body as string) as { messages: Array<{ content: string }>; max_tokens: number };
+    expect(requestBody.messages[1].content).toContain("THIRD_PARTY_FACTS_STATUS:\nNO_CONFIRMED_FACTS");
+    expect(requestBody.messages[1].content).not.toContain("定位 SDK，用于路线规划");
+    expect(requestBody.max_tokens).toBe(65_536);
   });
 
-  it("expands a short first draft and only returns a policy above the configured floor", async () => {
+  it("accepts a structurally complete short policy without a hidden expansion request", async () => {
     process.env.DEEPSEEK_API_KEY = "test-key";
-    process.env.POLICY_MIN_VISIBLE_CHARACTERS = "1000";
-    const expandedMarkdown = completeMarkdown.replace(
-      "本章节基于已填写事实生成，供法务继续编辑使用。",
-      `本章节基于已填写事实生成，供法务继续编辑使用。${"补充说明".repeat(320)}`,
-    );
-    const fetchMock = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: completeMarkdown } }] }), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: expandedMarkdown } }] }), { status: 200 }));
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: completeMarkdown } }] }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
     const result = await generatePolicyDraft(input);
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(result.markdown.length).toBeGreaterThan(1000);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(result.markdown).toBe(completeMarkdown);
   });
 
   it("classifies an aborted response body as a service timeout instead of invalid model output", async () => {
@@ -113,5 +106,25 @@ describe("DeepSeek adapter", () => {
         fields: [...input.selectedFeatures[0].fields, { key: "origin", label: "出发地", confirmed: false }],
       }],
     })).rejects.toMatchObject({ code: "EXPORT_BLOCKED" });
+  });
+
+  it("extracts only allowlisted slot candidates without sending competitor provenance", async () => {
+    process.env.DEEPSEEK_API_KEY = "test-key";
+    const detail = "产品仅在用户开始导航后持续定位，退出导航后立即停止。";
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({
+      questionId: "background-location",
+      candidates: [
+        { slotId: "trigger", value: "用户开始导航后", evidenceText: "用户开始导航后" },
+        { slotId: "invented", value: "编造内容", evidenceText: "产品" },
+      ],
+    }) } }] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await extractSupplementSlots("background-location", detail);
+
+    expect(result.candidates).toEqual([{ slotId: "trigger", value: "用户开始导航后", evidenceText: "用户开始导航后" }]);
+    const requestBody = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string) as { messages: Array<{ content: string }> };
+    const prompt = requestBody.messages.map((message) => message.content).join("\n");
+    expect(prompt).not.toMatch(/sourceRefs|REF-MAP-AMAP|REF-MAP-BAIDU|高德|百度/);
   });
 });

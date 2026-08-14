@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FormPayloadSchema } from "@/src/ai/deepseek";
-import { getRequiredSupplementQuestions, mapCnKnowledgePackage } from "@/src/knowledge/map-cn";
+import { getRequiredSupplementQuestions, getRuntimeSlotScenario, getSlotScenario, mapCnKnowledgePackage, mapSlotPackage } from "@/src/knowledge/map-cn";
 import { evaluateFormalPolicyReadiness } from "@/src/knowledge/readiness";
 
 const base = FormPayloadSchema.parse({
@@ -23,6 +23,9 @@ describe("map local knowledge readiness", () => {
     expect(mapCnKnowledgePackage.contentVersion).toBe("map-cn-v1.1.0");
     expect(mapCnKnowledgePackage.sources).toHaveLength(9);
     expect(mapCnKnowledgePackage.sources.map((item) => item.id)).toContain("REG-CORE-03");
+    expect(mapSlotPackage.scenarios).toHaveLength(5);
+    expect(getSlotScenario("background-location")?.sourceRefs).toContain("REF-MAP-AMAP:record-1-4");
+    expect(JSON.stringify(getRuntimeSlotScenario("background-location"))).not.toMatch(/AMAP|BAIDU|sourceRefs/);
   });
 
   it("triggers neutral supplemental questions from selected functionality", () => {
@@ -32,7 +35,7 @@ describe("map local knowledge readiness", () => {
     const withThirdParty = getRequiredSupplementQuestions({
       selected: ["navigation"],
       customFeatures: [],
-      supplementAnswers: { "third-party-services": { answer: "YES", detail: "示例 SDK" } },
+      supplementAnswers: { "third-party-services": { answer: "YES", detail: "示例 SDK", slots: {} } },
     });
     expect(withThirdParty.map((item) => item.id)).toContain("third-party-initialization");
   });
@@ -42,7 +45,7 @@ describe("map local knowledge readiness", () => {
     const partiallySelected = evaluateFormalPolicyReadiness({ ...base, confirmedFields: ["navigation.0"] });
     expect(partiallySelected.ready).toBe(true);
     expect(partiallySelected.diagnostics.some((item) => item.target?.startsWith("field."))).toBe(false);
-    const unknown = evaluateFormalPolicyReadiness({ ...base, supplementAnswers: { ...base.supplementAnswers, "background-location": { answer: "UNKNOWN", detail: "" } } });
+    const unknown = evaluateFormalPolicyReadiness({ ...base, supplementAnswers: { ...base.supplementAnswers, "background-location": { answer: "UNKNOWN", detail: "", slots: {} } } });
     expect(unknown.ready).toBe(false);
     expect(unknown.diagnostics.some((item) => item.code === "NEEDS_PRODUCT_OR_TECH")).toBe(true);
   });
@@ -55,5 +58,32 @@ describe("map local knowledge readiness", () => {
     });
     expect(result.ready).toBe(true);
     expect(result.diagnostics.some((item) => item.target === "field.navigation.origin")).toBe(false);
+  });
+
+  it("requires customer confirmation for every required slot and never accepts AI candidates as complete", () => {
+    const slotScenario = getSlotScenario("third-party-services");
+    expect(slotScenario).toBeDefined();
+    const candidateSlots = Object.fromEntries(slotScenario!.slots.map((slot) => [slot.id, { value: `候选-${slot.label}`, status: "CANDIDATE" as const }]));
+    const candidate = evaluateFormalPolicyReadiness({
+      ...base,
+      supplementAnswers: {
+        ...base.supplementAnswers,
+        "third-party-services": { answer: "YES", detail: "使用示例SDK", slots: candidateSlots },
+        "third-party-initialization": { answer: "NO", detail: "", slots: {} },
+      },
+    });
+    expect(candidate.ready).toBe(false);
+    expect(candidate.diagnostics.some((item) => item.target?.includes("question.third-party-services.slot"))).toBe(true);
+
+    const confirmedSlots = Object.fromEntries(slotScenario!.slots.map((slot) => [slot.id, { value: slot.inputType === "url" ? "https://example.com/privacy" : `已确认-${slot.label}`, status: "CONFIRMED" as const }]));
+    const confirmed = evaluateFormalPolicyReadiness({
+      ...base,
+      supplementAnswers: {
+        ...base.supplementAnswers,
+        "third-party-services": { answer: "YES", detail: "使用示例SDK", slots: confirmedSlots },
+        "third-party-initialization": { answer: "NO", detail: "", slots: {} },
+      },
+    });
+    expect(confirmed.ready).toBe(true);
   });
 });

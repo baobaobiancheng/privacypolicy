@@ -16,7 +16,37 @@ const AnswerDependencySchema = z.object({
 export const SupplementAnswerSchema = z.object({
   answer: z.enum(["YES", "NO", "UNKNOWN"]),
   detail: z.string().trim().max(4_000).default(""),
+  slots: z.record(StableId, z.object({
+    value: z.string().trim().max(2_000),
+    status: z.enum(["CANDIDATE", "CONFIRMED"]),
+    evidenceText: z.string().trim().max(2_000).optional(),
+    updatedAt: z.string().datetime().optional(),
+  }).strict()).default({}),
   updatedAt: z.string().datetime().optional(),
+}).strict();
+
+export const SlotDefinitionSchema = z.object({
+  id: StableId,
+  label: z.string().min(1),
+  prompt: z.string().min(1),
+  inputType: z.enum(["text", "textarea", "url"]),
+  required: z.boolean(),
+}).strict();
+
+export const SlotScenarioSchema = z.object({
+  scenarioId: StableId,
+  questionId: StableId,
+  title: z.string().min(1),
+  status: z.literal("PUBLISHED"),
+  sourceRefs: z.array(z.string().min(1)).min(1),
+  slots: z.array(SlotDefinitionSchema).min(1),
+}).strict();
+
+export const MapSlotPackageSchema = z.object({
+  schemaVersion: z.literal("1"),
+  contentVersion: z.string().regex(/^map-slot-v1\.\d+\.\d+$/),
+  publishedAt: z.string().datetime(),
+  scenarios: z.array(SlotScenarioSchema).length(5),
 }).strict();
 
 export const KnowledgeQuestionSchema = z.object({
@@ -44,5 +74,9 @@ export const MapKnowledgePackageSchema = z.object({
 }).strict();
 
 export type SupplementAnswer = z.infer<typeof SupplementAnswerSchema>;
+export type SupplementSlot = SupplementAnswer["slots"][string];
+export type SlotDefinition = z.infer<typeof SlotDefinitionSchema>;
+export type SlotScenario = z.infer<typeof SlotScenarioSchema>;
+export type MapSlotPackage = z.infer<typeof MapSlotPackageSchema>;
 export type KnowledgeQuestion = z.infer<typeof KnowledgeQuestionSchema>;
 export type MapKnowledgePackage = z.infer<typeof MapKnowledgePackageSchema>;
