@@ -26,6 +26,7 @@ import { scenarios } from "@/src/content/map-v1/ui-content";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import { getRequiredSupplementQuestions, getSlotScenario } from "@/src/knowledge/map-cn";
 import { evaluateFormalPolicyReadiness, resolveFieldAnswer, type FieldAnswer } from "@/src/knowledge/readiness";
+import { createGenerationId } from "@/src/application/draft-regeneration";
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
 import type { FormPayload, PreflightIssue } from "@/src/ai/deepseek";
 
@@ -710,13 +711,6 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       setStatusMessage("同一份表单正在生成，请稍候");
       return;
     }
-    if (data.generated?.status === "SUCCEEDED" && downloadUrl) {
-      const anchor = document.createElement("a");
-      anchor.href = downloadUrl;
-      anchor.download = `${data.profile.productName || "隐私政策"}-隐私政策草稿.docx`;
-      anchor.click();
-      return;
-    }
     if (!canGenerate) {
       setStatusMessage("请完成信息选择和必填补充项后再生成隐私政策草稿");
       return;
@@ -729,7 +723,9 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       setStatusMessage(error instanceof Error ? error.message : "项目创建失败");
       return;
     }
-    const generationId = `${id}-g${data.revision + 1}`;
+    // Project revision tracks form writes, not generation attempts. A new
+    // generation therefore always gets its own id even if facts did not change.
+    const generationId = createGenerationId(id);
     await runDraftGeneration(id, generationId, {
       profile: data.profile,
       selected: data.selected,
@@ -848,8 +844,8 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
               <div><span>3</span><strong>生成并制作 Word</strong><small>按固定结构生成政策，并加入目录、表格和正式排版。</small></div>
             </div>
             <div className="draft-preview"><div className="draft-page"><span className="draft-watermark">隐私政策草稿</span><MarkdownPreview markdown={data.generatedMarkdown} fallback={<><h3>{data.profile.productName} 隐私政策</h3><p>完成信息填写后，系统会在这里展示可预览和下载的隐私政策草稿。</p><h4>生成范围</h4><p>已选择 {selectedCount} 项产品功能和 {processedFieldCount} 项实际处理的个人信息。</p></>} /><p className="draft-footnote">{processedFieldCount} 项实际处理信息 · {supplementQuestions.length} 项补充信息</p></div><aside className="draft-audit"><FileDoc weight="duotone" /><strong>{data.generated?.status === "GENERATING" ? "正在生成草稿" : "草稿预览"}</strong><span>{selectedCount} 项产品功能</span><span>{processedFieldCount} 项实际处理信息</span><span>{supplementQuestions.length} 项补充信息</span><span>{warningCount} 项重点核对提示</span></aside></div>
-            {latestSuccessfulHistory.length > 0 && <div className="draft-history"><div className="field-confirm-heading"><strong>生成记录</strong><span>显示最新一份成功生成的隐私政策。</span></div><GenerationHistory history={latestSuccessfulHistory} generating={false} onRetry={retrySnapshot} onDownload={downloadSnapshotDocx} /></div>}
-            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(4)}><ArrowLeft weight="bold" /> 返回补充信息</button><button type="button" className="button button-primary" disabled={data.generated?.status === "GENERATING" || (!canGenerate && data.generated?.status !== "SUCCEEDED")} onClick={handleDraftAction}>{data.generated?.status === "SUCCEEDED" ? <><DownloadSimple weight="bold" /> 下载 Word 草稿</> : <><FileDoc weight="bold" /> {data.generated?.status === "GENERATING" ? "正在生成…" : data.generated?.status === "FAILED" ? "重新生成" : "生成隐私政策草稿"}</>}</button></div>
+            {latestSuccessfulHistory.length > 0 && <div className="draft-history"><div className="field-confirm-heading"><strong>生成记录</strong><span>显示最新一份成功生成的隐私政策。</span></div><GenerationHistory history={latestSuccessfulHistory} generating={data.generated?.status === "GENERATING"} onRetry={retrySnapshot} onDownload={downloadSnapshotDocx} /></div>}
+            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(4)}><ArrowLeft weight="bold" /> 返回补充信息</button><button type="button" className="button button-primary" disabled={data.generated?.status === "GENERATING" || !canGenerate} onClick={handleDraftAction}>{data.generated?.status === "SUCCEEDED" ? <><ArrowClockwise weight="bold" /> 重新生成</> : <><FileDoc weight="bold" /> {data.generated?.status === "GENERATING" ? "正在生成…" : data.generated?.status === "FAILED" ? "重新生成" : "生成隐私政策草稿"}</>}</button></div>
           </section>}
         </div>
       </div>

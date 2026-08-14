@@ -191,8 +191,10 @@ export async function generatePolicyDraft(input: PolicyGenerationInput): Promise
   validateRequiredPolicyTables(content, hasConfirmedSupplementSlots(normalizedInput.form, "third-party-services"));
 
   const parsed = parsePolicyMarkdown(content, allowedFactKeys, [], JSON.stringify(input.form), {
-    allowThirdPartyDenial: normalizedInput.form.supplementAnswers?.["third-party-services"]?.answer === "NO"
-      && normalizedInput.form.supplementAnswers?.["sharing-transfer-public"]?.answer === "NO",
+    // Integrating an SDK does not necessarily mean disclosing data as a
+    // separate controller. The dedicated disclosure answer is the customer's
+    // authoritative fact for negative sharing/transfer/publication language.
+    allowThirdPartyDenial: normalizedInput.form.supplementAnswers?.["sharing-transfer-public"]?.answer === "NO",
   });
   return { ...parsed, model };
 }

@@ -13,6 +13,7 @@ import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
 import { ensureDevUsers } from "@/src/data/dev-seed";
 import { getPrisma } from "@/src/data/prisma";
 import { authorizeProject, type ProjectAccessRecord } from "@/src/application/authorization";
+import { canReuseSuccessfulFactReview, fallbackMapLawKeywords, haveEquivalentDraftInput } from "@/src/application/draft-regeneration";
 import { evaluateFormalPolicyReadiness, resolveFieldAnswer } from "@/src/knowledge/readiness";
 import { getSlotScenario, mapCnKnowledgePackage } from "@/src/knowledge/map-cn";
 import { searchLawsByKeywords, type LawKeywordSearchResult } from "@/src/law/baijian";
@@ -97,13 +98,41 @@ export async function POST(request: Request) {
   }
 
   try {
-    const preflight = await analyzeFormBeforeGeneration(parsed.data);
     const inputHash = createHash("sha256").update(JSON.stringify(parsed.data)).digest("hex");
     const reviewToken = `sha256:${inputHash}`;
+    const priorSuccessfulSnapshots = await prisma.draftSnapshot.findMany({
+      where: { projectId, state: "SUCCEEDED" },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { inputHash: true, inputJson: true },
+    });
+    const equivalentPriorInput = priorSuccessfulSnapshots.some((snapshot) => {
+      const priorInput = DraftInputSchema.safeParse(snapshot.inputJson);
+      return priorInput.success && haveEquivalentDraftInput(parsed.data, [priorInput.data]);
+    });
+    const currentFormReviewed = meta.data.acknowledgedPreflightReviewToken === reviewToken
+      || canReuseSuccessfulFactReview(reviewToken, priorSuccessfulSnapshots.map((snapshot) => snapshot.inputHash))
+      || equivalentPriorInput;
+    // A successful artifact or an explicit user acknowledgement already proves
+    // that this exact immutable input passed the review gate. Re-checking may
+    // surface useful warnings, but a transient/variable model response must not
+    // make regeneration impossible.
+    let preflight;
+    try {
+      preflight = await analyzeFormBeforeGeneration(parsed.data);
+    } catch (error) {
+      if (!currentFormReviewed) throw error;
+      preflight = {
+        issues: [],
+        lawKeywords: fallbackMapLawKeywords({
+          hasLocation: parsed.data.selected.includes("navigation") || parsed.data.selected.includes("traffic"),
+          hasThirdParty: parsed.data.supplementAnswers["third-party-services"]?.answer === "YES",
+        }),
+      };
+    }
     const issuesWithFingerprint = preflight.issues.map((issue) => ({ ...issue, fingerprint: preflightIssueFingerprint(inputHash, issue) }));
     // 模型的措辞和 relatedPaths 可能在相同输入下轻微变化，因此不能把逐条模型输出
     // 当作稳定确认主键。确认令牌绑定完整表单哈希：表单一改，确认自然失效。
-    const currentFormReviewed = meta.data.acknowledgedPreflightReviewToken === reviewToken;
     const blockingIssues = currentFormReviewed ? [] : issuesWithFingerprint.filter((issue) => issue.severity === "BLOCKING");
     if (blockingIssues.length > 0) {
       return NextResponse.json({
@@ -113,7 +142,16 @@ export async function POST(request: Request) {
         reviewToken,
       }, { status: 422, headers: { "Cache-Control": "no-store" } });
     }
-    const legalSearchResults = await searchLawsByKeywords(preflight.lawKeywords);
+    let legalSearchResults: LawKeywordSearchResult[];
+    try {
+      legalSearchResults = await searchLawsByKeywords(preflight.lawKeywords);
+    } catch (error) {
+      // An unchanged form already has a successful, reviewable artifact and a
+      // versioned local knowledge package. A transient external search outage
+      // must not turn the rewrite button into a dead end.
+      if (!equivalentPriorInput) throw error;
+      legalSearchResults = [];
+    }
     const claim = await claimSnapshot(prisma, {
       projectId,
       expectedRevision,
