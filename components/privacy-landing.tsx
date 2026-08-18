@@ -14,7 +14,7 @@ import {
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
-import { reviewNotes, scenarios, sourceLayers } from "@/src/content/map-v1/ui-content";
+import { reviewNotes, scenarios } from "@/src/content/map-v1/ui-content";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -147,10 +147,6 @@ export function PrivacyLanding() {
             <div><p>律师判断</p><h3>必要性与处理依据单独复核，不覆盖事实来源。</h3></div>
           </article>
         </div>
-
-        <div className="source-marquee" aria-label="证据来源层">
-          <div className="marquee-track">{[...sourceLayers, ...sourceLayers].map((source, index) => <span key={`${source}-${index}`}><i /> {source}</span>)}</div>
-        </div>
       </section>
 
       <section id="workflow" className="workflow-section">
@@ -158,7 +154,7 @@ export function PrivacyLanding() {
           <div className="flow-copy">
             <p>从法规锚点到客户事实</p>
             <h2>五组场景，一项一项确认。</h2>
-            <p className="flow-description">先阅读律师整理的地图类场景，进入试点后再在独立工作区填写。展示页的说明不会预先创建项目，也不会保存选择。</p>
+            <p className="flow-description">先浏览适用的地图类场景，进入试点后再在独立工作区填写。展示页的说明不会预先创建项目，也不会保存选择。</p>
             <Link className="text-link" href="/projects/new/scope">进入地图类试点 <ArrowRight weight="bold" /></Link>
           </div>
 
@@ -175,7 +171,7 @@ export function PrivacyLanding() {
                     <div><p className="scenario-group">{scenario.group}</p><h3>{scenario.title}</h3><p>{scenario.summary}</p></div>
                     <div className="field-chips">{scenario.fields.map((field) => <span key={field}>{field}</span>)}</div>
                     {scenario.risk && <p className="scenario-risk">{scenario.risk}</p>}
-                    <div className="scenario-footer"><span>{scenario.source}</span><span className="scenario-readonly"><CaretRight weight="bold" /> 进入工作区后填写</span></div>
+                    <div className="scenario-footer"><span className="scenario-readonly"><CaretRight weight="bold" /> 进入工作区后填写</span></div>
                   </div>
                 </article>
               );

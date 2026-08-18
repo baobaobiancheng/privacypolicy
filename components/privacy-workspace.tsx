@@ -16,6 +16,7 @@ import {
   MapPin,
   Plus,
   ShieldCheck,
+  Sparkle,
   Warning,
   WarningCircle,
   X,
@@ -29,6 +30,7 @@ import { evaluateFormalPolicyReadiness, resolveFieldAnswer, type FieldAnswer } f
 import { createGenerationId, haveEquivalentDraftInput, resolveAcknowledgedReviewToken } from "@/src/application/draft-regeneration";
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
 import type { FormPayload, PreflightIssue } from "@/src/ai/deepseek";
+import { EXPLAINABLE_TERMS } from "@/src/ai/explain-terms";
 import { WORKSPACE_STEPS, workspaceSlugFor, stripProjectLocalExtras } from "@/src/workspace/contract";
 
 const steps = WORKSPACE_STEPS.map((item) => item.label);
@@ -247,6 +249,10 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   const [preflightIssues, setPreflightIssues] = useState<DisplayPreflightIssue[]>([]);
   const [acknowledgedPreflightIssues, setAcknowledgedPreflightIssues] = useState<string[]>([]);
   const [preflightReviewToken, setPreflightReviewToken] = useState<string | null>(null);
+  const [explainerOpen, setExplainerOpen] = useState(false);
+  const [explainingTerm, setExplainingTerm] = useState<string | null>(null);
+  const [explanation, setExplanation] = useState<{ term: string; text: string } | null>(null);
+  const [explainError, setExplainError] = useState<string | null>(null);
   const lastSavedKeyRef = useRef<string | null>(null);
   const dataRef = useRef<ProjectData>(data);
   useEffect(() => {
@@ -428,7 +434,6 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     .filter((item) => item.inputJson && haveEquivalentDraftInput(currentFormForHistory, [item.inputJson]))
     .slice(0, 1);
   const selectedCount = data.selected.length + data.customFeatures.length;
-  const progress = activeStep === 0 ? (scopeConfirmed ? 16 : 8) : Math.min(96, activeStep * 16 + (canGenerate ? 16 : 8));
 
   useEffect(() => {
     let cancelled = false;
@@ -701,6 +706,40 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     }
   }
 
+  function toggleExplainer() {
+    setExplainerOpen((open) => !open);
+    if (explainerOpen) {
+      setExplanation(null);
+      setExplainError(null);
+      setExplainingTerm(null);
+    }
+  }
+
+  async function requestExplanation(termKey: string) {
+    const term = EXPLAINABLE_TERMS.find((item) => item.key === termKey);
+    if (!term) return;
+    setExplainingTerm(termKey);
+    setExplanation(null);
+    setExplainError(null);
+    try {
+      const res = await fetch("/api/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
+        body: JSON.stringify({ term: termKey }),
+      });
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null) as { message?: string } | null;
+        throw new Error(payload?.message || "解释生成失败，请稍后重试");
+      }
+      const payload = await res.json() as { term: string; explanation: string };
+      setExplanation({ term: payload.term, text: payload.explanation });
+    } catch (error) {
+      setExplainError(error instanceof Error ? error.message : "解释生成失败，请稍后重试");
+    } finally {
+      setExplainingTerm(null);
+    }
+  }
+
   function updateProfile(field: string, value: string) {
     commit({ profile: { ...data.profile, [field]: value } }, "通用信息已保存");
   }
@@ -922,10 +961,11 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
         </aside>
 
         <div className="workspace-main">
+          <ol className="workspace-stepper" aria-label="表单流程">
+            {steps.map((step, index) => <li key={step} data-active={activeStep === index} data-complete={index < activeStep}><button type="button" onClick={() => goToStep(index as StepIndex)}><span className="stepper-node">{index < activeStep ? <Check weight="bold" /> : index + 1}</span><span className="stepper-label">{step}</span></button></li>)}
+          </ol>
           <div className="workspace-toolbar">
-            <div><span>项目完成度</span><strong>{progress}%</strong></div>
-            <div className="progress-line"><span style={{ width: `${progress}%` }} /></div>
-            <div className="workspace-toolbar-actions">{saveState === "saving" ? <span className="status-pending">保存中…</span> : saveState === "saved" ? <span className="status-complete">已保存到服务器</span> : null}<button type="button" onClick={handleSaveAndExit}>保存并退出</button></div>
+            <div className="workspace-toolbar-actions"><button type="button" className="toolbar-ai-button" aria-expanded={explainerOpen} onClick={toggleExplainer}><Sparkle weight="fill" /> 术语怎么理解</button>{saveState === "saving" ? <span className="status-pending">保存中…</span> : saveState === "saved" ? <span className="status-complete">已保存到服务器</span> : null}<button type="button" onClick={handleSaveAndExit}>保存并退出</button>{explainerOpen && <div className="explainer-popover"><div className="explainer-head"><strong>AI 助手 · 术语解释</strong><span>对功能术语做通俗解释，不代替法律意见。</span></div><ul className="explainer-terms">{EXPLAINABLE_TERMS.map((term) => <li key={term.key}><button type="button" disabled={explainingTerm !== null} onClick={() => requestExplanation(term.key)}>{term.label}{explainingTerm === term.key ? <span className="explainer-loading">解释中…</span> : <CaretRight weight="bold" />}</button></li>)}</ul>{explanation ? <div className="explainer-result"><strong>{explanation.term}</strong><p>{explanation.text}</p></div> : null}{explainError ? <div className="explainer-result explainer-error"><p>{explainError}</p></div> : null}</div>}</div>
           </div>
           <div className="workspace-status" role="status" aria-live="polite">{statusMessage}</div>
 
@@ -935,10 +975,10 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
 
           {activeStep === 2 && <section className="workspace-panel panel-enter">
             <div className="panel-heading"><p>功能与信息</p><h2>确认产品实际提供的功能。</h2><span>候选项默认不选；选中后必须填写处理活动目的和保存期限。</span></div>
-            <div className="workspace-feature-list">{scenarios.map((scenario) => { const checked = data.selected.includes(scenario.id); return <button key={scenario.id} type="button" className="workspace-feature-card group" data-selected={checked} onClick={() => toggleFeature(scenario.id)}><span className="feature-check">{checked && <Check weight="bold" />}</span><span><strong>{scenario.title}</strong><small>{scenario.group}</small></span><span className="feature-source">{scenario.source}</span><CaretRight weight="bold" /></button>; })}{data.customFeatures.map((feature) => <div key={feature} className="workspace-feature-card" data-selected="true"><span className="feature-check"><Check weight="bold" /></span><span><strong>{feature}</strong><small>客户自定义功能</small></span><span className="feature-source">客户填写</span><button type="button" className="remove-feature" onClick={() => commit({ customFeatures: data.customFeatures.filter((item) => item !== feature), customDetails: Object.fromEntries(Object.entries(data.customDetails).filter(([key]) => key !== feature)) }, "自定义功能已删除")} aria-label={`删除${feature}`}><X weight="bold" /></button></div>)}</div>
+            <div className="workspace-feature-list">{scenarios.map((scenario) => { const checked = data.selected.includes(scenario.id); return <button key={scenario.id} type="button" className="workspace-feature-card group" data-selected={checked} onClick={() => toggleFeature(scenario.id)}><span className="feature-check">{checked && <Check weight="bold" />}</span><span><strong>{scenario.title}</strong><small>{scenario.group}</small></span><CaretRight weight="bold" /></button>; })}{data.customFeatures.map((feature) => <div key={feature} className="workspace-feature-card" data-selected="true"><span className="feature-check"><Check weight="bold" /></span><span><strong>{feature}</strong><small>客户自定义功能</small></span><button type="button" className="remove-feature" onClick={() => commit({ customFeatures: data.customFeatures.filter((item) => item !== feature), customDetails: Object.fromEntries(Object.entries(data.customDetails).filter(([key]) => key !== feature)) }, "自定义功能已删除")} aria-label={`删除${feature}`}><X weight="bold" /></button></div>)}</div>
             {customOpen ? <div className="custom-form"><input autoFocus value={customName} onChange={(event) => setCustomName(event.target.value)} placeholder="例如：收藏常用地点" onKeyDown={(event) => event.key === "Enter" && addCustomFeature()} /><button type="button" onClick={addCustomFeature}>添加</button><button type="button" onClick={() => setCustomOpen(false)}>取消</button></div> : <button type="button" className="add-feature" onClick={() => setCustomOpen(true)}><Plus weight="bold" /> 添加表单中没有的功能</button>}
             <label className="additional-notes"><span>表单外补充信息（可选）</span><small>把表单没有覆盖、但产品实际存在的功能、SDK、第三方或处理规则写在这里。模型只会将其作为客户原文，不会自动变成未经确认的事实。</small><textarea value={data.additionalNotes} onChange={(event) => commit({ additionalNotes: event.target.value }, "补充信息已保存")} placeholder="例如：使用定位 SDK，仅在用户点击开始导航后获取前台定位；不做后台持续定位。" /></label>
-            {(selectedScenarios.length > 0 || selectedCustomFeatures.length > 0) && <div className="activity-details"><div className="field-confirm-heading"><strong>处理活动详情</strong><span>这些内容必须来自客户实际产品，不能由参考政策代填。</span></div>{selectedScenarios.map((scenario) => <div className="activity-detail-card" key={scenario.id}><div><strong>{scenario.title}</strong><small>{scenario.fields.join("、")}</small></div><label><span>实际处理目的</span><input value={data.activityDetails[scenario.id]?.purpose ?? ""} onChange={(event) => updateActivityDetail(scenario.id, "purpose", event.target.value)} placeholder="例如：提供路线规划" /></label><label><span>保存期限规则</span><input value={data.activityDetails[scenario.id]?.retention ?? ""} onChange={(event) => updateActivityDetail(scenario.id, "retention", event.target.value)} placeholder="例如：导航结束后删除或去标识化" /></label></div>)}{selectedCustomFeatures.map((feature) => <div className="activity-detail-card" key={feature}><div><strong>{feature}</strong><small>客户自定义功能 · 至少填写实际目的和保存期限</small></div><label><span>实际处理目的</span><input value={data.customDetails[feature]?.purpose ?? ""} onChange={(event) => commit({ customDetails: { ...data.customDetails, [feature]: { purpose: event.target.value, retention: data.customDetails[feature]?.retention ?? "" } } }, "自定义功能目的已保存")} placeholder="例如：收藏常用地点" /></label><label><span>保存期限规则</span><input value={data.customDetails[feature]?.retention ?? ""} onChange={(event) => commit({ customDetails: { ...data.customDetails, [feature]: { purpose: data.customDetails[feature]?.purpose ?? "", retention: event.target.value } } }, "自定义功能保存期限已保存")} placeholder="例如：用户删除后清除" /></label></div>)}</div>}
+            {(selectedScenarios.length > 0 || selectedCustomFeatures.length > 0) && <div className="activity-details"><div className="field-confirm-heading"><strong>处理活动详情</strong><span>这些内容必须来自客户实际产品。</span></div>{selectedScenarios.map((scenario) => <div className="activity-detail-card" key={scenario.id}><div><strong>{scenario.title}</strong><small>{scenario.fields.join("、")}</small></div><label><span>实际处理目的</span><input value={data.activityDetails[scenario.id]?.purpose ?? ""} onChange={(event) => updateActivityDetail(scenario.id, "purpose", event.target.value)} placeholder="例如：提供路线规划" /></label><label><span>保存期限规则</span><input value={data.activityDetails[scenario.id]?.retention ?? ""} onChange={(event) => updateActivityDetail(scenario.id, "retention", event.target.value)} placeholder="例如：导航结束后删除或去标识化" /></label></div>)}{selectedCustomFeatures.map((feature) => <div className="activity-detail-card" key={feature}><div><strong>{feature}</strong><small>客户自定义功能 · 至少填写实际目的和保存期限</small></div><label><span>实际处理目的</span><input value={data.customDetails[feature]?.purpose ?? ""} onChange={(event) => commit({ customDetails: { ...data.customDetails, [feature]: { purpose: event.target.value, retention: data.customDetails[feature]?.retention ?? "" } } }, "自定义功能目的已保存")} placeholder="例如：收藏常用地点" /></label><label><span>保存期限规则</span><input value={data.customDetails[feature]?.retention ?? ""} onChange={(event) => commit({ customDetails: { ...data.customDetails, [feature]: { purpose: data.customDetails[feature]?.purpose ?? "", retention: event.target.value } } }, "自定义功能保存期限已保存")} placeholder="例如：用户删除后清除" /></label></div>)}</div>}
             <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(1)}><ArrowLeft weight="bold" /> 返回</button><button type="button" className="button button-primary" disabled={!selectedCount || !selectedDetailsComplete} onClick={() => goToStep(3)}>选择个人信息 <ArrowRight weight="bold" /></button></div>
           </section>}
 
