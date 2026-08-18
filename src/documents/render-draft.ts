@@ -14,7 +14,6 @@ import {
   Table,
   TableCell,
   TableLayoutType,
-  TableOfContents,
   TableRow,
   TextRun,
   WidthType,
@@ -41,20 +40,9 @@ export async function renderDraftDocx(plan: DraftPlan, metadata: DraftMetadata, 
   const contentBlocks = markdownBlocks.filter((_, index) => index !== titleIndex);
   const body = generatedDraft
     ? [
-      title && title.type !== "table" ? renderParagraphBlock(title) : new Paragraph({ text: `${metadata.productName}隐私政策`, heading: HeadingLevel.TITLE }),
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 360 },
-        children: [new TextRun({ text: `适用产品：${metadata.productName} ${metadata.productVersion}`, color: "59645F", size: 19 })],
-      }),
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 480 },
-        children: [new TextRun({ text: `生效日期：${metadata.policyEffectiveDate || "以正文为准"}　更新日期：${metadata.generatedAt || new Date().toISOString().slice(0, 10)}`, color: "59645F", size: 18 })],
-      }),
-      new Paragraph({ children: [new PageBreak()] }),
-      new Paragraph({ text: "目录", style: "TOCHeading" }),
-      new TableOfContents("目录", { hyperlink: true, headingStyleRange: "1-3" }),
+      ...renderCoverPage(metadata, title && title.type !== "table" ? title.text : `${metadata.productName}隐私政策`),
+      new Paragraph({ text: "目 录", style: "TOCHeading", alignment: AlignmentType.CENTER }),
+      ...renderStaticToc(contentBlocks),
       new Paragraph({ children: [new PageBreak()] }),
       ...contentBlocks.flatMap(renderBlock),
     ]
@@ -90,6 +78,16 @@ export async function renderDraftDocx(plan: DraftPlan, metadata: DraftMetadata, 
           paragraph: { spacing: { before: 0, after: 240 }, keepNext: true },
         },
         {
+          id: "TOC1", name: "TOC 1", basedOn: "Normal", next: "Normal", quickFormat: true,
+          run: { font: "宋体", size: 21, color: "222222" },
+          paragraph: { spacing: { after: 100 }, indent: { left: 0 } },
+        },
+        {
+          id: "TOC2", name: "TOC 2", basedOn: "Normal", next: "Normal", quickFormat: true,
+          run: { font: "宋体", size: 20, color: "444444" },
+          paragraph: { spacing: { after: 80 }, indent: { left: 360 } },
+        },
+        {
           id: "Heading1", name: "Heading 1", basedOn: "Normal", next: "Normal", quickFormat: true,
           run: { font: "黑体", size: 28, bold: true, color: "172B25" },
           paragraph: { spacing: { before: 360, after: 180 }, keepNext: true, outlineLevel: 0 },
@@ -110,6 +108,58 @@ export async function renderDraftDocx(plan: DraftPlan, metadata: DraftMetadata, 
   });
 
   return Packer.toBuffer(document);
+}
+
+function renderCoverPage(metadata: DraftMetadata, titleText: string): Paragraph[] {
+  const generatedAt = metadata.generatedAt || new Date().toISOString().slice(0, 10);
+  return [
+    new Paragraph({ text: "", spacing: { before: 1400 } }),
+    new Paragraph({ text: titleText, heading: HeadingLevel.TITLE }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 600 },
+      children: [new TextRun({ text: "个人信息保护政策", color: "59645F", size: 24 })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 120 },
+      children: [new TextRun({ text: `适用产品：${metadata.productName} ${metadata.productVersion}`, color: "333333", size: 21 })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 120 },
+      children: [new TextRun({ text: `运营主体：${metadata.operatorName}`, color: "333333", size: 21 })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 120 },
+      children: [new TextRun({ text: `生效日期：${metadata.policyEffectiveDate || "以正文为准"}`, color: "333333", size: 21 })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 120 },
+      children: [new TextRun({ text: `更新日期：${generatedAt}`, color: "333333", size: 21 })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 800, after: 0 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: "AEB9B4", space: 6 } },
+      children: [new TextRun({ text: "", color: "FFFFFF" })],
+    }),
+    new Paragraph({ children: [new PageBreak()] }),
+  ];
+}
+
+function renderStaticToc(contentBlocks: MarkdownBlock[]): Paragraph[] {
+  const tocBlocks = contentBlocks.filter((block) => block.type === "heading1" || block.type === "heading2");
+  if (tocBlocks.length === 0) {
+    return [new Paragraph({ children: [new TextRun({ text: "（正文暂无章节）", color: "888888", size: 20 })] })];
+  }
+  return tocBlocks.map((block) => new Paragraph({
+    style: block.type === "heading2" ? "TOC2" : "TOC1",
+    spacing: { after: 100 },
+    children: inlineRuns(block.markdown),
+  }));
 }
 
 function renderBlock(block: MarkdownBlock): Array<Paragraph | Table> {

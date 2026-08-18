@@ -26,12 +26,13 @@ import { scenarios } from "@/src/content/map-v1/ui-content";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import { getRequiredSupplementQuestions, getSlotScenario } from "@/src/knowledge/map-cn";
 import { evaluateFormalPolicyReadiness, resolveFieldAnswer, type FieldAnswer } from "@/src/knowledge/readiness";
-import { createGenerationId, resolveAcknowledgedReviewToken } from "@/src/application/draft-regeneration";
+import { createGenerationId, haveEquivalentDraftInput, resolveAcknowledgedReviewToken } from "@/src/application/draft-regeneration";
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
 import type { FormPayload, PreflightIssue } from "@/src/ai/deepseek";
+import { WORKSPACE_STEPS, workspaceSlugFor, stripProjectLocalExtras } from "@/src/workspace/contract";
 
-const steps = ["适用范围", "通用信息", "功能与信息", "信息选择", "补充信息", "生成政策"];
-const stepRoutes = ["scope", "profile", "features", "review", "supplement", "draft"] as const;
+const steps = WORKSPACE_STEPS.map((item) => item.label);
+
 const CLIENT_PERSONA_ID = "client-editor";
 const profileFields = [
   ["operatorName", "运营主体全称", "例如：杭州行迹科技有限公司"],
@@ -48,8 +49,7 @@ const profileFields = [
   ["policyUpdateNotice", "政策更新通知方式", "例如：App 弹窗和隐私政策页提示"],
 ] as const;
 
-type StepIndex = 0 | 1 | 2 | 3 | 4 | 5;
-type GeneratedState = { status: "PENDING" | "GENERATING" | "FAILED" | "SUCCEEDED"; generationId: string; message?: string; createdAt: string };
+type StepIndex = 0 | 1 | 2 | 3 | 4 | 5;type GeneratedState = { status: "PENDING" | "GENERATING" | "FAILED" | "SUCCEEDED"; generationId: string; message?: string; createdAt: string };
 type DisplayPreflightIssue = PreflightIssue & { fingerprint: string };
 type ActivityDetail = { purpose: string; retention: string };
 type DraftFormInput = {
@@ -106,6 +106,38 @@ const initialProject: ProjectData = {
 
 function projectStorageKey(projectId?: string) {
   return projectId ? `privacy-policy-project:${projectId}` : "privacy-policy-project:new";
+}
+
+/** 根据表单完成度返回“最先不完整”的步骤；全部完成返回 5。 */
+function firstIncompleteFor(project: ProjectData): StepIndex {
+  const scopeConfirmed = mapV1Content.payload.scopeGates.every((gate) => project.scopeAnswers[gate.id] === true);
+  if (!scopeConfirmed) return 0;
+  const profileComplete = profileFields.every(([key]) => Boolean(project.profile[key]?.trim()));
+  if (!profileComplete) return 1;
+  const selectedScenarios = scenarios.filter((scenario) => project.selected.includes(scenario.id));
+  const detailsComplete = selectedScenarios.every((scenario) => {
+    const detail = project.activityDetails[scenario.id];
+    return Boolean(detail?.purpose?.trim() && detail?.retention?.trim());
+  }) && project.customFeatures.every((feature) => Boolean(project.customDetails[feature]?.purpose?.trim() && project.customDetails[feature]?.retention?.trim()));
+  if (!project.selected.length || !detailsComplete) return 2;
+  const hasProcessedField = selectedScenarios.some((scenario) => {
+    const feature = mapV1Content.payload.features.find((item) => item.key === scenario.id);
+    return (feature?.fields ?? []).some((field, index) => resolveFieldAnswer(project, `${scenario.id}.${field.key}`) === "PROCESS" || resolveFieldAnswer(project, `${scenario.id}.${index}`) === "PROCESS");
+  });
+  if (!hasProcessedField) return 3;
+  const readiness = evaluateFormalPolicyReadiness({
+    profile: project.profile as unknown as FormPayload["profile"],
+    selected: project.selected,
+    customFeatures: project.customFeatures,
+    customDetails: project.customDetails,
+    activityDetails: project.activityDetails,
+    confirmedFields: project.confirmedFields,
+    fieldAnswers: project.fieldAnswers,
+    additionalNotes: project.additionalNotes,
+    scopeAnswers: project.scopeAnswers,
+    supplementAnswers: project.supplementAnswers,
+  });
+  return readiness.ready ? 5 : 4;
 }
 
 const failureMessages: Record<string, { title: string; detail: string }> = {
@@ -216,9 +248,13 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   const [acknowledgedPreflightIssues, setAcknowledgedPreflightIssues] = useState<string[]>([]);
   const [preflightReviewToken, setPreflightReviewToken] = useState<string | null>(null);
   const lastSavedKeyRef = useRef<string | null>(null);
+  const dataRef = useRef<ProjectData>(data);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
 
   function computeFormKey(project: Partial<ProjectData>) {
-    return JSON.stringify({
+    const form = {
       scopeAnswers: project.scopeAnswers ?? {},
       profile: project.profile ?? {},
       selected: project.selected ?? [],
@@ -230,8 +266,10 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       activityDetails: project.activityDetails ?? {},
       supplementAnswers: project.supplementAnswers ?? {},
       scopeStop: project.scopeStop,
-      generatedMarkdown: project.generatedMarkdown ?? "",
-    });
+    };
+    // 生成预览（generatedMarkdown）不是表单事实，不参与保存键，避免生成成功
+    // 后触发一次无意义的项目修订递增。
+    return JSON.stringify(stripProjectLocalExtras(form));
   }
   const formKey = computeFormKey(data);
 
@@ -244,6 +282,66 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       return { formData: payload.formData, revision: payload.revision };
     } catch {
       return null;
+    }
+  }
+
+  /** 去掉运行期本地细节，仅保留可作为表单事实入库的字段。 */
+  function toProjectFormData(current: ProjectData): Partial<ProjectData> {
+    return stripProjectLocalExtras({
+      scopeAnswers: current.scopeAnswers,
+      profile: current.profile,
+      selected: current.selected,
+      customFeatures: current.customFeatures,
+      customDetails: current.customDetails,
+      additionalNotes: current.additionalNotes,
+      confirmedFields: current.confirmedFields,
+      fieldAnswers: current.fieldAnswers,
+      activityDetails: current.activityDetails,
+      supplementAnswers: current.supplementAnswers,
+      scopeStop: current.scopeStop,
+    });
+  }
+
+  /**
+   * 立即把当前表单写入服务器并返回最新 revision。
+   * 供所有“保存并离开”的 handler 在导航前调用，避免 400ms 防抖定时器
+   * 被页面卸载清掉后丢失最后一段修改。
+   */
+  async function persistNow(): Promise<{ ok: true; revision: number } | { ok: false }> {
+    const id = dataRef.current.projectId;
+    if (!id) return { ok: false };
+    const pending = toProjectFormData(dataRef.current);
+    const key = JSON.stringify(pending);
+    if (lastSavedKeyRef.current === key) return { ok: true, revision: dataRef.current.revision };
+    try {
+      const res = await fetch(`/api/projects/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
+        body: JSON.stringify({ expectedRevision: dataRef.current.revision, formData: pending }),
+      });
+      if (res.status === 409) {
+        setStatusMessage("项目已在其他页面更新，已重新载入最新版本");
+        const server = await loadProjectFromServer(id);
+        if (server) {
+          lastSavedKeyRef.current = computeFormKey(server.formData);
+          const reloaded = { ...initialProject, ...server.formData, projectId: id, revision: server.revision, generated: undefined };
+          dataRef.current = reloaded;
+          setData(reloaded);
+        }
+        return { ok: false };
+      }
+      if (!res.ok) throw new Error("保存失败");
+      const payload = await res.json() as { revision: number };
+      lastSavedKeyRef.current = key;
+      const mergedSave = { ...dataRef.current, revision: payload.revision };
+      dataRef.current = mergedSave;
+      setData(mergedSave);
+      setSaveState("saved");
+      return { ok: true, revision: payload.revision };
+    } catch {
+      setSaveState("error");
+      setStatusMessage("保存到服务器失败，请检查 MySQL 是否可用");
+      return { ok: false };
     }
   }
 
@@ -265,7 +363,11 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   const scopeAnswered = Object.keys(data.scopeAnswers).length > 0;
   const selectedScenarios = scenarios.filter((scenario) => data.selected.includes(scenario.id));
   const selectedCustomFeatures = data.customFeatures;
-  const selectedFieldItems = selectedScenarios.flatMap((scenario) => scenario.fields.map((field, index) => ({ id: `${scenario.id}.${index}`, featureId: scenario.id, feature: scenario.title, label: field })));
+  const selectedFieldItems = selectedScenarios.flatMap((scenario) => {
+    const feature = mapV1Content.payload.features.find((item) => item.key === scenario.id);
+    return (feature?.fields ?? scenario.fields.map((label) => ({ key: label, label })))
+      .map((field) => ({ id: `${scenario.id}.${field.key}`, featureId: scenario.id, feature: scenario.title, label: field.label }));
+  });
   const fieldAnswer = (fieldId: string) => resolveFieldAnswer(data, fieldId);
   const processedFieldCount = selectedFieldItems.filter((field) => fieldAnswer(field.id) === "PROCESS").length;
   const selectedDetailsComplete = selectedScenarios.every((scenario) => {
@@ -285,7 +387,16 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     if (!slotScenario) return Boolean(answer.detail.trim());
     return slotScenario.slots.filter((slot) => slot.required).every((slot) => {
       const value = answer.slots?.[slot.id];
-      return Boolean(value?.value.trim() && value.status === "CONFIRMED");
+      if (!value || !value.value.trim() || value.status !== "CONFIRMED") return false;
+      if (slot.inputType === "url") {
+        try {
+          const url = new URL(value.value);
+          if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+        } catch {
+          return false;
+        }
+      }
+      return true;
     });
   };
   const completedSupplementCount = supplementQuestions.filter(isSupplementComplete).length;
@@ -307,8 +418,14 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   const warningCount = selectedScenarios.filter((scenario) => scenario.risk).length;
   const canReview = scopeConfirmed && profileComplete && data.selected.length > 0 && selectedDetailsComplete;
   const canGenerate = canReview && formalReadiness.ready;
+  // 直链守卫：任何一步不满足都回到“最先不完整”的步骤，与侧边栏守卫保持一致。
+  const firstIncompleteStep: StepIndex = !scopeConfirmed ? 0 : !profileComplete ? 1 : !data.selected.length || !selectedDetailsComplete ? 2 : processedFieldCount === 0 ? 3 : !formalReadiness.ready ? 4 : 5;
+  // JSON.parse/stringify 去掉 undefined 键（如未设置的 scopeStop），
+  // 保证与快照 inputJson 的等价比较不被空键干扰。
+  const currentFormForHistory = JSON.parse(JSON.stringify(toProjectFormData(data))) as Partial<ProjectData>;
   const latestSuccessfulHistory = (history ?? [])
     .filter((item) => item.state === "SUCCEEDED" && Boolean(item.markdown && item.docxBase64))
+    .filter((item) => item.inputJson && haveEquivalentDraftInput(currentFormForHistory, [item.inputJson]))
     .slice(0, 1);
   const selectedCount = data.selected.length + data.customFeatures.length;
   const progress = activeStep === 0 ? (scopeConfirmed ? 16 : 8) : Math.min(96, activeStep * 16 + (canGenerate ? 16 : 8));
@@ -336,15 +453,9 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
           generated: undefined,
         };
         lastSavedKeyRef.current = computeFormKey(serverData);
+        dataRef.current = serverData;
         setData(serverData);
-        const detailsComplete = scenarios
-          .filter((scenario) => serverData.selected.includes(scenario.id))
-          .every((scenario) => Boolean(serverData.activityDetails[scenario.id]?.purpose.trim() && serverData.activityDetails[scenario.id]?.retention.trim()))
-          && serverData.customFeatures.every((feature) => Boolean(serverData.customDetails[feature]?.purpose.trim() && serverData.customDetails[feature]?.retention.trim()));
-        const serverScopeConfirmed = mapV1Content.payload.scopeGates.every((gate) => serverData.scopeAnswers[gate.id] === true);
-        const serverProfileComplete = profileFields.every(([key]) => Boolean(serverData.profile[key]?.trim()));
-        const serverReadiness = evaluateFormalPolicyReadiness({ profile: serverData.profile as unknown as FormPayload["profile"], selected: serverData.selected, customFeatures: serverData.customFeatures, customDetails: serverData.customDetails, activityDetails: serverData.activityDetails, confirmedFields: serverData.confirmedFields, additionalNotes: serverData.additionalNotes, scopeAnswers: serverData.scopeAnswers, supplementAnswers: serverData.supplementAnswers });
-        const firstIncomplete: StepIndex = !serverScopeConfirmed ? 0 : !serverProfileComplete ? 1 : !serverData.selected.length || !detailsComplete ? 2 : !serverReadiness.ready ? 4 : 5;
+        const firstIncomplete = firstIncompleteFor(serverData);
         setActiveStep(initialStep > firstIncomplete ? firstIncomplete : initialStep);
         setHydrated(true);
       });
@@ -357,7 +468,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as Partial<ProjectData>;
-        setData({
+        const restored: ProjectData = {
           ...initialProject,
           ...parsed,
           projectId: parsed.projectId ?? null,
@@ -372,7 +483,9 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
           activityDetails: parsed.activityDetails ?? {},
           supplementAnswers: parsed.supplementAnswers ?? {},
           generatedMarkdown: parsed.generatedMarkdown ?? "",
-        });
+        };
+        dataRef.current = restored;
+        setData(restored);
       } catch {
         setStatusMessage("本地项目表单无法读取，已创建空白填写页");
       }
@@ -384,21 +497,33 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     };
   }, [projectId, storageKey]);
 
-  useEffect(() => {
-    setActiveStep(initialStep);
-  }, [initialStep]);
-
+  // 步骤由“水合 + 守卫”共同决定；直接链接进入不完整步骤会被守卫回退。
+  // 不再无条件 setActiveStep(initialStep)，避免与守卫抢步，导致点“保存并选择功能”
+  // 后又被拉回上一个步骤。
   useEffect(() => {
     if (!hydrated) return;
-    const firstIncomplete: StepIndex = !scopeConfirmed ? 0 : !profileComplete ? 1 : !data.selected.length || !selectedDetailsComplete ? 2 : !formalReadiness.ready ? 4 : 5;
-    if (initialStep > firstIncomplete) setActiveStep(firstIncomplete);
-  }, [data.selected.length, hydrated, initialStep, profileComplete, scopeConfirmed, selectedDetailsComplete, formalReadiness.ready]);
+    if (initialStep > firstIncompleteStep) {
+      setActiveStep(firstIncompleteStep);
+      // 直链守卫：URL 与回退后的实际步骤保持一致，避免 /features 显示 scope 内容。
+      if (data.projectId) router.replace(`/projects/${data.projectId}/${workspaceSlugFor(firstIncompleteStep)}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, initialStep, firstIncompleteStep, data.projectId]);
 
   useEffect(() => () => {
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
   }, [downloadUrl]);
 
-  // 防抖保存到 MySQL；revision 作为乐观锁，冲突时重新载入。
+  // 未创建项目的草稿先写进 localStorage，创建成功（POST 返回 id）后再挂到项目保存。
+  useEffect(() => {
+    if (!hydrated || data.projectId) return;
+    try {
+      window.localStorage.setItem(projectStorageKey(undefined), JSON.stringify(toProjectFormData(data)));
+    } catch {
+      // 忽略隐私模式/配额异常，不打断填写。
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, data]);
   useEffect(() => {
     if (!hydrated || !data.projectId || !formKey) return;
     if (lastSavedKeyRef.current === formKey) return;
@@ -409,7 +534,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
         const res = await fetch(`/api/projects/${projectId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
-          body: JSON.stringify({ expectedRevision: data.revision, formData: data }),
+          body: JSON.stringify({ expectedRevision: data.revision, formData: toProjectFormData(data) }),
         });
         if (res.status === 409) {
           setStatusMessage("项目已在其他页面更新，已重新载入最新版本");
@@ -448,11 +573,11 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
 
   function commit(next: Partial<ProjectData>, message = "已保存") {
     const touchesGenerated = "generated" in next;
-    setData((current) => {
-      // 非生成动作（用户修改表单）必须失效已生成的草稿，避免下载/预览与当前确认事实不一致的旧文档。
-      const changes = touchesGenerated ? next : { ...next, generated: undefined, generatedMarkdown: "" };
-      return { ...current, ...changes };
-    });
+    // 非生成动作（用户修改表单）必须失效已生成的草稿，避免下载/预览与当前确认事实不一致的旧文档。
+    const changes = touchesGenerated ? next : { ...next, generated: undefined, generatedMarkdown: "" };
+    const merged = { ...dataRef.current, ...changes };
+    dataRef.current = merged; // 同步最新值，保证 persistNow / goToStep 导航前 flush 不丢改动。
+    setData(merged);
     if (!touchesGenerated) setDownloadUrl(null);
     setStatusMessage(message);
   }
@@ -462,7 +587,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     const res = await fetch("/api/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
-      body: JSON.stringify({ formData: data }),
+      body: JSON.stringify({ formData: toProjectFormData(dataRef.current) }),
     });
     if (!res.ok) {
       const payload = await res.json().catch(() => null) as { message?: string } | null;
@@ -470,11 +595,19 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     }
     const payload = await res.json() as { projectId: string; revision: number };
     lastSavedKeyRef.current = formKey;
-    setData((current) => ({ ...current, projectId: payload.projectId, revision: payload.revision }));
+    const mergedProject = { ...dataRef.current, projectId: payload.projectId, revision: payload.revision };
+    dataRef.current = mergedProject;
+    setData(mergedProject);
+    // 草稿已落库，清理本地占位草稿，避免下次进入“创建”页误读旧内容。
+    try {
+      window.localStorage.removeItem(projectStorageKey(undefined));
+    } catch {
+      // 忽略。
+    }
     return payload.projectId;
   }
 
-  function goToStep(step: StepIndex) {
+  async function goToStep(step: StepIndex) {
     if (step > 0 && !scopeConfirmed) {
       setStatusMessage("请先完成四项范围门禁");
       setActiveStep(0);
@@ -490,13 +623,31 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       setActiveStep(2);
       return;
     }
+    if (step > 3 && data.selected.length > 0 && processedFieldCount === 0) {
+      setStatusMessage("请至少勾选一项产品实际处理的个人信息");
+      setActiveStep(3);
+      return;
+    }
     if (step > 4 && !formalReadiness.ready) {
       setStatusMessage("请先补齐必填的产品信息");
       setActiveStep(4);
       return;
     }
+    // 步骤切换可能触发客户端组件重挂载（路由段变化），重挂载后按服务器数据
+    // 水合。必须先把未落库的最新填写 flush 到服务器，否则守卫会因读到旧数据
+    // 把用户弹回上一个未完成步骤。
+    const id = dataRef.current.projectId;
+    if (id) {
+      const saved = await persistNow();
+      if (!saved.ok) {
+        setStatusMessage("保存到服务器失败，请稍后重试");
+        return;
+      }
+      setActiveStep(step);
+      router.push(`/projects/${id}/${workspaceSlugFor(step)}`);
+      return;
+    }
     setActiveStep(step);
-    if (data.projectId) router.push(`/projects/${data.projectId}/${stepRoutes[step]}`);
   }
 
   function updateScope(gateId: string) {
@@ -525,6 +676,9 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     try {
       const id = await ensureProjectId();
       commit({ scopeStop: "SCOPE_STOP", projectId: id }, "已保存范围停止原因；该项目暂不适用地图类试点");
+      // scopeStop 不在 POST body 里，必须显式落库后再离开，否则防抖定时器
+      // 随页面卸载被清掉，范围停止原因会丢。
+      await persistNow();
       router.push("/projects");
     } catch (error) {
       setStatusMessage(error instanceof Error ? error.message : "项目创建失败");
@@ -539,7 +693,8 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     }
     try {
       await ensureProjectId();
-      setStatusMessage("已保存，正在返回项目列表");
+      const saved = await persistNow();
+      setStatusMessage(saved.ok ? "已保存，正在返回项目列表" : "保存失败，请稍后重试");
       router.push("/projects");
     } catch (error) {
       setStatusMessage(error instanceof Error ? error.message : "项目创建失败");
@@ -566,6 +721,10 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     const normalized = customName.trim();
     if (!normalized) {
       setStatusMessage("请填写自定义功能名称");
+      return;
+    }
+    if (data.customFeatures.some((feature) => feature === normalized)) {
+      setStatusMessage("该自定义功能已添加，请勿重复添加");
       return;
     }
     commit({ customFeatures: [...data.customFeatures, normalized], customDetails: { ...data.customDetails, [normalized]: { purpose: "", retention: "" } } }, "自定义功能已保存");
@@ -647,7 +806,14 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       if (!response.ok) {
         const errorPayload = await response.json().catch(() => null) as { message?: string; code?: string; issues?: DisplayPreflightIssue[]; reviewToken?: string } | null;
         if (errorPayload?.code === "FORM_SEMANTIC_REVIEW_REQUIRED" && errorPayload.issues?.length) {
-          setPreflightIssues(errorPayload.issues);
+          // 兜底去重：模型可能返回语义相同的多条 issue，避免重复卡片和 React 重复 key。
+          const seen = new Set<string>();
+          const uniqueIssues = errorPayload.issues.filter((issue) => {
+            if (seen.has(issue.fingerprint)) return false;
+            seen.add(issue.fingerprint);
+            return true;
+          });
+          setPreflightIssues(uniqueIssues);
           setPreflightReviewToken(errorPayload.reviewToken ?? null);
           setAcknowledgedPreflightIssues([]);
           setData((current) => ({ ...current, generated: { status: "PENDING", generationId, createdAt: new Date().toISOString() } }));
@@ -765,7 +931,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
 
           {activeStep === 0 && <section className="workspace-panel panel-enter"><div className="panel-heading"><p>确认适用范围</p><h2>这个项目是否适合地图类首期试点？</h2><span>四项都满足后才进入地图类工作区；回答不会被 AI 自动补齐。</span></div><div className="scope-list">{mapV1Content.payload.scopeGates.map((gate) => <label key={gate.id} className="scope-item"><input type="checkbox" checked={data.scopeAnswers[gate.id] === true} onChange={() => updateScope(gate.id)} /><span className="custom-checkbox"><Check weight="bold" /></span><span>{gate.label}</span></label>)}</div><div className="rule-callout"><Gavel weight="duotone" /><div><strong>地图类必要信息规则</strong><span>基本功能：定位和导航；必要信息：位置信息、出发地、到达地。</span></div><a href="https://www.gov.cn/zhengce/zhengceku/2021-03/23/content_5595088.htm" target="_blank" rel="noreferrer">查看原文</a></div><div className="panel-actions"><button type="button" className="button button-ghost" onClick={handleScopeStop}>暂存并退出</button><button type="button" className="button button-primary" disabled={!scopeConfirmed} onClick={handleScopeContinue}>确认并继续 <ArrowRight weight="bold" /></button></div></section>}
 
-          {activeStep === 1 && <section className="workspace-panel panel-enter"><div className="panel-heading"><p>通用披露信息</p><h2>先把政策的主体和适用范围说清楚。</h2><span>以下内容来自客户填写，不会由模板自动补齐。</span></div><div className="form-grid">{profileFields.map(([key, label, placeholder]) => <label key={key} className={key === "rightsEntry" ? "full-field" : ""}><span>{label}</span><input value={data.profile[key] ?? ""} onChange={(event) => updateProfile(key, event.target.value)} placeholder={placeholder} /></label>)}</div><div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(0)}><ArrowLeft weight="bold" /> 返回</button><button type="button" className="button button-primary" disabled={!profileComplete} onClick={() => goToStep(2)}>保存并选择功能 <ArrowRight weight="bold" /></button></div></section>}
+          {activeStep === 1 && <section className="workspace-panel panel-enter"><div className="panel-heading"><p>通用披露信息</p><h2>先把政策的主体和适用范围说清楚。</h2><span>以下内容来自客户填写，不会由模板自动补齐。</span></div><div className="form-grid">{profileFields.map(([key, label, placeholder]) => <label key={key} className={key === "rightsEntry" ? "full-field" : ""}><span>{label}</span><input type={key === "contactEmail" ? "email" : key === "policyEffectiveDate" ? "date" : "text"} value={data.profile[key] ?? ""} onChange={(event) => updateProfile(key, event.target.value)} placeholder={placeholder} /></label>)}</div><div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(0)}><ArrowLeft weight="bold" /> 返回</button><button type="button" className="button button-primary" disabled={!profileComplete} onClick={() => goToStep(2)}>保存并选择功能 <ArrowRight weight="bold" /></button></div></section>}
 
           {activeStep === 2 && <section className="workspace-panel panel-enter">
             <div className="panel-heading"><p>功能与信息</p><h2>确认产品实际提供的功能。</h2><span>候选项默认不选；选中后必须填写处理活动目的和保存期限。</span></div>

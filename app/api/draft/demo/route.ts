@@ -6,7 +6,7 @@ import { verifiedMapV1Content } from "@/src/content/map-v1/server-content";
 import { buildDraftPlan } from "@/src/domain/draft/export-plan";
 import { evaluateExportInvariants, type ActivityFacts } from "@/src/domain/rules";
 import { renderDraftDocx } from "@/src/documents/render-draft";
-import { analyzeFormBeforeGeneration, FormPayloadSchema, generatePolicyDraft } from "@/src/ai/deepseek";
+import { analyzeFormBeforeGeneration, FormPayloadSchema, generatePolicyDraft, type PreflightIssue } from "@/src/ai/deepseek";
 import { isDomainError } from "@/src/domain/errors";
 import { requireDevActor } from "@/src/auth/session";
 import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
@@ -130,7 +130,23 @@ export async function POST(request: Request) {
         }),
       };
     }
-    const issuesWithFingerprint = preflight.issues.map((issue) => ({ ...issue, fingerprint: preflightIssueFingerprint(inputHash, issue) }));
+    // 模型可能返回多条“语义相同但 wording 不同”的 issue。fingerprint 用
+    // id/category/title/relatedPaths 做稳定身份；重复出现时只保留第一条，
+    // 既避免页面出现重复卡片，也保证 React key 唯一。
+    const seenFingerprints = new Set<string>();
+    const issuesWithFingerprint: Array<PreflightIssue & { fingerprint: string }> = [];
+    for (const issue of preflight.issues) {
+      const fingerprint = preflightIssueFingerprint(inputHash, issue);
+      if (seenFingerprints.has(fingerprint)) continue;
+      seenFingerprints.add(fingerprint);
+      issuesWithFingerprint.push({
+        ...issue,
+        title: humanizePreflightText(issue.title),
+        description: humanizePreflightText(issue.description),
+        questionForUser: humanizePreflightText(issue.questionForUser),
+        fingerprint,
+      });
+    }
     // 模型的措辞和 relatedPaths 可能在相同输入下轻微变化，因此不能把逐条模型输出
     // 当作稳定确认主键。确认令牌绑定完整表单哈希：表单一改，确认自然失效。
     const blockingIssues = currentFormReviewed ? [] : issuesWithFingerprint.filter((issue) => issue.severity === "BLOCKING");
@@ -210,7 +226,7 @@ async function renderDraftResponse(
       : []),
   ]);
 
-  const fieldAnswer = (featureKey: string, index: number) => resolveFieldAnswer(input, `${featureKey}.${index}`);
+  const fieldAnswer = (featureKey: string, fieldKey: string) => resolveFieldAnswer(input, `${featureKey}.${fieldKey}`);
   const activities: ActivityFacts[] = selectedFeatures.map((feature) => ({
     activityKey: `activity-${feature.key}`,
     featureKey: feature.key,
@@ -218,13 +234,13 @@ async function renderDraftResponse(
     // 仅内容地图标记为 required 的字段进入必填校验；可选字段由客户决定是否处理。
     requiredFields: feature.fields.filter((field) => field.required).map((field) => field.key),
     riskCode: feature.riskCode,
-    assertions: feature.fields.map((field, index) => ({
+    assertions: feature.fields.map((field) => ({
       assertionId: `${generationId}-${feature.key}-${field.key}`,
       activityKey: `activity-${feature.key}`,
       fieldKey: field.key,
       value: field.label,
       originType: "CLIENT_ORIGINAL" as const,
-      factVerification: fieldAnswer(feature.key, index) === "PROCESS" ? "CLIENT_CONFIRMED" as const : fieldAnswer(feature.key, index) === "NOT_PROCESS" ? "EXCLUDED" as const : "UNCONFIRMED" as const,
+      factVerification: fieldAnswer(feature.key, field.key) === "PROCESS" ? "CLIENT_CONFIRMED" as const : fieldAnswer(feature.key, field.key) === "NOT_PROCESS" ? "EXCLUDED" as const : "UNCONFIRMED" as const,
       legalReview: "NOT_REQUIRED" as const,
       current: true,
     })),
@@ -302,10 +318,10 @@ async function renderDraftResponse(
       key: feature.key,
       title: feature.title,
       summary: feature.summary,
-      fields: feature.fields.filter((_, index) => fieldAnswer(feature.key, index) === "PROCESS").map((field) => ({ key: field.key, label: field.label, confirmed: true })),
+      fields: feature.fields.filter((field) => fieldAnswer(feature.key, field.key) === "PROCESS").map((field) => ({ key: field.key, label: field.label, confirmed: true })),
     })),
     allowedFactKeys: [
-      ...selectedFeatures.flatMap((feature) => feature.fields.filter((_, index) => fieldAnswer(feature.key, index) === "PROCESS").map((field) => `${feature.key}.${field.key}`)),
+      ...selectedFeatures.flatMap((feature) => feature.fields.filter((field) => fieldAnswer(feature.key, field.key) === "PROCESS").map((field) => `${feature.key}.${field.key}`)),
       ...input.selected.flatMap((key) => [`activityDetails.${key}.purpose`, `activityDetails.${key}.retention`]),
       ...input.customFeatures.flatMap((key) => [`customDetails.${key}.purpose`, `customDetails.${key}.retention`]),
       ...Object.keys(input.profile),
@@ -318,7 +334,7 @@ async function renderDraftResponse(
       "THIRD_PARTY_FACTS_STATUS",
     ],
     confirmedFactKeys: [
-      ...selectedFeatures.flatMap((feature) => feature.fields.flatMap((field, index) => fieldAnswer(feature.key, index) === "PROCESS" ? [`${feature.key}.${field.key}`] : [])),
+      ...selectedFeatures.flatMap((feature) => feature.fields.flatMap((field) => fieldAnswer(feature.key, field.key) === "PROCESS" ? [`${feature.key}.${field.key}`] : [])),
       ...input.selected.flatMap((key) => [`activityDetails.${key}.purpose`, `activityDetails.${key}.retention`]),
       ...input.customFeatures.flatMap((key) => [`customDetails.${key}.purpose`, `customDetails.${key}.retention`]),
       ...Object.keys(input.profile),
@@ -458,7 +474,44 @@ function fieldEvidence(fields: Array<{ key: string; sourceRefs: string[] }>, fie
   return fields.find((field) => field.key === fieldKey)?.sourceRefs ?? [];
 }
 
-function preflightIssueFingerprint(inputHash: string, issue: { category: string; relatedPaths: string[] }) {
-  const identity = [inputHash, issue.category, ...[...issue.relatedPaths].sort()].join("|");
+function preflightIssueFingerprint(inputHash: string, issue: { id: string; category: string; title: string; relatedPaths: string[] }) {
+  const identity = [inputHash, issue.id, issue.category, issue.title, ...[...issue.relatedPaths].sort()].join("|");
   return `sha256:${createHash("sha256").update(identity).digest("hex")}`;
+}
+
+/**
+ * 把模型返回的预检文案从“内部字段路径”转成客户能理解的自然语言。
+ * 即使模型仍输出了代码路径，也会在这里兜底清理，保证前端不暴露实现细节。
+ */
+function humanizePreflightText(text: string): string {
+  const replacements: Array<[RegExp, string]> = [
+    [/supplementAnswers\.third-party-services\.service-name/g, "SDK 名称"],
+    [/supplementAnswers\.third-party-services\.provider-name/g, "SDK 提供方"],
+    [/supplementAnswers\.third-party-services\.privacy-policy-url/g, "第三方隐私政策链接"],
+    [/supplementAnswers\.third-party-services/g, "SDK 与第三方服务说明"],
+    [/supplementAnswers\.storage-locations\.retention/g, "存储位置的保存期限"],
+    [/supplementAnswers\.storage-locations/g, "本地与服务器存储说明"],
+    [/supplementAnswers\.background-location\.retention/g, "后台定位日志的保存期限"],
+    [/supplementAnswers\.background-location/g, "后台定位说明"],
+    [/supplementAnswers\.customer-service-records/g, "客服记录说明"],
+    [/supplementAnswers\.diagnostic-logs/g, "诊断日志说明"],
+    [/supplementAnswers\.account-cloud-sync\.deletion-rule/g, "云端删除规则"],
+    [/supplementAnswers\.account-cloud-sync/g, "账号与云端同步说明"],
+    [/supplementAnswers\.history-and-favorites/g, "搜索、浏览与收藏记录说明"],
+    [/activityDetails\.support\.retention/g, "客服记录的保存期限"],
+    [/activityDetails\.traffic\.retention/g, "交通日志的保存期限"],
+    [/activityDetails\.security\.retention/g, "安全日志的保存期限"],
+    [/activityDetails\.navigation\.retention/g, "导航记录的保存期限"],
+    [/activityDetails\.discovery\.retention/g, "浏览记录的保存期限"],
+    [/profile\.contactEmail/g, "隐私联系邮箱"],
+    [/profile\.operatorContact/g, "运营地址"],
+    [/profile\.operatorName/g, "运营主体名称"],
+  ];
+  let result = text;
+  for (const [pattern, replacement] of replacements) {
+    result = result.replace(pattern, replacement);
+  }
+  // 兜底：仍残留的 FORM_JSON 路径统一替换为“对应填写内容”。
+  result = result.replace(/\b(?:profile|activityDetails|customDetails|supplementAnswers|scopeAnswers|confirmedFields|fieldAnswers)\.[a-zA-Z0-9._-]+/g, "对应填写内容");
+  return result.replace(/\s{2,}/g, " ").trim();
 }

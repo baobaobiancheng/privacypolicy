@@ -30,7 +30,7 @@ describe("policy Markdown document contract", () => {
     expect(cleanMarkdownText("**重点** [链接](https://example.com)")).toBe("重点 链接");
   });
 
-  it("renders an updateable Word table of contents, tables and hyperlinks", async () => {
+  it("renders a visible Word table of contents, tables and hyperlinks", async () => {
     const markdown = `# 示例隐私政策
 
 ## 1. 基本功能与扩展功能
@@ -53,7 +53,9 @@ describe("policy Markdown document contract", () => {
     const documentXml = await zip.file("word/document.xml")!.async("string");
     const relationshipsXml = await zip.file("word/_rels/document.xml.rels")!.async("string");
 
-    expect(documentXml).toContain("TOC \\h \\o &quot;1-3&quot;");
+    expect(documentXml).toContain("目 录");
+    expect(documentXml).toContain("TOC1");
+    expect(documentXml).toContain("1. 基本功能与扩展功能");
     expect(documentXml).toContain("<w:tbl>");
     expect(documentXml).toContain("重点说明");
     expect(relationshipsXml).toContain("https://example.com/privacy");

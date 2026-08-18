@@ -1,20 +1,18 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { PrivacyWorkspace } from "@/components/privacy-workspace";
+import { parseWorkspaceStep, workspaceSlugFor } from "@/src/workspace/contract";
 
-const sections = new Map<string, 0 | 1 | 2 | 3 | 4 | 5>([
-  ["scope", 0],
-  ["profile", 1],
-  ["features", 2],
-  ["activities", 2],
-  ["review", 3],
-  ["supplement", 4],
-  ["draft", 5],
-  ["exports", 5],
+// 早期别名：统一 302 到规范段，避免“同一状态两个 URL”。
+const legacyAliases = new Map<string, string>([
+  ["activities", "features"],
+  ["exports", "draft"],
 ]);
 
 export default async function ProjectSectionPage({ params }: { params: Promise<{ id: string; section: string }> }) {
-  const { id, section } = await params;
-  const step = sections.get(section);
-  if (step === undefined) notFound();
+  const { id, section: rawSection } = await params;
+  const section = legacyAliases.get(rawSection) ?? rawSection;
+  const step = parseWorkspaceStep(section);
+  if (step === null) notFound();
+  if (section !== rawSection) redirect(`/projects/${id}/${workspaceSlugFor(step)}`);
   return <PrivacyWorkspace projectId={id} initialStep={step} />;
 }

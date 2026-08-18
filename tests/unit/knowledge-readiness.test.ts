@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FormPayloadSchema } from "@/src/ai/deepseek";
 import { getRequiredSupplementQuestions, getRuntimeSlotScenario, getSlotScenario, mapCnKnowledgePackage, mapSlotPackage } from "@/src/knowledge/map-cn";
-import { evaluateFormalPolicyReadiness } from "@/src/knowledge/readiness";
+import { evaluateFormalPolicyReadiness, resolveFieldAnswer } from "@/src/knowledge/readiness";
 
 const base = FormPayloadSchema.parse({
   profile: {
@@ -85,5 +85,23 @@ describe("map local knowledge readiness", () => {
       },
     });
     expect(confirmed.ready).toBe(true);
+  });
+
+  it("blocks generation when no personal-information field is checked as processed", () => {
+    const noFields = evaluateFormalPolicyReadiness({
+      ...base,
+      confirmedFields: [],
+      fieldAnswers: {},
+    });
+    expect(noFields.ready).toBe(false);
+    expect(noFields.diagnostics.some((item) => item.target === "fields" && item.severity === "BLOCKING")).toBe(true);
+  });
+
+  it("resolves legacy index-based field ids to their stable key after content reorders", () => {
+    // 旧数据用 `navigation.0` 记录“位置信息”，映射到稳定键 navigation.location。
+    const legacy = evaluateFormalPolicyReadiness({ ...base, confirmedFields: ["navigation.0"], fieldAnswers: {} });
+    expect(legacy.ready).toBe(true);
+    expect(resolveFieldAnswer({ confirmedFields: ["navigation.0"], fieldAnswers: {} }, "navigation.location")).toBe("PROCESS");
+    expect(resolveFieldAnswer({ confirmedFields: ["navigation.0"], fieldAnswers: {} }, "navigation.location")).toBe("PROCESS");
   });
 });

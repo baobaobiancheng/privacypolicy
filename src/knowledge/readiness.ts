@@ -1,4 +1,5 @@
 import type { FormPayload } from "@/src/ai/deepseek";
+import { mapV1Content } from "@/src/content/map-v1";
 import { getRequiredSupplementQuestions, getSlotScenario } from "./map-cn";
 import { SupplementAnswerSchema, type SupplementAnswer } from "./map-cn/schema";
 
@@ -24,7 +25,37 @@ export type FieldAnswer = "PROCESS" | "NOT_PROCESS";
  * mistaken for an incomplete answer.
  */
 export function resolveFieldAnswer(input: { fieldAnswers?: Record<string, FieldAnswer>; confirmedFields: string[] }, fieldId: string): FieldAnswer | undefined {
-  return input.fieldAnswers?.[fieldId] ?? (input.confirmedFields.includes(fieldId) ? "PROCESS" : undefined);
+  const explicit = input.fieldAnswers?.[fieldId];
+  if (explicit) return explicit;
+  if (input.confirmedFields.includes(fieldId)) return "PROCESS";
+
+  // 历史数据以 `${featureKey}.${index}` 记录。两个方向都需要兼容：
+  // 1) 传入的是旧 index 键 → 映射到稳定键；
+  // 2) 传入的是稳定键 → 检查是否存在映射到它的旧 index 键。
+  const stable = fieldIdFromLegacy(fieldId);
+  if (stable && stable !== fieldId) {
+    const stableExplicit = input.fieldAnswers?.[stable];
+    if (stableExplicit) return stableExplicit;
+    if (input.confirmedFields.includes(stable)) return "PROCESS";
+    return undefined;
+  }
+  for (const key of [...Object.keys(input.fieldAnswers ?? {}), ...input.confirmedFields]) {
+    if (fieldIdFromLegacy(key) === fieldId) {
+      const legacyExplicit = input.fieldAnswers?.[key];
+      if (legacyExplicit) return legacyExplicit;
+      return "PROCESS";
+    }
+  }
+  return undefined;
+}
+
+function fieldIdFromLegacy(fieldId: string): string | null {
+  const match = /^([a-z][a-z0-9_-]{1,63})\.(\d+)$/.exec(fieldId);
+  if (!match) return null;
+  const feature = mapV1Content.payload.features.find((item) => item.key === match[1]);
+  const index = Number(match[2]);
+  const field = feature?.fields[index];
+  return field ? `${feature.key}.${field.key}` : null;
 }
 
 const profileKeys = ["operatorName", "operatorContact", "productName", "productVersion", "contactEmail", "rightsEntry", "rightsResponsePeriod", "minorProcessing", "securityMeasures", "incidentChannel", "policyEffectiveDate", "policyUpdateNotice"] as const;
@@ -45,6 +76,13 @@ export function evaluateFormalPolicyReadiness(input: FormPayload & { scopeAnswer
   for (const feature of input.customFeatures) {
     const detail = input.customDetails[feature];
     if (!detail?.purpose?.trim() || !detail.retention?.trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `custom.${feature}`, message: `自定义功能“${feature}”缺少处理目的或保存期限。` });
+  }
+
+  // 至少确认一项实际处理的个人信息：未勾选任何信息项的草稿没有披露内容。
+  const selectedFeatures = mapV1Content.payload.features.filter((feature) => input.selected.includes(feature.key));
+  const hasProcessedField = selectedFeatures.some((feature) => feature.fields.some((field, index) => resolveFieldAnswer(input, `${feature.key}.${field.key}`) === "PROCESS" || resolveFieldAnswer(input, `${feature.key}.${index}`) === "PROCESS"));
+  if (selectedFeatures.length > 0 && !hasProcessedField) {
+    diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: "fields", message: "请至少勾选一项产品实际处理的个人信息。" });
   }
 
   const requiredQuestions = getRequiredSupplementQuestions(input);
