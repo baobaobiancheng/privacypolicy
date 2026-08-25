@@ -10,6 +10,10 @@ import { DomainError } from "@/src/domain/errors";
 import { appCategoryRegistry, getAppCategory } from "@/src/categories";
 import { verifiedMapV1Content } from "@/src/content/map-v1/server-content";
 import { calculateProjectProgress, FORM_SCHEMA_VERSION, ProjectFormDataSchema } from "@/src/workspace/contract";
+import {
+  createDevelopmentProjectFormData,
+  developmentFormDefaultsEnabled,
+} from "@/src/workspace/development-defaults";
 
 export const runtime = "nodejs";
 
@@ -33,7 +37,10 @@ export async function POST(request: Request) {
     await ensureDevUsers();
     const prisma = getPrisma();
     const requestId = getRequestId(request);
-    const formData = parsed.data.formData ?? ProjectFormDataSchema.parse({ schemaVersion: FORM_SCHEMA_VERSION });
+    const formData = parsed.data.formData
+      ?? (developmentFormDefaultsEnabled()
+        ? createDevelopmentProjectFormData()
+        : ProjectFormDataSchema.parse({ schemaVersion: FORM_SCHEMA_VERSION }));
     const productName = formData.profile.productName?.trim() || null;
     const uniqueKey = {
       tenantId: actor.tenantId,

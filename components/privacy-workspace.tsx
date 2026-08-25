@@ -24,6 +24,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { mapV1Content } from "@/src/content/map-v1";
 import { scenarios } from "@/src/content/map-v1/ui-content";
 import { BaijianBrand } from "@/components/baijian-brand";
@@ -33,13 +34,11 @@ import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
 import type { FormPayload, PreflightIssue } from "@/src/ai/deepseek";
 import { FORM_SCHEMA_VERSION, ProjectFormDataSchema, WORKSPACE_STEPS, workspaceSlugFor, type ProjectFormData } from "@/src/workspace/contract";
 import { canonicalizeProjectFormData, toWorkspaceCompatibilityState } from "@/src/workspace/form-adapter";
-import { createDevelopmentProjectDefaults } from "@/src/workspace/development-defaults";
+import {
+  createDevelopmentProjectDefaults,
+  developmentFormDefaultsEnabled,
+} from "@/src/workspace/development-defaults";
 import { BasicInformationStep } from "@/components/workspace/steps/basic-information-step";
-import { DevicePermissionsStep } from "@/components/workspace/steps/device-permissions-step";
-import { StorageSecurityStep } from "@/components/workspace/steps/storage-security-step";
-import { PartnersStep } from "@/components/workspace/steps/partners-step";
-import { ProcessingActivitiesStep } from "@/components/workspace/steps/processing-activities-step";
-import { RightsGenerationStep } from "@/components/workspace/steps/rights-generation-step";
 import {
   ASSISTANT_EXAMPLES,
   BASIC_FEATURE_IDS,
@@ -67,6 +66,28 @@ import {
 } from "@/components/workspace/workspace-model";
 
 const steps = WORKSPACE_STEPS.map((item) => item.label);
+
+const stepLoading = () => <section className="workspace-panel panel-enter" aria-busy="true">正在加载当前步骤…</section>;
+const ProcessingActivitiesStep = dynamic(
+  () => import("@/components/workspace/steps/processing-activities-step").then((module) => module.ProcessingActivitiesStep),
+  { loading: stepLoading },
+);
+const DevicePermissionsStep = dynamic(
+  () => import("@/components/workspace/steps/device-permissions-step").then((module) => module.DevicePermissionsStep),
+  { loading: stepLoading },
+);
+const PartnersStep = dynamic(
+  () => import("@/components/workspace/steps/partners-step").then((module) => module.PartnersStep),
+  { loading: stepLoading },
+);
+const StorageSecurityStep = dynamic(
+  () => import("@/components/workspace/steps/storage-security-step").then((module) => module.StorageSecurityStep),
+  { loading: stepLoading },
+);
+const RightsGenerationStep = dynamic(
+  () => import("@/components/workspace/steps/rights-generation-step").then((module) => module.RightsGenerationStep),
+  { loading: stepLoading },
+);
 
 type PrivacyWorkspaceProps = {
   projectId?: string;
@@ -99,8 +120,7 @@ const emptyProject: ProjectData = {
   attachments: [],
 };
 
-const developmentPrefillEnabled = process.env.NODE_ENV === "development"
-  && process.env.NEXT_PUBLIC_DEV_FORM_DEFAULTS !== "false";
+const developmentPrefillEnabled = developmentFormDefaultsEnabled();
 
 const initialProject: ProjectData = developmentPrefillEnabled
   ? { ...emptyProject, ...createDevelopmentProjectDefaults() }

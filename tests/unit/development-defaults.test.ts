@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createDevelopmentProjectDefaults } from "@/src/workspace/development-defaults";
+import {
+  createDevelopmentProjectDefaults,
+  createDevelopmentProjectFormData,
+  developmentFormDefaultsEnabled,
+} from "@/src/workspace/development-defaults";
 import { evaluateFormalPolicyReadiness } from "@/src/knowledge/readiness";
 
 describe("development form defaults", () => {
@@ -22,5 +26,20 @@ describe("development form defaults", () => {
     expect(defaults.supplementAnswers["background-location"].slots?.trigger.value).toBe("用户主动开始导航后");
     expect(result.ready).toBe(true);
     expect(result.diagnostics).toEqual([]);
+  });
+
+  it("provides a canonical v2 form for server-side project creation", () => {
+    const form = createDevelopmentProjectFormData();
+
+    expect(form.schemaVersion).toBe("privacy-form-v2.0.0");
+    expect(form.profile.productName).toBe("行迹地图");
+    expect(form.processingActivities).toHaveLength(5);
+    expect(form.permissions.some((item) => item.key === "location")).toBe(true);
+  });
+
+  it("keeps explicit demo data enabled for a production-like preview", () => {
+    expect(developmentFormDefaultsEnabled("production", "true")).toBe(true);
+    expect(developmentFormDefaultsEnabled("production", "false")).toBe(false);
+    expect(developmentFormDefaultsEnabled("development", undefined)).toBe(true);
   });
 });

@@ -25,12 +25,14 @@ export async function GET(request: Request, { params }: RouteContext) {
     const actor = requireDevActor(request);
     const projectId = requireEntityId((await params).projectId, "prj", "项目 ID");
     const prisma = getPrisma();
-    const project = await loadProject(actor, projectId, "READ", prisma);
-    const latestReport = await prisma.report.findFirst({
-      where: { projectId, state: "CURRENT" },
-      orderBy: { createdAt: "desc" },
-      select: { id: true, filename: true, createdAt: true },
-    });
+    const [project, latestReport] = await Promise.all([
+      loadProject(actor, projectId, "READ", prisma),
+      prisma.report.findFirst({
+        where: { projectId, state: "CURRENT" },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, filename: true, createdAt: true },
+      }),
+    ]);
     const category = getAppCategory(project.categoryKey);
     const requestId = getRequestId(request);
     return NextResponse.json({

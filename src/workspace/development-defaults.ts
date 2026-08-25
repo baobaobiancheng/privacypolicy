@@ -1,5 +1,10 @@
 import { mapV1Content } from "@/src/content/map-v1";
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
+import {
+  FORM_SCHEMA_VERSION,
+  ProjectFormDataSchema,
+  type ProjectFormData,
+} from "@/src/workspace/contract";
 
 const confirmed = (value: string) => ({ value, status: "CONFIRMED" as const });
 const yes = (detail: string, slots: SupplementAnswer["slots"] = {}): SupplementAnswer => ({ answer: "YES", detail, slots });
@@ -166,4 +171,32 @@ export function createDevelopmentProjectDefaults() {
     },
     attachments: [],
   };
+}
+
+/**
+ * 模拟数据由显式开关控制。开发环境默认开启；生产构建只有明确配置为
+ * `true` 时才开启，方便演示部署继续使用，并在正式上线前一处关闭。
+ */
+export function developmentFormDefaultsEnabled(
+  environment = process.env.NODE_ENV,
+  configured = process.env.NEXT_PUBLIC_DEV_FORM_DEFAULTS,
+): boolean {
+  return configured === "true" || (environment === "development" && configured !== "false");
+}
+
+/** 创建接口直接持久化的 v2 表单，避免依赖客户端水合后再补写模拟数据。 */
+export function createDevelopmentProjectFormData(): ProjectFormData {
+  const defaults = createDevelopmentProjectDefaults();
+  return ProjectFormDataSchema.parse({
+    schemaVersion: FORM_SCHEMA_VERSION,
+    profile: defaults.profile,
+    additionalNotes: defaults.additionalNotes,
+    supplementAnswers: defaults.supplementAnswers,
+    processingActivities: defaults.processingActivities,
+    permissions: defaults.permissions,
+    partners: defaults.partners,
+    storageAndSecurity: defaults.storageAndSecurity,
+    rightsAndGovernance: defaults.rightsAndGovernance,
+    attachments: defaults.attachments,
+  });
 }
