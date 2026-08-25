@@ -993,7 +993,13 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     const res = await fetch("/api/v1/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
-      body: JSON.stringify({ categoryKey: "map-navigation", formData: toProjectFormData(dataRef.current) }),
+      body: JSON.stringify({
+        categoryKey: "map-navigation",
+        idempotencyKey: `project-create-${typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`,
+        formData: toProjectFormData(dataRef.current),
+      }),
     });
     if (!res.ok) {
       const payload = await res.json().catch(() => null) as { error?: { message?: string } } | null;

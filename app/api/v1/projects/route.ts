@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { requireDevActor } from "@/src/auth/session";
 import { ensureDevUsers } from "@/src/data/dev-seed";
 import { getPrisma } from "@/src/data/prisma";
@@ -15,6 +15,7 @@ export const runtime = "nodejs";
 
 const CreateProjectSchema = z.object({
   categoryKey: z.string().trim().min(1),
+  idempotencyKey: z.string().trim().min(8).max(128),
   formData: ProjectFormDataSchema.optional(),
 }).strict();
 
@@ -34,31 +35,71 @@ export async function POST(request: Request) {
     const requestId = getRequestId(request);
     const formData = parsed.data.formData ?? ProjectFormDataSchema.parse({ schemaVersion: FORM_SCHEMA_VERSION });
     const productName = formData.profile.productName?.trim() || null;
-    const project = await prisma.$transaction(async (tx) => {
-      const created = await tx.project.create({ data: {
-        id: createEntityId("prj"),
-        tenantId: actor.tenantId,
-        ownerId: actor.userId,
-        name: productName ?? `未命名${category.label}项目`,
-        productName,
-        formSchemaVersion: FORM_SCHEMA_VERSION,
-        categoryKey: category.key,
-        categoryVersion: appCategoryRegistry.categoryVersion,
-        currentStepKey: "profile",
-        contentVersion: verifiedMapV1Content.contentVersion,
-        contentHash: verifiedMapV1Content.contentHash,
-        formData: formData as unknown as Prisma.InputJsonValue,
-      }, select: { id: true, revision: true, categoryKey: true, currentStepKey: true } });
-      await tx.auditEvent.create({ data: {
-        id: createEntityId("aud"), requestId, projectId: created.id, userId: actor.userId,
-        action: "PROJECT_CREATED", metadata: { categoryKey: category.key, schemaVersion: formData.schemaVersion },
-      } });
-      return created;
+    const uniqueKey = {
+      tenantId: actor.tenantId,
+      ownerId: actor.userId,
+      creationKey: parsed.data.idempotencyKey,
+    };
+    const existing = await prisma.project.findUnique({
+      where: { tenantId_ownerId_creationKey: uniqueKey },
+      select: projectCreationSelect,
     });
-    return NextResponse.json({ data: project, requestId }, { status: 201, headers: { Location: `/projects/${project.id}`, "x-request-id": requestId } });
+    if (existing) return projectCreationResponse(existing, requestId, true);
+
+    try {
+      const project = await prisma.$transaction(async (tx) => {
+        const created = await tx.project.create({ data: {
+          id: createEntityId("prj"),
+          tenantId: actor.tenantId,
+          ownerId: actor.userId,
+          creationKey: parsed.data.idempotencyKey,
+          name: productName ?? `未命名${category.label}项目`,
+          productName,
+          formSchemaVersion: FORM_SCHEMA_VERSION,
+          categoryKey: category.key,
+          categoryVersion: appCategoryRegistry.categoryVersion,
+          currentStepKey: "profile",
+          contentVersion: verifiedMapV1Content.contentVersion,
+          contentHash: verifiedMapV1Content.contentHash,
+          formData: formData as unknown as Prisma.InputJsonValue,
+        }, select: projectCreationSelect });
+        await tx.auditEvent.create({ data: {
+          id: createEntityId("aud"), requestId, projectId: created.id, userId: actor.userId,
+          action: "PROJECT_CREATED", metadata: { categoryKey: category.key, schemaVersion: formData.schemaVersion },
+        } });
+        return created;
+      });
+      return projectCreationResponse(project, requestId, false);
+    } catch (error) {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
+      const concurrent = await prisma.project.findUnique({
+        where: { tenantId_ownerId_creationKey: uniqueKey },
+        select: projectCreationSelect,
+      });
+      if (!concurrent) throw error;
+      return projectCreationResponse(concurrent, requestId, true);
+    }
   } catch (error) {
     return apiError(error, request, "项目创建失败。");
   }
+}
+
+const projectCreationSelect = {
+  id: true,
+  revision: true,
+  categoryKey: true,
+  currentStepKey: true,
+} satisfies Prisma.ProjectSelect;
+
+function projectCreationResponse(
+  project: { id: string; revision: number; categoryKey: string; currentStepKey: string },
+  requestId: string,
+  reused: boolean,
+) {
+  return NextResponse.json({ data: { ...project, reused }, requestId }, {
+    status: reused ? 200 : 201,
+    headers: { Location: `/projects/${project.id}`, "x-request-id": requestId },
+  });
 }
 
 export async function GET(request: Request) {

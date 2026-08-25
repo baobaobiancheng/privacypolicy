@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { createHash } from "node:crypto";
 import mariadb, { type Pool } from "mariadb";
@@ -34,7 +34,12 @@ integration("MySQL core v2 API and worker", () => {
     databaseUrl = url.toString();
     process.env.DATABASE_URL = databaseUrl;
 
-    const migration = readFileSync(resolve("prisma/migrations/20260824190000_core_v2_baseline/migration.sql"), "utf8")
+    const migration = readdirSync(resolve("prisma/migrations"), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => resolve("prisma/migrations", entry.name, "migration.sql"))
+      .sort()
+      .map((file) => readFileSync(file, "utf8"))
+      .join("\n")
       .replace(/^--.*$/gm, "")
       .split(/;\s*(?:\n|$)/)
       .map((statement) => statement.trim())
@@ -70,11 +75,20 @@ integration("MySQL core v2 API and worker", () => {
     const createResponse = await POST(new Request("http://localhost/api/v1/projects", {
       method: "POST",
       headers: { "content-type": "application/json", "x-persona-id": "client-editor" },
-      body: JSON.stringify({ categoryKey: "map-navigation" }),
+      body: JSON.stringify({ categoryKey: "map-navigation", idempotencyKey: "integration-project-create-1" }),
     }));
     expect(createResponse.status).toBe(201);
     const created = await createResponse.json() as { data: { id: string; revision: number } };
     expect(created.data.id).toMatch(/^prj_/);
+
+    const repeatedCreateResponse = await POST(new Request("http://localhost/api/v1/projects", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-persona-id": "client-editor" },
+      body: JSON.stringify({ categoryKey: "map-navigation", idempotencyKey: "integration-project-create-1" }),
+    }));
+    expect(repeatedCreateResponse.status).toBe(200);
+    const repeatedProject = await repeatedCreateResponse.json() as { data: { id: string; reused: boolean } };
+    expect(repeatedProject.data).toMatchObject({ id: created.data.id, reused: true });
 
     const listResponse = await GET(new Request("http://localhost/api/v1/projects?limit=1", { headers: { "x-persona-id": "client-editor" } }));
     const list = await listResponse.json() as { data: { items: Array<{ id: string }>; nextCursor: string | null } };

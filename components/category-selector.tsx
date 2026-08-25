@@ -1,12 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, CheckCircle, LockSimple, MagnifyingGlass, MapPin, X } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { BaijianBrand } from "@/components/baijian-brand";
 import { appCategoryRegistry, type AppCategory } from "@/src/categories";
 
 const PERSONA_ID = "client-editor";
+const CREATE_TIMEOUT_MS = 15_000;
+const NAVIGATION_FALLBACK_MS = 2_500;
+
+function createProjectIdempotencyKey() {
+  const random = typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  return `project-create-${random}`;
+}
 
 export function CategorySelector() {
   const router = useRouter();
@@ -14,6 +23,12 @@ export function CategorySelector() {
   const [creating, setCreating] = useState(false);
   const [notice, setNotice] = useState<AppCategory | null>(null);
   const [error, setError] = useState("");
+  const creationKeyRef = useRef<string | null>(null);
+  const navigationFallbackRef = useRef<number | null>(null);
+
+  useEffect(() => () => {
+    if (navigationFallbackRef.current !== null) window.clearTimeout(navigationFallbackRef.current);
+  }, []);
 
   const groups = useMemo(() => {
     const keyword = query.trim().toLowerCase();
@@ -35,18 +50,30 @@ export function CategorySelector() {
       return;
     }
     setCreating(true);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), CREATE_TIMEOUT_MS);
+    creationKeyRef.current ??= createProjectIdempotencyKey();
     try {
       const response = await fetch("/api/v1/projects", {
         method: "POST",
         headers: { "content-type": "application/json", "x-persona-id": PERSONA_ID },
-        body: JSON.stringify({ categoryKey: category.key }),
+        body: JSON.stringify({ categoryKey: category.key, idempotencyKey: creationKeyRef.current }),
+        signal: controller.signal,
       });
       const payload = await response.json() as { data?: { id: string }; error?: { message?: string } };
       if (!response.ok || !payload.data?.id) throw new Error(payload.error?.message || "项目创建失败，请稍后重试。");
-      router.push(`/projects/${payload.data.id}/profile`);
+      const target = `/projects/${payload.data.id}/profile`;
+      router.push(target);
+      navigationFallbackRef.current = window.setTimeout(() => {
+        window.location.assign(target);
+      }, NAVIGATION_FALLBACK_MS);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "项目创建失败，请稍后重试。");
+      setError(cause instanceof DOMException && cause.name === "AbortError"
+        ? "创建请求等待时间过长，请重试；系统不会重复创建项目。"
+        : cause instanceof Error ? cause.message : "项目创建失败，请稍后重试。");
       setCreating(false);
+    } finally {
+      window.clearTimeout(timeout);
     }
   }
 

@@ -66,6 +66,7 @@ model Project {
   id                String          @id @db.VarChar(64)
   tenantId          String          @db.VarChar(64)
   ownerId           String          @db.VarChar(64)
+  creationKey       String?         @db.VarChar(128)
   name              String          @db.VarChar(160)
   productName       String?         @db.VarChar(160)
   status            ProjectStatus   @default(INFORMATION_COLLECTING)
@@ -88,6 +89,7 @@ model Project {
   @@index([tenantId, status, updatedAt])
   @@index([ownerId, updatedAt])
   @@index([tenantId, categoryKey])
+  @@unique([tenantId, ownerId, creationKey])
   @@map("projects")
 }
 

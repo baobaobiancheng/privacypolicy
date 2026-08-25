@@ -12,6 +12,9 @@ import { MysqlReportStorage } from "@/src/storage/report-storage";
 const LEASE_MS = 90_000;
 const HEARTBEAT_MS = 20_000;
 const MAX_ATTEMPTS = 3;
+const PROGRESS_WRITE_INTERVAL_MS = 1_500;
+const PREVIEW_WRITE_INTERVAL_MS = 5_000;
+const PREVIEW_WRITE_CHARACTER_DELTA = 4_096;
 
 export type GenerationJobView = {
   id: string;
@@ -118,6 +121,26 @@ export async function processNextGenerationJob(
 
   let heartbeat: ReturnType<typeof setInterval> | undefined;
   let lastProgressWrite = 0;
+  let lastPreviewWrite = 0;
+  let lastPreviewLength = 0;
+  let progressWriteQueue = Promise.resolve();
+  let progressWriteError: unknown;
+  const queueProgressWrite = (
+    stage: GenerationStage,
+    progress: unknown,
+    previewMarkdown?: string,
+  ) => {
+    progressWriteQueue = progressWriteQueue
+      .then(() => updateProgress(prisma, job.id, workerId, stage, progress, previewMarkdown))
+      .catch((error) => {
+        progressWriteError ??= error;
+      });
+    return progressWriteQueue;
+  };
+  const flushProgressWrites = async () => {
+    await progressWriteQueue;
+    if (progressWriteError) throw progressWriteError;
+  };
   try {
     heartbeat = setInterval(() => {
       void renewLease(prisma, job.id, workerId).catch((error) => {
@@ -130,15 +153,26 @@ export async function processNextGenerationJob(
     const generatePolicy = dependencies.generatePolicy ?? generatePolicyFromProjectFacts;
     const result: PolicyGeneratorResult = await generatePolicy(reportId, input.formData, {
       onStage: async (stage, message) => {
-        await updateProgress(prisma, job.id, workerId, stageToDatabase(stage), { message });
+        await queueProgressWrite(stageToDatabase(stage), { message });
+        await flushProgressWrites();
       },
       onProgress: (progress) => {
         const now = Date.now();
-        if (now - lastProgressWrite < 1_000 && progress.phase !== "VALIDATED") return;
+        const force = progress.phase === "VALIDATED";
+        const progressDue = force || now - lastProgressWrite >= PROGRESS_WRITE_INTERVAL_MS;
+        const previewDue = force
+          || now - lastPreviewWrite >= PREVIEW_WRITE_INTERVAL_MS
+          || progress.previewMarkdown.length - lastPreviewLength >= PREVIEW_WRITE_CHARACTER_DELTA;
+        if (!progressDue && !previewDue) return;
         lastProgressWrite = now;
-        void updateProgress(prisma, job.id, workerId, "DRAFTING", progress, progress.previewMarkdown);
+        if (previewDue) {
+          lastPreviewWrite = now;
+          lastPreviewLength = progress.previewMarkdown.length;
+        }
+        void queueProgressWrite("DRAFTING", progress, previewDue ? progress.previewMarkdown : undefined);
       },
     });
+    await flushProgressWrites();
     const docxHash = `sha256:${createHash("sha256").update(result.docx).digest("hex")}`;
     const storage = new MysqlReportStorage(prisma);
     const stored = await storage.prepare(reportId, result.docx, docxHash);

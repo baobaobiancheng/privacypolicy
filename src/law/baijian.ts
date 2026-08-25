@@ -7,6 +7,7 @@ const ENDPOINT = "https://mcpgateway.100credit.cn/mcp";
 const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_KEYWORDS = 5;
 const ROWS_PER_KEYWORD = 3;
+const MAX_CONCURRENT_SEARCHES = 3;
 
 const LawSearchItemSchema = z.object({
   lawId: z.string().min(1),
@@ -33,8 +34,16 @@ export async function searchLawsByKeywords(keywords: string[]): Promise<LawKeywo
   const normalized = [...new Set(keywords.map(normalizeKeyword).filter(Boolean))].slice(0, MAX_KEYWORDS);
   if (normalized.length === 0) return [];
   const credential = await loadCredential();
-  const results: LawKeywordSearchResult[] = [];
-  for (const keyword of normalized) results.push(await keywordSearch(keyword, credential));
+  const results = new Array<LawKeywordSearchResult>(normalized.length);
+  let nextIndex = 0;
+  const workers = Array.from({ length: Math.min(MAX_CONCURRENT_SEARCHES, normalized.length) }, async () => {
+    while (nextIndex < normalized.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await keywordSearch(normalized[index], credential);
+    }
+  });
+  await Promise.all(workers);
   return results;
 }
 
