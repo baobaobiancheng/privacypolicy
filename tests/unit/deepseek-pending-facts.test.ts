@@ -3,7 +3,9 @@ import { POLICY_SECTION_TITLES, parsePolicyMarkdown } from "@/src/ai/deepseek";
 
 function completeMarkdown(collectionParagraph: string) {
   return `# 行迹地图隐私政策\n\n${POLICY_SECTION_TITLES.map((title, index) => {
-    const body = index === 1 ? collectionParagraph : "本章节内容来自已确认表单，待律师复核。\n<!-- assertions: -->";
+    const body = index === 0
+      ? `| 功能 | 个人信息 | 处理目的 |\n|---|---|---|\n| 安全保障 | 崩溃日志 | 排查问题 |\n\n${collectionParagraph}`
+      : "本章节内容来自已确认表单。\n<!-- assertions: -->";
     return `## ${index + 1}. ${title}\n${body}`;
   }).join("\n\n")}`;
 }

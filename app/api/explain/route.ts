@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { generateTermExplanation } from "@/src/ai/deepseek";
-import { isExplainableTerm } from "@/src/ai/explain-terms";
+import { fallbackTermExplanation, isExplainableTerm } from "@/src/ai/explain-terms";
 import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
 import { requireDevActor, type SessionActor } from "@/src/auth/session";
 import { isDomainError } from "@/src/domain/errors";
@@ -54,10 +54,11 @@ export async function POST(request: Request) {
     const result = await generateTermExplanation(parsed.data.term);
     return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
-    if (isDomainError(error)) {
-      const status = error.code === "MODEL_NOT_CONFIGURED" ? 503 : error.code === "PROJECT_FORBIDDEN" ? 403 : 502;
-      return NextResponse.json({ code: error.code, message: error.message, retryable: error.retryable }, { status });
+    const fallback = fallbackTermExplanation(parsed.data.term);
+    if (fallback) {
+      return NextResponse.json({ ...fallback, source: "LOCAL_GLOSSARY" }, { headers: { "Cache-Control": "public, max-age=3600" } });
     }
+    if (isDomainError(error)) return NextResponse.json({ code: error.code, message: error.message, retryable: error.retryable }, { status: 502 });
     return NextResponse.json({ code: "EXPLAIN_FAILED", message: "解释生成失败，请稍后重试。", retryable: true }, { status: 502 });
   }
 }

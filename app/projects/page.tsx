@@ -2,28 +2,66 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, MapPin, ShieldCheck } from "@phosphor-icons/react";
+import { ArrowRight, CheckCircle, FileDoc, MapPin, Plus, SpinnerGap } from "@phosphor-icons/react";
+import { BaijianBrand } from "@/components/baijian-brand";
 
-type ProjectSummary = { id: string; name: string; revision: number; scopeStop: string | undefined };
+type ProjectSummary = {
+  id: string;
+  name: string;
+  productName: string | null;
+  categoryLabel: string;
+  progress: number;
+  status: string;
+  currentStepKey: string;
+  updatedAt: string;
+  latestReport: { id: string; createdAt: string; previewUrl: string; downloadUrl: string } | null;
+};
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/projects", { headers: { "x-persona-id": "client-editor" } })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("加载项目列表失败");
-        const payload = await res.json() as { projects: ProjectSummary[] };
-        return payload.projects ?? [];
-      })
-      .then(setProjects)
-      .catch(() => setProjects([]));
+    void loadProjects();
+    // Initial page only. Further pages are loaded explicitly to avoid duplicate requests.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <main className="project-list-page">
-      <header className="project-list-header"><Link href="/" className="brand"><span className="brand-mark"><ShieldCheck weight="fill" /></span><span>知证</span></Link><span>项目列表</span></header>
-          <section className="project-list-content"><p className="hero-kicker">项目工作区</p><h1>从一个真实产品事实开始。</h1><p>地图导航类首期只保存你明确提交过的答案。没有提交范围答案时，不会创建空项目。</p><Link className="button button-primary" href="/projects/new/scope">创建地图类项目 <ArrowRight weight="bold" /></Link><div className="project-cards">{projects.map((project) => <Link className="project-empty-card" key={project.id} href={`/projects/${project.id}/scope`}><span className="project-icon"><MapPin weight="fill" /></span><div><strong>{project.name}</strong><span>{project.scopeStop ? "暂存：不适用地图类首期" : `项目修订号 ${project.revision}`}</span></div><ArrowRight weight="bold" /></Link>)}{projects.length === 0 && <div className="project-empty-card"><span className="project-icon"><MapPin weight="fill" /></span><div><strong>地图导航类首期试点</strong><span>提交范围门禁后会出现在这里</span></div></div>}</div></section>
-    </main>
-  );
+  async function loadProjects(cursor?: string) {
+    cursor ? setLoadingMore(true) : setLoading(true);
+    setLoadError(null);
+    try {
+      const query = cursor ? `?limit=20&cursor=${encodeURIComponent(cursor)}` : "?limit=20";
+      const response = await fetch(`/api/v1/projects${query}`, { headers: { "x-persona-id": "client-editor" } });
+      if (!response.ok) throw new Error("加载项目列表失败，请稍后重试");
+      const payload = await response.json() as { data: { items: ProjectSummary[]; nextCursor: string | null } };
+      setProjects((current) => cursor ? [...current, ...payload.data.items] : payload.data.items);
+      setNextCursor(payload.data.nextCursor);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "加载项目列表失败，请稍后重试");
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }
+
+  return <main className="project-list-page workspace-v3">
+    <header className="project-list-header"><BaijianBrand /><span>我的项目</span></header>
+    <section className="project-list-content">
+      <div className="project-list-title-row"><div><p className="hero-kicker">隐私政策项目</p><h1>保存每一次事实收集。</h1><p>继续填写历史项目，回看已确认信息，或下载最新生成的隐私政策。</p></div><Link className="button button-primary" href="/projects/new/category"><Plus weight="bold" /> 新建项目</Link></div>
+      {loading ? <div className="project-list-loading"><SpinnerGap className="spin" /> 正在加载项目…</div> : <div className="project-cards">
+        {projects.map((project) => <Link className="project-card-v2" key={project.id} href={`/projects/${project.id}`}>
+          <span className="project-icon"><MapPin weight="fill" /></span>
+          <div className="project-card-main"><div><span>{project.categoryLabel}类</span>{project.latestReport ? <em><CheckCircle weight="fill" /> 已生成报告</em> : <em>信息收集中</em>}</div><strong>{project.productName || project.name}</strong><small>更新于 {new Date(project.updatedAt).toLocaleString("zh-CN")}</small><div className="project-progress"><span><i style={{ width: `${project.progress}%` }} /></span><b>{project.progress}%</b></div></div>
+          <span className="project-card-action">{project.latestReport ? <FileDoc weight="duotone" /> : null}<ArrowRight weight="bold" /></span>
+        </Link>)}
+        {loadError && projects.length === 0 ? <div className="project-list-empty"><strong>项目暂时无法加载</strong><span>{loadError}</span><button className="button button-secondary" type="button" onClick={() => void loadProjects()}>重新加载</button></div> : null}
+        {!loadError && projects.length === 0 ? <div className="project-list-empty"><MapPin weight="duotone" /><strong>还没有项目</strong><span>选择应用类别后，项目会自动保存在这里。</span><Link className="button button-primary" href="/projects/new/category">创建第一个项目</Link></div> : null}
+        {nextCursor ? <button className="button button-secondary project-load-more" type="button" disabled={loadingMore} onClick={() => void loadProjects(nextCursor)}>{loadingMore ? <><SpinnerGap className="spin" /> 正在加载</> : "加载更多项目"}</button> : null}
+      </div>}
+    </section>
+  </main>;
 }

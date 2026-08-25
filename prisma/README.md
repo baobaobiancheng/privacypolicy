@@ -1,15 +1,13 @@
-# 本地 MySQL 数据层
+# Core v2 数据库
 
-`schema.prisma` 是首期 12 张物理表的关系合同，使用 Prisma 7 配置文件读取 `DATABASE_URL`。当前工作区只完成 schema 验证与客户端生成，不会在未获批准的情况下连接或修改数据库。
+`schema.prisma` 是当前唯一数据库合同。持久化业务事实以 `Project.formData` 中带 `schemaVersion` 的 JSON 为准；关系表只保留身份授权、项目、生成任务、报告和审计事件。
 
-准备本地 MySQL 8.4 后：
+`20260824190000_core_v2_baseline` 是开发阶段的新基线，不兼容旧演示库，也不会自动重置任何数据库。需要迁移时应先备份并创建新数据库，然后使用：
 
 ```bash
-cp .env.example .env
-# 按本机数据库修改 DATABASE_URL
 npm run db:validate
 npm run db:generate
-npx prisma migrate dev --name init
+npm run db:migrate:deploy
 ```
 
-写入前必须补齐种子用户、地图内容 Evidence 和项目授权。所有编辑命令都应经过 `src/application/commands` 的 `commandId + expectedProjectRevision` 合同；页面不得直接调用 Prisma Client。
+Web 路由不得直接编排长任务。生成命令写入 `generation_jobs`，由 `npm run worker` 领取、续租并完成报告落库。

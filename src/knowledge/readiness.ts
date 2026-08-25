@@ -60,22 +60,18 @@ function fieldIdFromLegacy(fieldId: string): string | null {
 
 const profileKeys = ["operatorName", "operatorContact", "productName", "productVersion", "contactEmail", "rightsEntry", "rightsResponsePeriod", "minorProcessing", "securityMeasures", "incidentChannel", "policyEffectiveDate", "policyUpdateNotice"] as const;
 
-export function evaluateFormalPolicyReadiness(input: FormPayload & { scopeAnswers?: Record<string, boolean>; supplementAnswers?: Record<string, SupplementAnswer> }): FormalPolicyReadiness {
+export function evaluateFormalPolicyReadiness(input: FormPayload & { supplementAnswers?: Record<string, SupplementAnswer> }): FormalPolicyReadiness {
   const diagnostics: ReadinessDiagnostic[] = [];
-  const scopeAnswers = input.scopeAnswers ?? {};
-  for (const gate of ["single-product", "map-primary", "single-category", "no-cross-border"]) {
-    if (scopeAnswers[gate] !== true) diagnostics.push({ code: "OUT_OF_SCOPE", severity: "BLOCKING", target: gate, message: "当前项目未通过地图类首期范围门禁，不能生成隐私政策草稿。" });
-  }
   for (const key of profileKeys) {
     if (!(input.profile[key] ?? "").trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `profile.${key}`, message: "通用披露信息尚未填写完整。" });
   }
   for (const feature of input.selected) {
     const detail = input.activityDetails[feature];
-    if (!detail?.purpose?.trim() || !detail.retention?.trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `activity.${feature}`, message: "每个已选功能都需要填写实际处理目的和保存期限。" });
+    if (!detail?.purpose?.trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `activity.${feature}`, message: "每个已选功能都需要确认实际处理目的。" });
   }
   for (const feature of input.customFeatures) {
     const detail = input.customDetails[feature];
-    if (!detail?.purpose?.trim() || !detail.retention?.trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `custom.${feature}`, message: `自定义功能“${feature}”缺少处理目的或保存期限。` });
+    if (!detail?.purpose?.trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `custom.${feature}`, message: `自定义功能“${feature}”缺少处理目的。` });
   }
 
   // 至少确认一项实际处理的个人信息：未勾选任何信息项的草稿没有披露内容。

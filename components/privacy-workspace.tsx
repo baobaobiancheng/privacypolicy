@@ -3,97 +3,79 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
-  ArrowClockwise,
   ArrowRight,
   BracketsCurly,
   Check,
   CheckCircle,
+  CaretUp,
   CaretRight,
-  DownloadSimple,
-  Eye,
   FileDoc,
-  Gavel,
-  MapPin,
+  FilePdf,
+  FileText,
+  FileXls,
+  Copy,
+  ImageSquare,
+  Paperclip,
+  PaperPlaneTilt,
   Plus,
-  ShieldCheck,
   Sparkle,
-  Warning,
+  SpinnerGap,
   WarningCircle,
   X,
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { mapV1Content } from "@/src/content/map-v1";
 import { scenarios } from "@/src/content/map-v1/ui-content";
-import { MarkdownPreview } from "@/components/markdown-preview";
+import { BaijianBrand } from "@/components/baijian-brand";
 import { getRequiredSupplementQuestions, getSlotScenario } from "@/src/knowledge/map-cn";
-import { evaluateFormalPolicyReadiness, resolveFieldAnswer, type FieldAnswer } from "@/src/knowledge/readiness";
-import { createGenerationId, haveEquivalentDraftInput, resolveAcknowledgedReviewToken } from "@/src/application/draft-regeneration";
+import { evaluateFormalPolicyReadiness, resolveFieldAnswer } from "@/src/knowledge/readiness";
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
 import type { FormPayload, PreflightIssue } from "@/src/ai/deepseek";
-import { EXPLAINABLE_TERMS } from "@/src/ai/explain-terms";
-import { WORKSPACE_STEPS, workspaceSlugFor, stripProjectLocalExtras } from "@/src/workspace/contract";
+import { FORM_SCHEMA_VERSION, ProjectFormDataSchema, WORKSPACE_STEPS, workspaceSlugFor, type ProjectFormData } from "@/src/workspace/contract";
+import { canonicalizeProjectFormData, toWorkspaceCompatibilityState } from "@/src/workspace/form-adapter";
+import { createDevelopmentProjectDefaults } from "@/src/workspace/development-defaults";
+import { BasicInformationStep } from "@/components/workspace/steps/basic-information-step";
+import { DevicePermissionsStep } from "@/components/workspace/steps/device-permissions-step";
+import { StorageSecurityStep } from "@/components/workspace/steps/storage-security-step";
+import { PartnersStep } from "@/components/workspace/steps/partners-step";
+import { ProcessingActivitiesStep } from "@/components/workspace/steps/processing-activities-step";
+import { RightsGenerationStep } from "@/components/workspace/steps/rights-generation-step";
+import {
+  ASSISTANT_EXAMPLES,
+  BASIC_FEATURE_IDS,
+  CLIENT_PERSONA_ID,
+  INITIAL_GENERATION_STAGES,
+  PERMISSION_PRESETS,
+  PRESET_ADDITIONAL_FEATURES,
+  PURPOSE_PRESETS,
+  QUESTION_DETAIL_PRESETS,
+  SECURITY_PRESETS,
+  SLOT_PRESETS,
+  basicProfileFields,
+  profileFields,
+  rightsProfileFields,
+  type AssistantAttachment,
+  type AssistantMessage,
+  type ActivityDetail,
+  type DisplayPreflightIssue,
+  type GenerationJobPayload,
+  type GenerationStageItem,
+  type LiveGenerationState,
+  type ProjectData,
+  type SnapshotItem,
+  type StepIndex,
+} from "@/components/workspace/workspace-model";
 
 const steps = WORKSPACE_STEPS.map((item) => item.label);
-
-const CLIENT_PERSONA_ID = "client-editor";
-const profileFields = [
-  ["operatorName", "运营主体全称", "例如：杭州行迹科技有限公司"],
-  ["operatorContact", "运营主体联系信息", "例如：浙江省杭州市西湖区××路××号"],
-  ["productName", "产品名称", "例如：行迹地图"],
-  ["productVersion", "产品版本", "例如：Android 2.4"],
-  ["contactEmail", "隐私联系邮箱", "例如：privacy@example.com"],
-  ["rightsEntry", "用户权利请求入口", "例如：App 内「我的」-「隐私中心」"],
-  ["rightsResponsePeriod", "权利请求响应方式和期限", "例如：收到申请后 15 个工作日内回复"],
-  ["minorProcessing", "未成年人信息实际处理情况", "例如：不面向未成年人，发现后删除"],
-  ["securityMeasures", "安全措施概述", "例如：访问控制、传输加密、最小权限"],
-  ["incidentChannel", "个人信息事件通知渠道", "例如：隐私联系邮箱和 App 公告"],
-  ["policyEffectiveDate", "政策生效日期", "例如：2026-08-10"],
-  ["policyUpdateNotice", "政策更新通知方式", "例如：App 弹窗和隐私政策页提示"],
-] as const;
-
-type StepIndex = 0 | 1 | 2 | 3 | 4 | 5;type GeneratedState = { status: "PENDING" | "GENERATING" | "FAILED" | "SUCCEEDED"; generationId: string; message?: string; createdAt: string };
-type DisplayPreflightIssue = PreflightIssue & { fingerprint: string };
-type ActivityDetail = { purpose: string; retention: string };
-type DraftFormInput = {
-  profile: Record<string, string>;
-  selected: string[];
-  customFeatures: string[];
-  customDetails: Record<string, ActivityDetail>;
-  activityDetails: Record<string, ActivityDetail>;
-  confirmedFields: string[];
-  fieldAnswers?: Record<string, FieldAnswer>;
-  additionalNotes: string;
-  scopeAnswers?: Record<string, boolean>;
-  supplementAnswers?: Record<string, SupplementAnswer>;
-};
-type SnapshotItem = { id: string; state: string; createdAt: string; failureCode: string | null; inputJson: DraftFormInput | null; markdown: string | null; docxBase64: string | null };
-type ProjectData = {
-  projectId: string | null;
-  revision: number;
-  scopeAnswers: Record<string, boolean>;
-  profile: Record<string, string>;
-  selected: string[];
-  customFeatures: string[];
-  customDetails: Record<string, ActivityDetail>;
-  additionalNotes: string;
-  confirmedFields: string[];
-  fieldAnswers: Record<string, FieldAnswer>;
-  activityDetails: Record<string, ActivityDetail>;
-  supplementAnswers: Record<string, SupplementAnswer>;
-  scopeStop?: string;
-  generated?: GeneratedState;
-  generatedMarkdown?: string;
-};
 
 type PrivacyWorkspaceProps = {
   projectId?: string;
   initialStep?: StepIndex;
 };
 
-const initialProject: ProjectData = {
+const emptyProject: ProjectData = {
   projectId: null,
   revision: 0,
-  scopeAnswers: {},
   profile: {},
   selected: [],
   customFeatures: [],
@@ -104,42 +86,83 @@ const initialProject: ProjectData = {
   activityDetails: {},
   supplementAnswers: {},
   generatedMarkdown: "",
+  processingActivities: [],
+  permissions: [],
+  partners: [],
+  storageAndSecurity: {
+    locations: ["CN"],
+    retentionPolicies: ["MINIMUM_NECESSARY", "LEGAL_REQUIREMENT"],
+    expiryActions: ["DELETE", "ANONYMIZE"],
+    securityMeasures: [],
+  },
+  rightsAndGovernance: {},
+  attachments: [],
 };
 
+const developmentPrefillEnabled = process.env.NODE_ENV === "development"
+  && process.env.NEXT_PUBLIC_DEV_FORM_DEFAULTS !== "false";
+
+const initialProject: ProjectData = developmentPrefillEnabled
+  ? { ...emptyProject, ...createDevelopmentProjectDefaults() }
+  : emptyProject;
+
+function formatAttachmentSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.ceil(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function assistantFactValue(value: unknown): string {
+  if (typeof value === "string") return value.trim();
+  if (Array.isArray(value)) return value.map(assistantFactValue).filter(Boolean).join("、");
+  if (value && typeof value === "object") {
+    return Object.entries(value as Record<string, unknown>)
+      .map(([key, item]) => {
+        const text = assistantFactValue(item);
+        return text ? `${key}：${text}` : "";
+      })
+      .filter(Boolean)
+      .join("；");
+  }
+  return value === undefined || value === null ? "" : String(value);
+}
+
+function AssistantAttachmentIcon({ attachment }: { attachment: AssistantAttachment }) {
+  if (attachment.previewUrl) return <img src={attachment.previewUrl} alt="" />;
+  if (attachment.kind === "IMAGE") return <ImageSquare weight="duotone" />;
+  if (attachment.kind === "SPREADSHEET") return <FileXls weight="duotone" />;
+  if (attachment.mimeType === "application/pdf" || attachment.name.toLowerCase().endsWith(".pdf")) return <FilePdf weight="duotone" />;
+  if (attachment.kind === "TEXT") return <FileText weight="duotone" />;
+  return <FileDoc weight="duotone" />;
+}
+
 function projectStorageKey(projectId?: string) {
-  return projectId ? `privacy-policy-project:${projectId}` : "privacy-policy-project:new";
+  if (projectId) return `privacy-policy-project:${projectId}`;
+  return developmentPrefillEnabled ? "privacy-policy-project:new:dev-prefill-v4" : "privacy-policy-project:new";
 }
 
 /** 根据表单完成度返回“最先不完整”的步骤；全部完成返回 5。 */
 function firstIncompleteFor(project: ProjectData): StepIndex {
-  const scopeConfirmed = mapV1Content.payload.scopeGates.every((gate) => project.scopeAnswers[gate.id] === true);
-  if (!scopeConfirmed) return 0;
-  const profileComplete = profileFields.every(([key]) => Boolean(project.profile[key]?.trim()));
-  if (!profileComplete) return 1;
+  const basicComplete = basicProfileFields.every(([key]) => Boolean(project.profile[key]?.trim()));
+  if (!basicComplete) return 0;
   const selectedScenarios = scenarios.filter((scenario) => project.selected.includes(scenario.id));
   const detailsComplete = selectedScenarios.every((scenario) => {
     const detail = project.activityDetails[scenario.id];
-    return Boolean(detail?.purpose?.trim() && detail?.retention?.trim());
-  }) && project.customFeatures.every((feature) => Boolean(project.customDetails[feature]?.purpose?.trim() && project.customDetails[feature]?.retention?.trim()));
-  if (!project.selected.length || !detailsComplete) return 2;
+    return Boolean(detail?.purpose?.trim());
+  }) && project.customFeatures.every((feature) => Boolean(project.customDetails[feature]?.purpose?.trim()));
+  const hasBasicFeature = project.selected.some((feature) => BASIC_FEATURE_IDS.has(feature))
+    || project.processingActivities.some((activity) => activity.kind === "BASIC");
+  if (!hasBasicFeature || !detailsComplete) return 1;
   const hasProcessedField = selectedScenarios.some((scenario) => {
     const feature = mapV1Content.payload.features.find((item) => item.key === scenario.id);
     return (feature?.fields ?? []).some((field, index) => resolveFieldAnswer(project, `${scenario.id}.${field.key}`) === "PROCESS" || resolveFieldAnswer(project, `${scenario.id}.${index}`) === "PROCESS");
   });
-  if (!hasProcessedField) return 3;
-  const readiness = evaluateFormalPolicyReadiness({
-    profile: project.profile as unknown as FormPayload["profile"],
-    selected: project.selected,
-    customFeatures: project.customFeatures,
-    customDetails: project.customDetails,
-    activityDetails: project.activityDetails,
-    confirmedFields: project.confirmedFields,
-    fieldAnswers: project.fieldAnswers,
-    additionalNotes: project.additionalNotes,
-    scopeAnswers: project.scopeAnswers,
-    supplementAnswers: project.supplementAnswers,
-  });
-  return readiness.ready ? 5 : 4;
+  const hasCustomInformation = project.processingActivities.some((activity) => activity.informationItems.length > 0);
+  if (!hasProcessedField && !hasCustomInformation) return 1;
+  if (!project.supplementAnswers["device-permissions"]) return 2;
+  if (!project.supplementAnswers["third-party-services"]) return 3;
+  if (!project.supplementAnswers["storage-locations"] || !project.profile.securityMeasures?.trim()) return 4;
+  return 5;
 }
 
 const failureMessages: Record<string, { title: string; detail: string }> = {
@@ -161,150 +184,116 @@ const failureMessages: Record<string, { title: string; detail: string }> = {
   },
 };
 
-function GenerationHistory({
-  history,
-  generating,
-  onRetry,
-  onDownload,
-}: {
-  history: SnapshotItem[] | null;
-  generating: boolean;
-  onRetry: (item: SnapshotItem) => void;
-  onDownload: (item: SnapshotItem) => void;
-}) {
-  const [expanded, setExpanded] = useState<{ id: string; view: "markdown" | "failure" | "form" } | null>(null);
-  if (history === null) return <p className="history-empty">正在加载生成记录…</p>;
-  if (history.length === 0) return <p className="history-empty">还没有生成记录。完成确认后即可生成第一份隐私政策草稿。</p>;
-
-  function toggle(id: string, view: "markdown" | "failure" | "form") {
-    setExpanded((current) => current?.id === id && current.view === view ? null : { id, view });
-  }
-
-  return <div className="generation-records">{history.map((item) => {
-    const succeeded = item.state === "SUCCEEDED" && Boolean(item.markdown && item.docxBase64);
-    const failure = failureMessages[item.failureCode ?? ""] ?? {
-      title: "草稿生成失败",
-      detail: "生成过程未完成，因此没有生成 Word 文件。您可以查看本次表单后重新生成。",
-    };
-    const activeView = expanded?.id === item.id ? expanded.view : null;
-    return <article key={item.id} className="generation-record" data-state={succeeded ? "success" : "failure"}>
-      <div className="generation-record-status" aria-hidden="true">{succeeded ? <CheckCircle weight="fill" /> : <WarningCircle weight="fill" />}</div>
-      <div className="generation-record-content">
-        <div className="generation-record-heading">
-          <div><strong>{succeeded ? "草稿已生成" : "政策生成失败"}</strong><span>{new Date(item.createdAt).toLocaleString("zh-CN", { hour12: false })}</span></div>
-          <p>{succeeded ? "隐私政策草稿已生成，可在线预览、编辑或下载 Word。" : "本次未形成可用政策，填写内容已完整保存。"}</p>
-        </div>
-        <div className="generation-record-actions">
-          {succeeded ? <>
-            <button type="button" className="history-action" aria-expanded={activeView === "markdown"} onClick={() => toggle(item.id, "markdown")}><Eye weight="bold" /> 预览 Markdown</button>
-            <button type="button" className="history-action history-action-primary" onClick={() => onDownload(item)}><DownloadSimple weight="bold" /> 下载 Word</button>
-          </> : <>
-            <button type="button" className="history-action history-action-primary" disabled={generating} onClick={() => onRetry(item)}><ArrowClockwise weight="bold" /> 重新生成</button>
-            <button type="button" className="history-action" aria-expanded={activeView === "failure"} onClick={() => toggle(item.id, "failure")}><WarningCircle weight="bold" /> 查看失败原因</button>
-            <button type="button" className="history-action" aria-expanded={activeView === "form"} onClick={() => toggle(item.id, "form")}><BracketsCurly weight="bold" /> 查看本次表单</button>
-          </>}
-        </div>
-        {activeView === "markdown" && item.markdown ? <div className="generation-record-detail markdown-detail"><MarkdownPreview markdown={item.markdown} fallback={null} /></div> : null}
-        {activeView === "failure" ? <div className="generation-record-detail failure-detail"><strong>{failure.title}</strong><p>{failure.detail}</p></div> : null}
-        {activeView === "form" ? <div className="generation-record-detail form-detail">{item.inputJson ? <FormSnapshotSummary input={item.inputJson} /> : <p>该记录生成于表单留存功能启用前，没有保存当次填写内容。请使用当前表单重新生成。</p>}</div> : null}
-      </div>
-    </article>;
-  })}</div>;
-}
-
-function FormSnapshotSummary({ input }: { input: DraftFormInput }) {
-  const featureNames = [
-    ...input.selected.map((key) => scenarios.find((scenario) => scenario.id === key)?.title ?? key),
-    ...input.customFeatures,
-  ];
-  const activities = [
-    ...input.selected.map((key) => ({ name: scenarios.find((scenario) => scenario.id === key)?.title ?? key, detail: input.activityDetails[key] })),
-    ...input.customFeatures.map((name) => ({ name, detail: input.customDetails[name] })),
-  ];
-  return <div className="form-snapshot-summary">
-    <div><strong>本次填写摘要</strong><span>以下是生成当时的内容，不会随项目后续修改而变化。</span></div>
-    <dl>
-      <div><dt>运营主体</dt><dd>{input.profile.operatorName || "未填写"}</dd></div>
-      <div><dt>产品</dt><dd>{[input.profile.productName, input.profile.productVersion].filter(Boolean).join(" ") || "未填写"}</dd></div>
-      <div><dt>已选功能</dt><dd>{featureNames.join("、") || "未选择"}</dd></div>
-      <div><dt>已选信息项</dt><dd>{input.confirmedFields.length} 项</dd></div>
-    </dl>
-    <div className="form-snapshot-activities">{activities.map(({ name, detail }) => <div key={name}><strong>{name}</strong><span>处理目的：{detail?.purpose || "未填写"}</span><span>保存期限：{detail?.retention || "未填写"}</span></div>)}</div>
-    {input.additionalNotes ? <div className="form-snapshot-note"><strong>表单外补充</strong><p>{input.additionalNotes}</p></div> : null}
-  </div>;
-}
-
 export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspaceProps) {
   const router = useRouter();
   const [activeStep, setActiveStep] = useState<StepIndex>(initialStep);
   const [data, setData] = useState<ProjectData>(() => ({ ...initialProject, projectId: projectId ?? null }));
   const [hydrated, setHydrated] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("所有操作会保留在当前项目表单中");
+  const [statusMessage, setStatusMessage] = useState(developmentPrefillEnabled
+    ? "已载入开发测试数据，所有字段仍可修改"
+    : "所有操作会保留在当前项目表单中");
   const [customOpen, setCustomOpen] = useState(false);
   const [customName, setCustomName] = useState("");
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [history, setHistory] = useState<SnapshotItem[] | null>(null);
   const [extractingQuestionId, setExtractingQuestionId] = useState<string | null>(null);
   const [preflightIssues, setPreflightIssues] = useState<DisplayPreflightIssue[]>([]);
   const [acknowledgedPreflightIssues, setAcknowledgedPreflightIssues] = useState<string[]>([]);
-  const [preflightReviewToken, setPreflightReviewToken] = useState<string | null>(null);
-  const [explainerOpen, setExplainerOpen] = useState(false);
-  const [explainingTerm, setExplainingTerm] = useState<string | null>(null);
-  const [explanation, setExplanation] = useState<{ term: string; text: string } | null>(null);
-  const [explainError, setExplainError] = useState<string | null>(null);
+  const [explainerOpen, setExplainerOpen] = useState(true);
+  const [assistantMessages, setAssistantMessages] = useState<AssistantMessage[]>([]);
+  const [assistantAttachments, setAssistantAttachments] = useState<AssistantAttachment[]>([]);
+  const [attachmentsCollapsed, setAttachmentsCollapsed] = useState(false);
+  const [assistantInput, setAssistantInput] = useState("");
+  const [assistantSending, setAssistantSending] = useState(false);
+  const [assistantError, setAssistantError] = useState<string | null>(null);
+  const [assistantStorageReady, setAssistantStorageReady] = useState(false);
+  const [liveGeneration, setLiveGeneration] = useState<LiveGenerationState | null>(null);
+  const [generationElapsed, setGenerationElapsed] = useState(0);
+  const assistantEndRef = useRef<HTMLDivElement>(null);
+  const assistantFileInputRef = useRef<HTMLInputElement>(null);
+  const assistantLoadedKeyRef = useRef<string | null>(null);
   const lastSavedKeyRef = useRef<string | null>(null);
+  const lastSavedStepRef = useRef<string | null>(null);
   const dataRef = useRef<ProjectData>(data);
   useEffect(() => {
     dataRef.current = data;
   }, [data]);
 
+  useEffect(() => {
+    if (data.generated?.status !== "GENERATING" || !liveGeneration) return;
+    const updateElapsed = () => setGenerationElapsed(Date.now() - liveGeneration.startedAt);
+    updateElapsed();
+    const timer = window.setInterval(updateElapsed, 1000);
+    return () => window.clearInterval(timer);
+  }, [data.generated?.status, liveGeneration?.startedAt]);
+
   function computeFormKey(project: Partial<ProjectData>) {
-    const form = {
-      scopeAnswers: project.scopeAnswers ?? {},
-      profile: project.profile ?? {},
-      selected: project.selected ?? [],
-      customFeatures: project.customFeatures ?? [],
-      customDetails: project.customDetails ?? {},
-      additionalNotes: project.additionalNotes ?? "",
-      confirmedFields: project.confirmedFields ?? [],
-      fieldAnswers: project.fieldAnswers ?? {},
-      activityDetails: project.activityDetails ?? {},
-      supplementAnswers: project.supplementAnswers ?? {},
-      scopeStop: project.scopeStop,
-    };
-    // 生成预览（generatedMarkdown）不是表单事实，不参与保存键，避免生成成功
-    // 后触发一次无意义的项目修订递增。
-    return JSON.stringify(stripProjectLocalExtras(form));
+    return JSON.stringify(toProjectFormData({ ...emptyProject, ...project } as ProjectData));
   }
   const formKey = computeFormKey(data);
 
-  async function loadProjectFromServer(id: string): Promise<{ formData: Partial<ProjectData>; revision: number } | null> {
+  async function loadProjectFromServer(id: string): Promise<{ formData: Partial<ProjectData>; revision: number; currentStepKey: string } | null> {
     try {
-      const res = await fetch(`/api/projects/${id}`, { headers: { "x-persona-id": CLIENT_PERSONA_ID } });
+      const res = await fetch(`/api/v1/projects/${id}`, { headers: { "x-persona-id": CLIENT_PERSONA_ID } });
       if (!res.ok) return null;
-      const payload = await res.json() as { formData: Partial<ProjectData> | null; revision: number };
-      if (!payload.formData) return null;
-      return { formData: payload.formData, revision: payload.revision };
+      const payload = await res.json() as { data: { formData: unknown; revision: number; currentStepKey: string } };
+      const canonical = canonicalizeProjectFormData(payload.data.formData);
+      return { formData: toWorkspaceCompatibilityState(canonical), revision: payload.data.revision, currentStepKey: payload.data.currentStepKey };
     } catch {
       return null;
     }
   }
 
   /** 去掉运行期本地细节，仅保留可作为表单事实入库的字段。 */
-  function toProjectFormData(current: ProjectData): Partial<ProjectData> {
-    return stripProjectLocalExtras({
-      scopeAnswers: current.scopeAnswers,
+  function toProjectFormData(current: ProjectData): ProjectFormData {
+    const processingActivities = [
+      ...scenarios.filter((scenario) => current.selected.includes(scenario.id)).map((scenario) => ({
+        featureKey: scenario.id,
+        title: scenario.title,
+        kind: (BASIC_FEATURE_IDS.has(scenario.id) ? "BASIC" : "EXTENSION") as "BASIC" | "EXTENSION",
+        informationItems: (mapV1Content.payload.features.find((item) => item.key === scenario.id)?.fields ?? [])
+          .filter((field) => resolveFieldAnswer(current, `${scenario.id}.${field.key}`) === "PROCESS")
+          .map((field) => field.label),
+        informationOther: current.processingActivities.find((item) => item.featureKey === scenario.id)?.informationOther ?? [],
+        purposes: current.activityDetails[scenario.id]?.purpose ? [current.activityDetails[scenario.id].purpose] : [],
+        purposeOther: "",
+      })),
+      ...current.customFeatures.map((feature) => {
+        const existing = current.processingActivities.find((item) => item.featureKey === `custom:${feature}`);
+        return {
+          ...(existing ?? {
+            featureKey: `custom:${feature}`,
+            title: feature,
+            kind: "CUSTOM" as const,
+            informationItems: [],
+            informationOther: [],
+          }),
+          purposes: current.customDetails[feature]?.purpose ? [current.customDetails[feature].purpose] : [],
+          purposeOther: "",
+        };
+      }),
+    ];
+    const rightsAndGovernance = {
+      ...current.rightsAndGovernance,
+      rightsEntry: current.profile.rightsEntry ?? "",
+      responsePeriod: current.profile.rightsResponsePeriod ?? "",
+      contactEmail: current.profile.contactEmail ?? "",
+      contactPhone: current.profile.contactPhone ?? "",
+      policyEntry: current.profile.policyEntry ?? "",
+      updateNotices: current.profile.policyUpdateNotice ? [current.profile.policyUpdateNotice] : [],
+      minorMode: current.profile.minorProcessing?.includes("不面向") ? "ADULT_ONLY" as const : current.rightsAndGovernance.minorMode,
+    };
+    return ProjectFormDataSchema.parse({
+      schemaVersion: FORM_SCHEMA_VERSION,
       profile: current.profile,
-      selected: current.selected,
-      customFeatures: current.customFeatures,
-      customDetails: current.customDetails,
       additionalNotes: current.additionalNotes,
-      confirmedFields: current.confirmedFields,
-      fieldAnswers: current.fieldAnswers,
-      activityDetails: current.activityDetails,
       supplementAnswers: current.supplementAnswers,
-      scopeStop: current.scopeStop,
+      processingActivities,
+      permissions: current.permissions,
+      partners: current.partners,
+      storageAndSecurity: current.storageAndSecurity,
+      rightsAndGovernance,
+      attachments: current.attachments,
     });
   }
 
@@ -313,37 +302,41 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
    * 供所有“保存并离开”的 handler 在导航前调用，避免 400ms 防抖定时器
    * 被页面卸载清掉后丢失最后一段修改。
    */
-  async function persistNow(): Promise<{ ok: true; revision: number } | { ok: false }> {
+  async function persistNow(currentStepKey = workspaceSlugFor(activeStep)): Promise<{ ok: true; revision: number } | { ok: false }> {
     const id = dataRef.current.projectId;
     if (!id) return { ok: false };
     const pending = toProjectFormData(dataRef.current);
     const key = JSON.stringify(pending);
-    if (lastSavedKeyRef.current === key) return { ok: true, revision: dataRef.current.revision };
+    if (lastSavedKeyRef.current === key && lastSavedStepRef.current === currentStepKey) {
+      return { ok: true, revision: dataRef.current.revision };
+    }
     try {
-      const res = await fetch(`/api/projects/${id}`, {
+      const res = await fetch(`/api/v1/projects/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
-        body: JSON.stringify({ expectedRevision: dataRef.current.revision, formData: pending }),
+        body: JSON.stringify({ expectedRevision: dataRef.current.revision, formData: pending, currentStepKey }),
       });
       if (res.status === 409) {
         setStatusMessage("项目已在其他页面更新，已重新载入最新版本");
         const server = await loadProjectFromServer(id);
         if (server) {
           lastSavedKeyRef.current = computeFormKey(server.formData);
-          const reloaded = { ...initialProject, ...server.formData, projectId: id, revision: server.revision, generated: undefined };
+          lastSavedStepRef.current = server.currentStepKey;
+          const reloaded = { ...emptyProject, ...server.formData, projectId: id, revision: server.revision, generated: undefined };
           dataRef.current = reloaded;
           setData(reloaded);
         }
         return { ok: false };
       }
       if (!res.ok) throw new Error("保存失败");
-      const payload = await res.json() as { revision: number };
+      const payload = await res.json() as { data: { revision: number } };
       lastSavedKeyRef.current = key;
-      const mergedSave = { ...dataRef.current, revision: payload.revision };
+      lastSavedStepRef.current = currentStepKey;
+      const mergedSave = { ...dataRef.current, revision: payload.data.revision };
       dataRef.current = mergedSave;
       setData(mergedSave);
       setSaveState("saved");
-      return { ok: true, revision: payload.revision };
+      return { ok: true, revision: payload.data.revision };
     } catch {
       setSaveState("error");
       setStatusMessage("保存到服务器失败，请检查 MySQL 是否可用");
@@ -352,21 +345,87 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   }
 
   function downloadSnapshotDocx(item: SnapshotItem) {
-    if (!item.docxBase64) return;
-    const binary = window.atob(item.docxBase64);
-    const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-    const blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${data.profile.productName || "隐私政策"}-${item.createdAt.slice(0, 10)}.docx`;
-    anchor.click();
-    window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+    window.location.assign(item.downloadUrl);
   }
 
   const storageKey = projectStorageKey(projectId ?? data.projectId ?? undefined);
-  const scopeConfirmed = mapV1Content.payload.scopeGates.every((gate) => data.scopeAnswers[gate.id] === true);
-  const scopeAnswered = Object.keys(data.scopeAnswers).length > 0;
+  const assistantStorageKey = `privacy-policy-assistant:v3:${projectId ?? data.projectId ?? "new"}`;
+
+  useEffect(() => {
+    if (assistantLoadedKeyRef.current === assistantStorageKey) return;
+    assistantLoadedKeyRef.current = assistantStorageKey;
+    setAssistantStorageReady(false);
+    try {
+      const stored = window.sessionStorage.getItem(assistantStorageKey);
+      if (!stored) {
+        setAssistantMessages([]);
+        setAssistantAttachments([]);
+        setAssistantStorageReady(true);
+        return;
+      }
+      const parsed = JSON.parse(stored) as { messages?: unknown; attachments?: unknown };
+      const messageItems = Array.isArray(parsed.messages) ? parsed.messages : [];
+      const messages = messageItems.filter((item): item is AssistantMessage => Boolean(
+        item && typeof item === "object"
+        && typeof (item as AssistantMessage).id === "string"
+        && ((item as AssistantMessage).role === "user" || (item as AssistantMessage).role === "assistant")
+        && typeof (item as AssistantMessage).content === "string",
+      )).slice(-20);
+      const attachmentItems = Array.isArray(parsed.attachments) ? parsed.attachments : [];
+      const attachments = attachmentItems.filter((item): item is AssistantAttachment => Boolean(
+        item && typeof item === "object"
+        && typeof (item as AssistantAttachment).id === "string"
+        && typeof (item as AssistantAttachment).name === "string"
+        && typeof (item as AssistantAttachment).content === "string"
+        && (item as AssistantAttachment).status === "READY",
+      )).slice(0, 5).map((attachment) => ({ ...attachment, useForFormFilling: attachment.useForFormFilling === true }));
+      setAssistantMessages(messages);
+      setAssistantAttachments(attachments);
+    } catch {
+      setAssistantMessages([]);
+      setAssistantAttachments([]);
+    } finally {
+      setAssistantStorageReady(true);
+    }
+  }, [assistantStorageKey]);
+
+  useEffect(() => {
+    if (!assistantStorageReady || assistantLoadedKeyRef.current !== assistantStorageKey) return;
+    try {
+      window.sessionStorage.setItem(assistantStorageKey, JSON.stringify({
+        messages: assistantMessages.slice(-20),
+        attachments: assistantAttachments.filter((attachment) => attachment.status === "READY").map(({ previewUrl: _previewUrl, ...attachment }) => attachment),
+      }));
+    } catch {
+      // 会话仍可继续，仅不能跨页恢复。
+    }
+  }, [assistantMessages, assistantAttachments, assistantStorageKey, assistantStorageReady]);
+
+  // 已由用户确认为“本产品资料”的附件提取文本随项目保存到 MySQL。
+  // 浏览器会话丢失或换设备后，从项目事实恢复；仅供临时问答的附件不持久化正文。
+  useEffect(() => {
+    if (!assistantStorageReady) return;
+    const persisted = data.attachments.filter((attachment) => attachment.status === "CONFIRMED" && attachment.content.trim());
+    if (persisted.length === 0) return;
+    setAssistantAttachments((current) => {
+      const existing = new Set(current.map((attachment) => attachment.id));
+      const missing: AssistantAttachment[] = persisted
+        .filter((attachment) => !existing.has(attachment.id))
+        .map((attachment) => ({
+          id: attachment.id,
+          name: attachment.name,
+          size: attachment.size,
+          mimeType: attachment.mimeType,
+          kind: attachment.kind,
+          status: "READY",
+          content: attachment.content,
+          truncated: attachment.truncated,
+          useForFormFilling: true,
+        }));
+      return missing.length ? [...current, ...missing].slice(0, 5) : current;
+    });
+  }, [assistantStorageReady, data.attachments]);
+
   const selectedScenarios = scenarios.filter((scenario) => data.selected.includes(scenario.id));
   const selectedCustomFeatures = data.customFeatures;
   const selectedFieldItems = selectedScenarios.flatMap((scenario) => {
@@ -375,19 +434,32 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       .map((field) => ({ id: `${scenario.id}.${field.key}`, featureId: scenario.id, feature: scenario.title, label: field.label }));
   });
   const fieldAnswer = (fieldId: string) => resolveFieldAnswer(data, fieldId);
-  const processedFieldCount = selectedFieldItems.filter((field) => fieldAnswer(field.id) === "PROCESS").length;
+  const processedFieldCount = selectedFieldItems.filter((field) => fieldAnswer(field.id) === "PROCESS").length
+    + data.processingActivities
+      .filter((activity) => activity.featureKey.startsWith("custom:") && data.customFeatures.includes(activity.title))
+      .reduce((total, activity) => total + new Set([...activity.informationItems, ...activity.informationOther]).size, 0)
+    + data.processingActivities
+      .filter((activity) => data.selected.includes(activity.featureKey))
+      .reduce((total, activity) => total + activity.informationOther.length, 0);
   const selectedDetailsComplete = selectedScenarios.every((scenario) => {
     const detail = data.activityDetails[scenario.id];
-    return Boolean(detail?.purpose.trim() && detail.retention.trim());
+    return Boolean(detail?.purpose.trim());
   }) && selectedCustomFeatures.every((feature) => {
     const detail = data.customDetails[feature];
-    return Boolean(detail?.purpose.trim() && detail.retention.trim());
+    return Boolean(detail?.purpose.trim());
   });
-  const profileComplete = profileFields.every(([key]) => Boolean(data.profile[key]?.trim()));
+  const basicProfileComplete = basicProfileFields.every(([key]) => Boolean(data.profile[key]?.trim()));
+  const profileComplete = profileFields
+    .filter(([key]) => key !== "contactPhone")
+    .every(([key]) => Boolean(data.profile[key]?.trim()));
   const supplementQuestions = getRequiredSupplementQuestions({ selected: data.selected, customFeatures: data.customFeatures, supplementAnswers: data.supplementAnswers });
+  const effectiveSupplementAnswers = Object.fromEntries(supplementQuestions.map((question) => [
+    question.id,
+    data.supplementAnswers[question.id] ?? { answer: "NO" as const, detail: "", slots: {} },
+  ]));
   const isSupplementComplete = (question: (typeof supplementQuestions)[number]) => {
-    const answer = data.supplementAnswers[question.id];
-    if (!answer || answer.answer === "UNKNOWN") return false;
+    const answer = effectiveSupplementAnswers[question.id];
+    if (answer.answer === "UNKNOWN") return false;
     if (answer.answer === "NO") return true;
     const slotScenario = getSlotScenario(question.id);
     if (!slotScenario) return Boolean(answer.detail.trim());
@@ -406,9 +478,6 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     });
   };
   const completedSupplementCount = supplementQuestions.filter(isSupplementComplete).length;
-  const activeSupplementRound = supplementQuestions.find((question) => !isSupplementComplete(question))?.round
-    ?? Math.max(1, ...supplementQuestions.map((question) => question.round));
-  const visibleSupplementRounds = [1, 2, 3].filter((round) => round <= activeSupplementRound && supplementQuestions.some((question) => question.round === round));
   const formalReadiness = evaluateFormalPolicyReadiness({
     profile: data.profile as unknown as FormPayload["profile"],
     selected: data.selected,
@@ -418,22 +487,348 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     confirmedFields: data.confirmedFields,
     fieldAnswers: data.fieldAnswers,
     additionalNotes: data.additionalNotes,
-    scopeAnswers: data.scopeAnswers,
-    supplementAnswers: data.supplementAnswers,
+    supplementAnswers: effectiveSupplementAnswers,
   });
   const warningCount = selectedScenarios.filter((scenario) => scenario.risk).length;
-  const canReview = scopeConfirmed && profileComplete && data.selected.length > 0 && selectedDetailsComplete;
-  const canGenerate = canReview && formalReadiness.ready;
+  const hasBasicFeature = data.selected.some((feature) => BASIC_FEATURE_IDS.has(feature))
+    || data.processingActivities.some((activity) => activity.kind === "BASIC" && data.customFeatures.includes(activity.title));
+  const canReview = basicProfileComplete && hasBasicFeature && selectedDetailsComplete && processedFieldCount > 0;
+  const permissionDetailsComplete = data.permissions.length === 0
+    || data.permissions.every((permission) => Boolean(permission.label.trim()) && (permission.scenes.length > 0 || Boolean(permission.sceneOther.trim())));
+  const storageDetailsComplete = Boolean(
+    data.storageAndSecurity.locations?.length
+    && data.storageAndSecurity.retentionPolicies?.length
+    && data.storageAndSecurity.expiryActions?.length
+    && (!data.storageAndSecurity.locations.includes("OVERSEAS") || data.storageAndSecurity.crossBorderDetail?.trim())
+    && (!data.storageAndSecurity.retentionPolicies.includes("FIXED_PERIOD") || data.storageAndSecurity.fixedPeriod?.trim())
+    && (!data.storageAndSecurity.expiryActions.includes("OTHER") || data.storageAndSecurity.expiryOther?.trim())
+    && data.profile.securityMeasures?.trim(),
+  );
+  const canGenerate = canReview && profileComplete && formalReadiness.ready;
   // 直链守卫：任何一步不满足都回到“最先不完整”的步骤，与侧边栏守卫保持一致。
-  const firstIncompleteStep: StepIndex = !scopeConfirmed ? 0 : !profileComplete ? 1 : !data.selected.length || !selectedDetailsComplete ? 2 : processedFieldCount === 0 ? 3 : !formalReadiness.ready ? 4 : 5;
-  // JSON.parse/stringify 去掉 undefined 键（如未设置的 scopeStop），
-  // 保证与快照 inputJson 的等价比较不被空键干扰。
-  const currentFormForHistory = JSON.parse(JSON.stringify(toProjectFormData(data))) as Partial<ProjectData>;
+  const firstIncompleteStep: StepIndex = !basicProfileComplete ? 0 : !data.selected.length || !selectedDetailsComplete || processedFieldCount === 0 ? 1 : !permissionDetailsComplete ? 2 : !data.supplementAnswers["third-party-services"] ? 3 : !data.supplementAnswers["storage-locations"] || !data.profile.securityMeasures?.trim() ? 4 : 5;
+  // 客户界面只展示该项目最新一份成功政策；历史快照仍由服务端保留。
+  // 不在浏览器内重做两套表单 schema 的等价判断，避免刚生成的 Word 被误隐藏。
   const latestSuccessfulHistory = (history ?? [])
-    .filter((item) => item.state === "SUCCEEDED" && Boolean(item.markdown && item.docxBase64))
-    .filter((item) => item.inputJson && haveEquivalentDraftInput(currentFormForHistory, [item.inputJson]))
+    .filter((item) => item.state === "SUCCEEDED" && Boolean(item.markdown && item.downloadUrl))
     .slice(0, 1);
   const selectedCount = data.selected.length + data.customFeatures.length;
+  const completedSteps = [
+    basicProfileComplete,
+    selectedCount > 0 && selectedDetailsComplete && processedFieldCount > 0,
+    permissionDetailsComplete,
+    Boolean(data.supplementAnswers["third-party-services"]),
+    Boolean(data.supplementAnswers["storage-locations"] && data.profile.securityMeasures?.trim()),
+    data.generated?.status === "SUCCEEDED",
+  ];
+  const completionPercent = Math.round(completedSteps.filter(Boolean).length / completedSteps.length * 100);
+  const assistantPrompt = activeStep === 0
+    ? "基本信息会用于政策标题、运营主体和生效日期。"
+    : activeStep === 1
+      ? "按功能选择产品实际处理的个人信息和处理目的；行业示例不会自动成为产品事实。"
+      : activeStep === 2
+        ? "只选择产品实际调用的设备权限，并说明对应使用场景。"
+        : activeStep === 3
+          ? "SDK 与合作方信息需要以实际接入情况和公开隐私政策链接为准。"
+          : activeStep === 4
+            ? "保存期限在这里统一选择，不再按每项功能重复填写。"
+            : "补齐用户权利和联系方式后，系统会检查事实、查询法规并生成政策。";
+  const assistantStepFields = activeStep === 0
+    ? basicProfileFields.map(([key, label]) => ({ key, label, value: data.profile[key] ?? "", required: true, complete: Boolean(data.profile[key]?.trim()) }))
+    : activeStep === 1
+      ? [
+        { key: "basic-feature", label: "至少选择一个基本功能", value: hasBasicFeature ? "已选择" : "", required: true, complete: hasBasicFeature },
+        ...selectedScenarios.flatMap((scenario) => {
+          const manualInformation = data.processingActivities.find((item) => item.featureKey === scenario.id)?.informationOther ?? [];
+          const selectedInformation = selectedFieldItems.filter((field) => field.featureId === scenario.id && fieldAnswer(field.id) === "PROCESS").map((field) => field.label);
+          const information = [...new Set([...selectedInformation, ...manualInformation])].join("、");
+          const purpose = data.activityDetails[scenario.id]?.purpose ?? "";
+          return [
+            { key: `${scenario.id}-information`, label: `“${scenario.title}”对应个人信息`, value: information, required: true, complete: Boolean(information) },
+            { key: `${scenario.id}-purpose`, label: `“${scenario.title}”处理目的`, value: purpose, required: true, complete: Boolean(purpose.trim()) },
+          ];
+        }),
+        ...selectedCustomFeatures.flatMap((feature) => {
+          const activity = data.processingActivities.find((item) => item.featureKey === `custom:${feature}`);
+          const information = [...new Set([...(activity?.informationItems ?? []), ...(activity?.informationOther ?? [])])].join("、");
+          const purpose = data.customDetails[feature]?.purpose ?? "";
+          return [
+            { key: `custom:${feature}-information`, label: `“${feature}”对应个人信息`, value: information, required: true, complete: Boolean(information) },
+            { key: `custom:${feature}-purpose`, label: `“${feature}”处理目的`, value: purpose, required: true, complete: Boolean(purpose.trim()) },
+          ];
+        }),
+      ]
+      : activeStep === 2
+        ? [
+          { key: "device-permissions", label: "设备权限使用情况", value: data.supplementAnswers["device-permissions"]?.answer ?? "", required: true, complete: Boolean(data.supplementAnswers["device-permissions"]) },
+          { key: "permission-items", label: "实际使用的权限及场景", value: assistantFactValue(data.permissions), required: data.supplementAnswers["device-permissions"]?.answer === "YES", complete: permissionDetailsComplete },
+        ]
+        : activeStep === 3
+          ? [
+            { key: "third-party-services", label: "SDK 与合作方使用情况", value: data.supplementAnswers["third-party-services"]?.answer ?? "", required: true, complete: Boolean(data.supplementAnswers["third-party-services"]) },
+            { key: "partner-items", label: "SDK 与合作方明细", value: assistantFactValue(data.partners), required: data.supplementAnswers["third-party-services"]?.answer === "YES", complete: data.supplementAnswers["third-party-services"]?.answer !== "YES" || data.partners.length > 0 },
+          ]
+          : activeStep === 4
+            ? [
+              { key: "storage-locations", label: "存储位置", value: assistantFactValue(data.storageAndSecurity.locations), required: true, complete: Boolean(data.storageAndSecurity.locations?.length) },
+              { key: "retention-policies", label: "保存期限原则", value: assistantFactValue(data.storageAndSecurity.retentionPolicies), required: true, complete: Boolean(data.storageAndSecurity.retentionPolicies?.length) },
+              { key: "expiry-actions", label: "期限届满后的处理方式", value: assistantFactValue(data.storageAndSecurity.expiryActions), required: true, complete: Boolean(data.storageAndSecurity.expiryActions?.length) },
+              { key: "security-measures", label: "实际采取的安全措施", value: data.profile.securityMeasures ?? "", required: true, complete: Boolean(data.profile.securityMeasures?.trim()) },
+            ]
+            : rightsProfileFields.map(([key, label]) => ({ key, label, value: data.profile[key] ?? "", required: key !== "contactPhone", complete: key === "contactPhone" || Boolean(data.profile[key]?.trim()) }));
+  const assistantProjectFacts: Array<{ section: string; label: string; value: string }> = [];
+  for (const [key, label] of profileFields) {
+    const value = data.profile[key]?.trim();
+    if (value) assistantProjectFacts.push({ section: "基本信息与用户权利", label, value: value.slice(0, 4_000) });
+  }
+  for (const scenario of selectedScenarios) {
+    const selectedInformation = selectedFieldItems.filter((field) => field.featureId === scenario.id && fieldAnswer(field.id) === "PROCESS").map((field) => field.label);
+    const manualInformation = data.processingActivities.find((item) => item.featureKey === scenario.id)?.informationOther ?? [];
+    const information = [...new Set([...selectedInformation, ...manualInformation])].join("、");
+    assistantProjectFacts.push({ section: "功能与个人信息", label: scenario.title, value: `个人信息：${information || "尚未选择"}；处理目的：${data.activityDetails[scenario.id]?.purpose || "尚未填写"}` });
+  }
+  for (const feature of selectedCustomFeatures) {
+    const activity = data.processingActivities.find((item) => item.featureKey === `custom:${feature}`);
+    const information = [...new Set([...(activity?.informationItems ?? []), ...(activity?.informationOther ?? [])])].join("、");
+    assistantProjectFacts.push({ section: "功能与个人信息", label: feature, value: `个人信息：${information || "尚未选择"}；处理目的：${data.customDetails[feature]?.purpose || "尚未填写"}` });
+  }
+  const structuredFacts: Array<[string, string, unknown]> = [
+    ["设备权限", "权限清单", data.permissions],
+    ["SDK 与合作方", "合作方清单", data.partners],
+    ["存储与安全", "存储和安全规则", data.storageAndSecurity],
+    ["用户权利", "权利与治理", data.rightsAndGovernance],
+    ["补充信息", "补充问卷", data.supplementAnswers],
+  ];
+  for (const [section, label, source] of structuredFacts) {
+    const value = assistantFactValue(source);
+    if (value) assistantProjectFacts.push({ section, label, value: value.slice(0, 4_000) });
+  }
+  if (data.additionalNotes.trim()) assistantProjectFacts.push({ section: "补充信息", label: "其他补充信息", value: data.additionalNotes.trim().slice(0, 4_000) });
+  const readyAssistantAttachments = assistantAttachments.filter((attachment) => attachment.status === "READY" && attachment.content);
+  const assistantHasReadingAttachment = assistantAttachments.some((attachment) => attachment.status === "READING");
+
+  function attachmentKindFromFile(file: File): AssistantAttachment["kind"] {
+    const extension = file.name.toLowerCase().split(".").pop() ?? "";
+    if (file.type.startsWith("image/") || ["png", "jpg", "jpeg", "webp"].includes(extension)) return "IMAGE";
+    if (extension === "csv") return "SPREADSHEET";
+    if (file.type.startsWith("text/") || ["txt", "md", "markdown", "json"].includes(extension)) return "TEXT";
+    return "DOCUMENT";
+  }
+
+  async function readAssistantAttachment(id: string, file: File) {
+    const body = new FormData();
+    body.append("file", file);
+    try {
+      const response = await fetch("/api/assistant/attachments", {
+        method: "POST",
+        headers: { "x-persona-id": CLIENT_PERSONA_ID },
+        body,
+      });
+      const payload = await response.json().catch(() => null) as {
+        name?: string;
+        mimeType?: string;
+        size?: number;
+        kind?: AssistantAttachment["kind"];
+        text?: string;
+        truncated?: boolean;
+        message?: string;
+      } | null;
+      if (!response.ok || !payload?.text || !payload.kind) throw new Error(payload?.message || "文件读取失败。");
+      setAssistantAttachments((current) => {
+        const otherTextLength = current.filter((attachment) => attachment.id !== id && attachment.status === "READY").reduce((sum, attachment) => sum + (attachment.content?.length ?? 0), 0);
+        if (otherTextLength + payload.text!.length > 60_000) {
+          return current.map((attachment) => attachment.id === id ? { ...attachment, status: "FAILED", error: "附件可读内容总量已达上限，请先删除其他文件。", content: undefined } : attachment);
+        }
+        return current.map((attachment) => attachment.id === id ? {
+          ...attachment,
+          name: payload.name ?? attachment.name,
+          mimeType: payload.mimeType ?? attachment.mimeType,
+          size: payload.size ?? attachment.size,
+          kind: payload.kind!,
+          status: "READY",
+          content: payload.text,
+          truncated: payload.truncated,
+          error: undefined,
+        } : attachment);
+      });
+    } catch (error) {
+      setAssistantAttachments((current) => current.map((attachment) => attachment.id === id ? {
+        ...attachment,
+        status: "FAILED",
+        error: error instanceof Error ? error.message : "文件读取失败。",
+      } : attachment));
+    }
+  }
+
+  function handleAssistantFiles(files: FileList | null) {
+    if (!files?.length) return;
+    const remaining = Math.max(0, 5 - assistantAttachments.length);
+    if (remaining === 0) {
+      setStatusMessage("每次最多上传 5 个文件，请先删除不需要的附件");
+      return;
+    }
+    const accepted = Array.from(files).slice(0, remaining);
+    if (files.length > remaining) setStatusMessage(`已加入前 ${remaining} 个文件，单次最多 5 个`);
+    const staged = accepted.map((file) => {
+      const id = `attachment-${typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`}`;
+      const item: AssistantAttachment = {
+        id,
+        name: file.name,
+        size: file.size,
+        mimeType: file.type || "application/octet-stream",
+        kind: attachmentKindFromFile(file),
+        status: "READING",
+        useForFormFilling: false,
+        ...(file.type.startsWith("image/") ? { previewUrl: URL.createObjectURL(file) } : {}),
+      };
+      return { file, item };
+    });
+    setAssistantAttachments((current) => [...current, ...staged.map(({ item }) => item)]);
+    setAttachmentsCollapsed(false);
+    for (const { file, item } of staged) void readAssistantAttachment(item.id, file);
+  }
+
+  function removeAssistantAttachment(id: string) {
+    setAssistantAttachments((current) => {
+      const target = current.find((attachment) => attachment.id === id);
+      if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
+      return current.filter((attachment) => attachment.id !== id);
+    });
+    commit({ attachments: dataRef.current.attachments.filter((attachment) => attachment.id !== id) }, "资料已移除");
+  }
+
+  function toggleAssistantAttachmentFactUse(id: string) {
+    const nextAttachments = assistantAttachments.map((attachment) => attachment.id === id
+      ? { ...attachment, useForFormFilling: !attachment.useForFormFilling }
+      : attachment);
+    setAssistantAttachments(nextAttachments);
+    commit({
+      attachments: nextAttachments
+        .filter((attachment) => attachment.status === "READY")
+        .map((attachment) => ({
+          id: attachment.id,
+          name: attachment.name,
+          kind: attachment.kind,
+          status: attachment.useForFormFilling ? "CONFIRMED" as const : "PENDING" as const,
+          mimeType: attachment.mimeType,
+          size: attachment.size,
+          content: attachment.useForFormFilling ? (attachment.content ?? "") : "",
+          truncated: attachment.truncated ?? false,
+        })),
+    }, "附件用途已保存；只有标记为本产品资料的内容可用于补充建议");
+  }
+
+  function assistantMessageId(role: AssistantMessage["role"]) {
+    return `${role}-${typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`}`;
+  }
+
+  async function sendAssistantMessage(prompt = assistantInput, appendUserMessage = true) {
+    const content = prompt.trim() || (readyAssistantAttachments.length > 0 ? "请阅读已上传资料，说明其中与当前项目隐私政策相关的要点，并指出可能需要补充的表单信息。" : "");
+    if (!content || assistantSending || assistantHasReadingAttachment) return;
+    const userMessage: AssistantMessage = { id: assistantMessageId("user"), role: "user", content, attachmentNames: readyAssistantAttachments.map((attachment) => attachment.name) };
+    const conversation = (appendUserMessage ? [...assistantMessages, userMessage] : assistantMessages).slice(-20);
+    if (appendUserMessage) setAssistantMessages(conversation);
+    setAssistantInput("");
+    setAssistantError(null);
+    setAssistantSending(true);
+    try {
+      const response = await fetch("/api/assistant/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
+        body: JSON.stringify({
+          messages: conversation.map(({ role, content: messageContent }) => ({ role, content: messageContent })),
+          projectContext: {
+            currentStep: `${steps[activeStep]}：${assistantPrompt}`,
+            productName: data.profile.productName ?? "",
+            operatorName: data.profile.operatorName ?? "",
+            selectedFeatures: [
+              ...selectedScenarios.map((scenario) => ({
+                name: scenario.title,
+                purpose: data.activityDetails[scenario.id]?.purpose ?? "",
+              })),
+              ...selectedCustomFeatures.map((name) => ({
+                name,
+                purpose: data.customDetails[name]?.purpose ?? "",
+              })),
+            ],
+            processedInformation: selectedFieldItems.filter((field) => fieldAnswer(field.id) === "PROCESS").map((field) => `${field.feature}：${field.label}`),
+            additionalNotes: data.additionalNotes,
+            currentStepFields: assistantStepFields,
+            projectFacts: assistantProjectFacts,
+          },
+          attachments: readyAssistantAttachments.map((attachment) => ({
+            id: attachment.id,
+            name: attachment.name,
+            mimeType: attachment.mimeType,
+            kind: attachment.kind,
+            content: attachment.content!,
+            truncated: attachment.truncated ?? false,
+            useForFormFilling: attachment.useForFormFilling,
+          })),
+        }),
+      });
+      const payload = await response.json().catch(() => null) as { answer?: string; suggestedText?: string; suggestionTarget?: AssistantMessage["suggestionTarget"]; message?: string } | null;
+      if (!response.ok || !payload?.answer) throw new Error(payload?.message || "AI 助手暂时无法回答，请稍后重试。");
+      const assistantMessage: AssistantMessage = {
+        id: assistantMessageId("assistant"),
+        role: "assistant",
+        content: payload.answer!,
+        suggestedText: payload.suggestedText,
+        suggestionTarget: payload.suggestionTarget,
+      };
+      setAssistantMessages((current) => [...current, assistantMessage].slice(-20));
+    } catch (error) {
+      setAssistantError(error instanceof Error ? error.message : "AI 助手暂时无法回答，请稍后重试。");
+    } finally {
+      setAssistantSending(false);
+    }
+  }
+
+  function applyAssistantSuggestion(message: AssistantMessage) {
+    if (!message.suggestedText || message.applied) return;
+    const target = message.suggestionTarget;
+    const scenario = target?.featureName ? scenarios.find((item) => item.title === target.featureName) : undefined;
+    const customFeature = target?.featureName && dataRef.current.customFeatures.includes(target.featureName) ? target.featureName : undefined;
+    if (target?.kind === "FEATURE_INFORMATION" && (scenario || customFeature)) {
+      const featureKey = scenario?.id ?? `custom:${customFeature!}`;
+      const current = dataRef.current.processingActivities.find((item) => item.featureKey === featureKey)
+        ?? { featureKey, title: target.featureName!, kind: scenario ? (BASIC_FEATURE_IDS.has(scenario.id) ? "BASIC" as const : "EXTENSION" as const) : "CUSTOM" as const, informationItems: [], informationOther: [], purposes: [], purposeOther: "" };
+      const informationOther = [...new Set([...current.informationOther, message.suggestedText.trim()])];
+      commit({ processingActivities: [...dataRef.current.processingActivities.filter((item) => item.featureKey !== featureKey), { ...current, informationOther }] }, `已填入“${target.featureName}”的其他个人信息，请核对`);
+    } else if (target?.kind === "FEATURE_PURPOSE" && scenario) {
+      const current = dataRef.current.activityDetails[scenario.id] ?? { purpose: "" };
+      const purpose = [...new Set([...current.purpose.split("；").filter(Boolean), message.suggestedText.trim()])].join("；");
+      commit({ activityDetails: { ...dataRef.current.activityDetails, [scenario.id]: { ...current, purpose } } }, `已填入“${target.featureName}”的处理目的，请核对`);
+    } else if (target?.kind === "FEATURE_PURPOSE" && customFeature) {
+      const current = dataRef.current.customDetails[customFeature] ?? { purpose: "" };
+      const purpose = [...new Set([...current.purpose.split("；").filter(Boolean), message.suggestedText.trim()])].join("；");
+      commit({ customDetails: { ...dataRef.current.customDetails, [customFeature]: { ...current, purpose } } }, `已填入“${target.featureName}”的处理目的，请核对`);
+    } else {
+      const nextNotes = [dataRef.current.additionalNotes.trim(), message.suggestedText.trim()].filter(Boolean).join("\n\n");
+      commit({ additionalNotes: nextNotes }, "内容已加入其他补充信息，请核对");
+    }
+    setAssistantMessages((current) => current.map((item) => item.id === message.id ? { ...item, applied: true } : item));
+  }
+
+  function clearAssistantConversation() {
+    if (assistantSending) return;
+    setAssistantMessages([]);
+    setAssistantInput("");
+    setAssistantError(null);
+  }
+
+  async function copyAssistantMessage(content: string) {
+    try {
+      await navigator.clipboard.writeText(content);
+      setStatusMessage("回答已复制");
+    } catch {
+      setStatusMessage("复制失败，请手动选择文本");
+    }
+  }
+
+  useEffect(() => {
+    assistantEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [assistantMessages, assistantSending]);
 
   useEffect(() => {
     let cancelled = false;
@@ -450,14 +845,18 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
           setHydrated(true);
           return;
         }
+        const serverFormIsEmpty = (server.formData.processingActivities?.length ?? 0) === 0 && Object.keys(server.formData.profile ?? {}).length === 0;
+        const hydratedForm = developmentPrefillEnabled && serverFormIsEmpty ? initialProject : server.formData;
         const serverData: ProjectData = {
-          ...initialProject,
-          ...server.formData,
+          ...emptyProject,
+          ...hydratedForm,
           projectId,
           revision: server.revision,
           generated: undefined,
         };
-        lastSavedKeyRef.current = computeFormKey(serverData);
+        // 空项目在开发期装载示例数据后应触发一次自动保存；否则刷新页面又会回到空表单。
+        lastSavedKeyRef.current = computeFormKey({ ...emptyProject, ...server.formData, projectId, revision: server.revision });
+        lastSavedStepRef.current = server.currentStepKey;
         dataRef.current = serverData;
         setData(serverData);
         const firstIncomplete = firstIncompleteFor(serverData);
@@ -472,12 +871,12 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     const saved = window.localStorage.getItem(storageKey);
     if (saved) {
       try {
-        const parsed = JSON.parse(saved) as Partial<ProjectData>;
+        const canonical = canonicalizeProjectFormData(JSON.parse(saved));
+        const parsed = toWorkspaceCompatibilityState(canonical) as Partial<ProjectData>;
         const restored: ProjectData = {
           ...initialProject,
           ...parsed,
           projectId: parsed.projectId ?? null,
-          scopeAnswers: parsed.scopeAnswers ?? {},
           profile: parsed.profile ?? {},
           selected: parsed.selected ?? [],
           customFeatures: parsed.customFeatures ?? [],
@@ -515,10 +914,6 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, initialStep, firstIncompleteStep, data.projectId]);
 
-  useEffect(() => () => {
-    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
-  }, [downloadUrl]);
-
   // 未创建项目的草稿先写进 localStorage，创建成功（POST 返回 id）后再挂到项目保存。
   useEffect(() => {
     if (!hydrated || data.projectId) return;
@@ -536,24 +931,26 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     setSaveState("saving");
     const timer = window.setTimeout(async () => {
       try {
-        const res = await fetch(`/api/projects/${projectId}`, {
+        const res = await fetch(`/api/v1/projects/${projectId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
-          body: JSON.stringify({ expectedRevision: data.revision, formData: toProjectFormData(data) }),
+          body: JSON.stringify({ expectedRevision: data.revision, formData: toProjectFormData(data), currentStepKey: workspaceSlugFor(activeStep) }),
         });
         if (res.status === 409) {
           setStatusMessage("项目已在其他页面更新，已重新载入最新版本");
           const server = await loadProjectFromServer(projectId);
           if (server) {
             lastSavedKeyRef.current = computeFormKey(server.formData);
-            setData({ ...initialProject, ...server.formData, projectId, revision: server.revision, generated: undefined });
+            lastSavedStepRef.current = server.currentStepKey;
+            setData({ ...emptyProject, ...server.formData, projectId, revision: server.revision, generated: undefined });
           }
           return;
         }
         if (!res.ok) throw new Error("保存失败");
-        const payload = await res.json() as { revision: number };
+        const payload = await res.json() as { data: { revision: number } };
         lastSavedKeyRef.current = formKey;
-        setData((current) => ({ ...current, revision: payload.revision }));
+        lastSavedStepRef.current = workspaceSlugFor(activeStep);
+        setData((current) => ({ ...current, revision: payload.data.revision }));
         setSaveState("saved");
       } catch {
         setSaveState("error");
@@ -564,15 +961,20 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formKey, hydrated, data.projectId, data.revision]);
 
-  // 最后一步加载生成历史记录。
+  // 最后一步只展示当前项目最新一份可用报告。
   useEffect(() => {
     if (activeStep !== 5 || !data.projectId) return;
-    fetch(`/api/projects/${data.projectId}/snapshots`, { headers: { "x-persona-id": CLIENT_PERSONA_ID } })
+    fetch(`/api/v1/projects/${data.projectId}`, { headers: { "x-persona-id": CLIENT_PERSONA_ID } })
       .then(async (res) => {
-        if (!res.ok) return { snapshots: [] };
-        return (await res.json()) as { snapshots: SnapshotItem[] };
+        if (!res.ok) return null;
+        const payload = await res.json() as { data: { latestReport: { id: string; createdAt: string; previewUrl: string; downloadUrl: string } | null } };
+        if (!payload.data.latestReport) return null;
+        const reportResponse = await fetch(payload.data.latestReport.previewUrl, { headers: { "x-persona-id": CLIENT_PERSONA_ID } });
+        if (!reportResponse.ok) return null;
+        const reportPayload = await reportResponse.json() as { data: { id: string; createdAt: string; markdown: string; downloadUrl: string } };
+        return { ...reportPayload.data, state: "SUCCEEDED" } as SnapshotItem;
       })
-      .then((payload) => setHistory(payload.snapshots))
+      .then((latest) => setHistory(latest ? [latest] : []))
       .catch(() => setHistory([]));
   }, [activeStep, data.projectId, data.generated?.status]);
 
@@ -583,58 +985,67 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     const merged = { ...dataRef.current, ...changes };
     dataRef.current = merged; // 同步最新值，保证 persistNow / goToStep 导航前 flush 不丢改动。
     setData(merged);
-    if (!touchesGenerated) setDownloadUrl(null);
     setStatusMessage(message);
   }
 
   async function ensureProjectId(): Promise<string> {
     if (data.projectId) return data.projectId;
-    const res = await fetch("/api/projects", {
+    const res = await fetch("/api/v1/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
-      body: JSON.stringify({ formData: toProjectFormData(dataRef.current) }),
+      body: JSON.stringify({ categoryKey: "map-navigation", formData: toProjectFormData(dataRef.current) }),
     });
     if (!res.ok) {
-      const payload = await res.json().catch(() => null) as { message?: string } | null;
-      throw new Error(payload?.message || "项目创建失败，请检查数据库连接");
+      const payload = await res.json().catch(() => null) as { error?: { message?: string } } | null;
+      throw new Error(payload?.error?.message || "项目创建失败，请检查数据库连接");
     }
-    const payload = await res.json() as { projectId: string; revision: number };
+    const payload = await res.json() as { data: { id: string; revision: number } };
     lastSavedKeyRef.current = formKey;
-    const mergedProject = { ...dataRef.current, projectId: payload.projectId, revision: payload.revision };
+    lastSavedStepRef.current = "profile";
+    const mergedProject = { ...dataRef.current, projectId: payload.data.id, revision: payload.data.revision };
     dataRef.current = mergedProject;
     setData(mergedProject);
+    try {
+      window.sessionStorage.setItem(`privacy-policy-assistant:v3:${payload.data.id}`, JSON.stringify({
+        messages: assistantMessages.slice(-20),
+        attachments: assistantAttachments.filter((attachment) => attachment.status === "READY").map(({ previewUrl: _previewUrl, ...attachment }) => attachment),
+      }));
+      window.sessionStorage.removeItem("privacy-policy-assistant:v3:new");
+    } catch {
+      // 不影响项目创建。
+    }
     // 草稿已落库，清理本地占位草稿，避免下次进入“创建”页误读旧内容。
     try {
       window.localStorage.removeItem(projectStorageKey(undefined));
     } catch {
       // 忽略。
     }
-    return payload.projectId;
+    return payload.data.id;
   }
 
   async function goToStep(step: StepIndex) {
-    if (step > 0 && !scopeConfirmed) {
-      setStatusMessage("请先完成四项范围门禁");
+    if (step > 0 && !basicProfileComplete) {
+      setStatusMessage("请先完成产品和运营主体的基本信息");
       setActiveStep(0);
       return;
     }
-    if (step > 1 && !profileComplete) {
-      setStatusMessage("请先完成通用披露信息");
+    if (step > 1 && (!data.selected.length || !selectedDetailsComplete || processedFieldCount === 0)) {
+      setStatusMessage("请先按功能选择个人信息并确认处理目的");
       setActiveStep(1);
       return;
     }
-    if (step > 2 && (!data.selected.length || !selectedDetailsComplete)) {
-      setStatusMessage("请为每个已选功能填写处理目的和保存期限");
+    if (step > 2 && !permissionDetailsComplete) {
+      setStatusMessage("请先确认设备权限及对应使用场景");
       setActiveStep(2);
       return;
     }
-    if (step > 3 && data.selected.length > 0 && processedFieldCount === 0) {
-      setStatusMessage("请至少勾选一项产品实际处理的个人信息");
+    if (step > 3 && !data.supplementAnswers["third-party-services"]) {
+      setStatusMessage("请先确认 SDK 与合作方情况");
       setActiveStep(3);
       return;
     }
-    if (step > 4 && !formalReadiness.ready) {
-      setStatusMessage("请先补齐必填的产品信息");
+    if (step > 4 && (!data.supplementAnswers["storage-locations"] || !data.profile.securityMeasures?.trim())) {
+      setStatusMessage("请先确认统一存储规则和实际安全措施");
       setActiveStep(4);
       return;
     }
@@ -643,7 +1054,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     // 把用户弹回上一个未完成步骤。
     const id = dataRef.current.projectId;
     if (id) {
-      const saved = await persistNow();
+      const saved = await persistNow(workspaceSlugFor(step));
       if (!saved.ok) {
         setStatusMessage("保存到服务器失败，请稍后重试");
         return;
@@ -655,44 +1066,9 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     setActiveStep(step);
   }
 
-  function updateScope(gateId: string) {
-    commit({ scopeAnswers: { ...data.scopeAnswers, [gateId]: !data.scopeAnswers[gateId] } }, "范围答案已保存");
-  }
-
-  async function handleScopeContinue() {
-    if (!scopeConfirmed) {
-      setStatusMessage("四项范围门禁全部确认后才能继续");
-      return;
-    }
-    try {
-      const id = await ensureProjectId();
-      setActiveStep(1);
-      router.push(`/projects/${id}/profile`);
-    } catch (error) {
-      setStatusMessage(error instanceof Error ? error.message : "项目创建失败");
-    }
-  }
-
-  async function handleScopeStop() {
-    if (!scopeAnswered) {
-      setStatusMessage("请至少回答一项范围问题，再保存并退出");
-      return;
-    }
-    try {
-      const id = await ensureProjectId();
-      commit({ scopeStop: "SCOPE_STOP", projectId: id }, "已保存范围停止原因；该项目暂不适用地图类试点");
-      // scopeStop 不在 POST body 里，必须显式落库后再离开，否则防抖定时器
-      // 随页面卸载被清掉，范围停止原因会丢。
-      await persistNow();
-      router.push("/projects");
-    } catch (error) {
-      setStatusMessage(error instanceof Error ? error.message : "项目创建失败");
-    }
-  }
-
   async function handleSaveAndExit() {
-    if (!data.projectId && !scopeAnswered) {
-      setStatusMessage("尚未提交任何范围答案，未创建空项目");
+    if (!data.projectId) {
+      setStatusMessage("项目尚未创建");
       router.push("/");
       return;
     }
@@ -708,40 +1084,30 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
 
   function toggleExplainer() {
     setExplainerOpen((open) => !open);
-    if (explainerOpen) {
-      setExplanation(null);
-      setExplainError(null);
-      setExplainingTerm(null);
-    }
-  }
-
-  async function requestExplanation(termKey: string) {
-    const term = EXPLAINABLE_TERMS.find((item) => item.key === termKey);
-    if (!term) return;
-    setExplainingTerm(termKey);
-    setExplanation(null);
-    setExplainError(null);
-    try {
-      const res = await fetch("/api/explain", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
-        body: JSON.stringify({ term: termKey }),
-      });
-      if (!res.ok) {
-        const payload = await res.json().catch(() => null) as { message?: string } | null;
-        throw new Error(payload?.message || "解释生成失败，请稍后重试");
-      }
-      const payload = await res.json() as { term: string; explanation: string };
-      setExplanation({ term: payload.term, text: payload.explanation });
-    } catch (error) {
-      setExplainError(error instanceof Error ? error.message : "解释生成失败，请稍后重试");
-    } finally {
-      setExplainingTerm(null);
-    }
   }
 
   function updateProfile(field: string, value: string) {
     commit({ profile: { ...data.profile, [field]: value } }, "通用信息已保存");
+  }
+
+  function toggleProfilePreset(field: string, value: string, multiple = false) {
+    if (!multiple) {
+      updateProfile(field, data.profile[field as keyof typeof data.profile] === value ? "" : value);
+      return;
+    }
+    const current = String(data.profile[field as keyof typeof data.profile] ?? "").split("、").map((item) => item.trim()).filter(Boolean);
+    updateProfile(field, current.includes(value) ? current.filter((item) => item !== value).join("、") : [...current, value].join("、"));
+  }
+
+  function updateProfileOther(field: string, presets: readonly string[], value: string, multiple = false) {
+    if (!multiple) {
+      updateProfile(field, value);
+      return;
+    }
+    const current = String(data.profile[field as keyof typeof data.profile] ?? "").split("、").map((item) => item.trim()).filter(Boolean);
+    const selectedPresets = current.filter((item) => presets.includes(item));
+    const other = value.split(/[、，,；;\n]/).map((item) => item.trim()).filter(Boolean);
+    updateProfile(field, [...selectedPresets, ...other].join("、"));
   }
 
   function toggleFeature(id: string) {
@@ -752,8 +1118,234 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   }
 
   function updateActivityDetail(id: string, field: keyof ActivityDetail, value: string) {
-    const current = data.activityDetails[id] ?? { purpose: "", retention: "" };
+    const current = data.activityDetails[id] ?? { purpose: "" };
     commit({ activityDetails: { ...data.activityDetails, [id]: { ...current, [field]: value } } }, "处理活动详情已保存");
+  }
+
+  function togglePurposePreset(id: string, purpose: string) {
+    const current = data.activityDetails[id] ?? { purpose: "" };
+    const values = current.purpose.split("；").map((item) => item.trim()).filter(Boolean);
+    const next = values.includes(purpose) ? values.filter((item) => item !== purpose) : [...values, purpose];
+    updateActivityDetail(id, "purpose", next.join("；"));
+  }
+
+  function updatePurposeOther(id: string, value: string) {
+    const current = data.activityDetails[id] ?? { purpose: "" };
+    const presets = PURPOSE_PRESETS[id] ?? [];
+    const selectedPresets = current.purpose.split("；").map((item) => item.trim()).filter((item) => presets.includes(item));
+    const other = value.split(/[；\n]/).map((item) => item.trim()).filter(Boolean);
+    updateActivityDetail(id, "purpose", [...selectedPresets, ...other].join("；"));
+  }
+
+  function updateInformationOther(featureKey: string, title: string, kind: "BASIC" | "EXTENSION" | "CUSTOM", value: string) {
+    const current = data.processingActivities.find((item) => item.featureKey === featureKey)
+      ?? { featureKey, title, kind, informationItems: [], informationOther: [], purposes: [], purposeOther: "" };
+    const informationOther = value.split(/[、，,；;\n]/).map((item) => item.trim()).filter(Boolean);
+    const next = { ...current, informationOther };
+    commit({ processingActivities: [...data.processingActivities.filter((item) => item.featureKey !== featureKey), next] }, "其他个人信息已保存");
+  }
+
+  function togglePresetFeature(feature: (typeof PRESET_ADDITIONAL_FEATURES)[number]) {
+    const selected = data.customFeatures.includes(feature.title);
+    const featureKey = `custom:${feature.title}`;
+    if (selected) {
+      commit({
+        customFeatures: data.customFeatures.filter((item) => item !== feature.title),
+        customDetails: Object.fromEntries(Object.entries(data.customDetails).filter(([key]) => key !== feature.title)),
+        processingActivities: data.processingActivities.filter((item) => item.featureKey !== featureKey),
+      }, "功能已移除");
+      return;
+    }
+    commit({
+      customFeatures: [...data.customFeatures, feature.title],
+      customDetails: { ...data.customDetails, [feature.title]: { purpose: "" } },
+      processingActivities: [
+        ...data.processingActivities.filter((item) => item.featureKey !== featureKey),
+        { featureKey, title: feature.title, kind: feature.kind, informationItems: [], informationOther: [], purposes: [], purposeOther: "" },
+      ],
+    }, "功能已选择，请继续确认个人信息和处理目的");
+  }
+
+  function removeCustomFeature(feature: string) {
+    commit({
+      customFeatures: data.customFeatures.filter((item) => item !== feature),
+      customDetails: Object.fromEntries(Object.entries(data.customDetails).filter(([key]) => key !== feature)),
+      processingActivities: data.processingActivities.filter((item) => item.featureKey !== `custom:${feature}`),
+    }, "自定义功能已删除");
+  }
+
+  function toggleCustomInformationPreset(feature: string, informationItem: string) {
+    const key = `custom:${feature}`;
+    const current = data.processingActivities.find((item) => item.featureKey === key)
+      ?? { featureKey: key, title: feature, kind: "CUSTOM" as const, informationItems: [], informationOther: [], purposes: [], purposeOther: "" };
+    const informationItems = current.informationItems.includes(informationItem)
+      ? current.informationItems.filter((item) => item !== informationItem)
+      : [...current.informationItems, informationItem];
+    commit({ processingActivities: [...data.processingActivities.filter((item) => item.featureKey !== key), { ...current, informationItems }] }, "个人信息选项已保存");
+  }
+
+  function toggleCustomPurposePreset(feature: string, purpose: string) {
+    const current = data.customDetails[feature] ?? { purpose: "" };
+    const purposes = current.purpose.split("；").map((item) => item.trim()).filter(Boolean);
+    const next = purposes.includes(purpose) ? purposes.filter((item) => item !== purpose) : [...purposes, purpose];
+    updateCustomPurpose(feature, next.join("；"), "处理目的已保存");
+  }
+
+  function updateCustomPurposeOther(feature: string, value: string) {
+    const current = data.customDetails[feature] ?? { purpose: "" };
+    const preset = PRESET_ADDITIONAL_FEATURES.find((item) => item.title === feature);
+    const options: readonly string[] = preset?.purposes ?? [];
+    const selectedPresets = current.purpose.split("；").map((item) => item.trim()).filter((item) => options.includes(item));
+    const other = value.split(/[；\n]/).map((item) => item.trim()).filter(Boolean);
+    updateCustomPurpose(feature, [...selectedPresets, ...other].join("；"), "其他处理目的已保存");
+  }
+
+  function updateCustomPurpose(feature: string, purpose: string, message: string) {
+    const featureKey = `custom:${feature}`;
+    const existing = data.processingActivities.find((item) => item.featureKey === featureKey)
+      ?? { featureKey, title: feature, kind: "CUSTOM" as const, informationItems: [], informationOther: [], purposes: [], purposeOther: "" };
+    commit({
+      customDetails: { ...data.customDetails, [feature]: { purpose } },
+      processingActivities: [
+        ...data.processingActivities.filter((item) => item.featureKey !== featureKey),
+        { ...existing, purposes: purpose ? [purpose] : [], purposeOther: "" },
+      ],
+    }, message);
+  }
+
+  function togglePermission(preset: (typeof PERMISSION_PRESETS)[number]) {
+    const exists = data.permissions.some((item) => item.key === preset.key);
+    const permissions = exists ? data.permissions.filter((item) => item.key !== preset.key) : [...data.permissions, { key: preset.key, label: preset.label, scenes: [], sceneOther: "" }];
+    const detail = permissions.length ? permissions.map((item) => `${item.label}：${[...item.scenes, item.sceneOther].filter(Boolean).join("、")}`).join("；") : "产品不调用设备权限";
+    commit({ permissions, supplementAnswers: { ...data.supplementAnswers, "device-permissions": { answer: permissions.length ? "YES" : "NO", detail, slots: {} } } }, "设备权限已保存");
+  }
+
+  function addCustomPermission() {
+    const permissions = [...data.permissions, { key: `custom:${Date.now().toString(36)}`, label: "", scenes: [], sceneOther: "" }];
+    commit({ permissions, supplementAnswers: { ...data.supplementAnswers, "device-permissions": { answer: "YES", detail: "", slots: {} } } }, "已添加其他设备权限");
+  }
+
+  function updateCustomPermission(key: string, patch: { label?: string; sceneOther?: string }) {
+    const permissions = data.permissions.map((item) => item.key === key ? { ...item, ...patch } : item);
+    const detail = permissions.map((item) => `${item.label || "其他设备权限"}：${[...item.scenes, item.sceneOther].filter(Boolean).join("、")}`).join("；");
+    commit({ permissions, supplementAnswers: { ...data.supplementAnswers, "device-permissions": { answer: permissions.length ? "YES" : "NO", detail, slots: {} } } }, "其他设备权限已保存");
+  }
+
+  function removePermission(key: string) {
+    const permissions = data.permissions.filter((item) => item.key !== key);
+    const detail = permissions.map((item) => `${item.label}：${[...item.scenes, item.sceneOther].filter(Boolean).join("、")}`).join("；");
+    commit({ permissions, supplementAnswers: { ...data.supplementAnswers, "device-permissions": { answer: permissions.length ? "YES" : "NO", detail, slots: {} } } }, "设备权限已移除");
+  }
+
+  function togglePermissionScene(key: string, scene: string) {
+    const permissions = data.permissions.map((item) => item.key === key
+      ? { ...item, scenes: item.scenes.includes(scene) ? item.scenes.filter((value) => value !== scene) : [...item.scenes, scene] }
+      : item);
+    const detail = permissions.map((item) => `${item.label}：${[...item.scenes, item.sceneOther].filter(Boolean).join("、")}`).join("；");
+    commit({ permissions, supplementAnswers: { ...data.supplementAnswers, "device-permissions": { answer: "YES", detail, slots: {} } } }, "权限使用场景已保存");
+  }
+
+  function updatePermissionScene(key: string, value: string) {
+    const permissions = data.permissions.map((item) => item.key === key ? { ...item, sceneOther: value } : item);
+    const detail = permissions.map((item) => `${item.label}：${[...item.scenes, item.sceneOther].filter(Boolean).join("、")}`).join("；");
+    commit({ permissions, supplementAnswers: { ...data.supplementAnswers, "device-permissions": { answer: "YES", detail, slots: {} } } }, "权限场景已保存");
+  }
+
+  function addPartner() {
+    commit({ partners: [...data.partners, { kind: "SDK", name: "", provider: "", purposes: [], informationItems: [], permissions: [], trigger: "", privacyUrl: "" }] }, "已添加一项 SDK 或合作方");
+  }
+
+  function updatePartner(index: number, patch: Partial<ProjectData["partners"][number]>) {
+    const partners = data.partners.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item);
+    commit({ partners }, "SDK 与合作方信息已保存");
+  }
+
+  function removePartner(index: number) {
+    commit({ partners: data.partners.filter((_, itemIndex) => itemIndex !== index) }, "已删除该项");
+  }
+
+  function togglePartnerPurpose(index: number, purpose: string) {
+    const partner = data.partners[index];
+    if (!partner) return;
+    updatePartner(index, { purposes: partner.purposes.includes(purpose) ? partner.purposes.filter((item) => item !== purpose) : [...partner.purposes, purpose] });
+  }
+
+  function togglePartnerListValue(index: number, key: "informationItems" | "permissions", value: string) {
+    const partner = data.partners[index];
+    if (!partner) return;
+    const current = partner[key];
+    updatePartner(index, { [key]: current.includes(value) ? current.filter((item) => item !== value) : [...current, value] });
+  }
+
+  function updatePartnerOtherValues(index: number, key: "purposes" | "informationItems" | "permissions", presets: readonly string[], value: string) {
+    const partner = data.partners[index];
+    if (!partner) return;
+    const selectedPresets = partner[key].filter((item) => presets.includes(item));
+    const otherValues = value.split(/[、，,；;\n]/).map((item) => item.trim()).filter(Boolean);
+    updatePartner(index, { [key]: [...selectedPresets, ...otherValues] });
+  }
+
+  function confirmPartners(answer: "YES" | "NO") {
+    const detail = answer === "NO" ? "当前产品未接入第三方 SDK 或合作方服务" : data.partners.map((item) => `${item.name || "未命名服务"}（${item.provider || "提供方待填写"}）：${item.purposes.join("、")}`).join("；");
+    const first = data.partners[0];
+    const slot = (value: string) => ({ value, status: "CONFIRMED" as const, updatedAt: new Date().toISOString() });
+    const slots: SupplementAnswer["slots"] = answer === "YES" && first ? {
+      "service-name": slot(first.name),
+      "provider-name": slot(first.provider),
+      purpose: slot(first.purposes.join("、")),
+      "data-types": slot(first.informationItems.join("、")),
+      "initialization-timing": slot(first.trigger),
+      "privacy-policy-url": slot(first.privacyUrl),
+    } : {};
+    commit({ supplementAnswers: { ...data.supplementAnswers, "third-party-services": { answer, detail, slots } } }, answer === "NO" ? "已确认无第三方 SDK 或合作方" : "SDK 与合作方情况已确认");
+  }
+
+  function buildStorageConfirmation(storageAndSecurity: ProjectData["storageAndSecurity"]) {
+    const locationLabels: Record<string, string> = { CN: "中华人民共和国境内", OVERSEAS: "境外", DEVICE: "设备本地", CLOUD: "云端服务器" };
+    const retentionLabels: Record<string, string> = { MINIMUM_NECESSARY: "提供服务所必需的最短期限", FIXED_PERIOD: storageAndSecurity.fixedPeriod || "客户填写的固定期限", UNTIL_DELETION_OR_CLOSURE: "用户删除相关信息或注销账号前", LEGAL_REQUIREMENT: "法律法规另有要求的期限" };
+    const expiryLabels: Record<string, string> = { DELETE: "删除", ANONYMIZE: "匿名化", OTHER: storageAndSecurity.expiryOther || "客户填写的其他方式" };
+    const locations = (storageAndSecurity.locations ?? []).map((item) => locationLabels[item] ?? item).join("、");
+    const retention = (storageAndSecurity.retentionPolicies ?? []).map((item) => retentionLabels[item] ?? item).join("、");
+    const deletion = (storageAndSecurity.expiryActions ?? []).map((item) => expiryLabels[item] ?? item).join("、");
+    const dataTypes = selectedFieldItems.filter((item) => fieldAnswer(item.id) === "PROCESS").map((item) => item.label).join("、") || "已选择功能涉及的个人信息";
+    const slot = (slotValue: string) => ({ value: slotValue, status: "CONFIRMED" as const, updatedAt: new Date().toISOString() });
+    const detail = `存储位置：${locations}；保存规则：${retention}；到期处理：${deletion}`;
+    return { answer: "YES" as const, detail, slots: { "data-types": slot(dataTypes), "storage-location": slot(locations), retention: slot(retention), "deletion-method": slot(deletion) } };
+  }
+
+  function commitStorageAndSecurity(storageAndSecurity: ProjectData["storageAndSecurity"], message = "统一存储规则已保存") {
+    commit({
+      storageAndSecurity,
+      supplementAnswers: { ...dataRef.current.supplementAnswers, "storage-locations": buildStorageConfirmation(storageAndSecurity) },
+    }, message);
+  }
+
+  function toggleStorageValue<K extends "locations" | "retentionPolicies" | "expiryActions">(key: K, value: NonNullable<ProjectData["storageAndSecurity"][K]>[number]) {
+    const current = (data.storageAndSecurity[key] ?? []) as Array<typeof value>;
+    const next = current.includes(value) ? current.filter((item) => item !== value) : [...current, value];
+    commitStorageAndSecurity({ ...data.storageAndSecurity, [key]: next });
+  }
+
+  function updateStorageText(field: "fixedPeriod" | "crossBorderDetail" | "expiryOther", value: string) {
+    commitStorageAndSecurity({ ...data.storageAndSecurity, [field]: value }, "存储补充信息已保存");
+  }
+
+  async function confirmStorageAndContinue() {
+    const storageAndSecurity = dataRef.current.storageAndSecurity;
+    commitStorageAndSecurity(storageAndSecurity);
+    await goToStep(5);
+  }
+
+  function toggleSecurityMeasure(value: string) {
+    const current = data.storageAndSecurity.securityMeasures ?? [];
+    const securityMeasures = current.includes(value) ? current.filter((item) => item !== value) : [...current, value];
+    const otherMeasures = (data.profile.securityMeasures ?? "").split(/[、；\n]/).map((item) => item.trim()).filter((item) => item && !SECURITY_PRESETS.includes(item as (typeof SECURITY_PRESETS)[number]));
+    commit({ storageAndSecurity: { ...data.storageAndSecurity, securityMeasures }, profile: { ...data.profile, securityMeasures: [...securityMeasures, ...otherMeasures].join("、") } }, "安全措施已保存");
+  }
+
+  function updateSecurityOther(value: string) {
+    const otherMeasures = value.split(/[、；\n]/).map((item) => item.trim()).filter(Boolean);
+    commit({ profile: { ...data.profile, securityMeasures: [...(data.storageAndSecurity.securityMeasures ?? []), ...otherMeasures].join("、") } }, "其他安全措施已保存");
   }
 
   function addCustomFeature() {
@@ -766,7 +1358,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       setStatusMessage("该自定义功能已添加，请勿重复添加");
       return;
     }
-    commit({ customFeatures: [...data.customFeatures, normalized], customDetails: { ...data.customDetails, [normalized]: { purpose: "", retention: "" } } }, "自定义功能已保存");
+    commit({ customFeatures: [...data.customFeatures, normalized], customDetails: { ...data.customDetails, [normalized]: { purpose: "" } } }, "自定义功能已保存");
     setCustomName("");
     setCustomOpen(false);
   }
@@ -785,12 +1377,41 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     commit({ supplementAnswers: { ...data.supplementAnswers, [questionId]: { ...current, ...patch, updatedAt: new Date().toISOString() } } }, "补充信息已保存");
   }
 
+  function toggleQuestionDetailPreset(questionId: string, value: string, presets: readonly string[]) {
+    const current = data.supplementAnswers[questionId];
+    const parts = (current?.detail ?? "").split("；").map((item) => item.trim()).filter(Boolean);
+    const next = parts.includes(value) ? parts.filter((item) => item !== value) : [...parts, value];
+    updateSupplement(questionId, { answer: next.length ? "YES" : "NO", detail: next.join("；"), slots: {} });
+  }
+
+  function updateQuestionDetailOther(questionId: string, value: string, presets: readonly string[]) {
+    const current = data.supplementAnswers[questionId];
+    const selectedPresets = (current?.detail ?? "").split("；").map((item) => item.trim()).filter((item) => presets.includes(item));
+    const other = value.split(/[；\n]/).map((item) => item.trim()).filter(Boolean);
+    const detail = [...selectedPresets, ...other].join("；");
+    updateSupplement(questionId, { answer: detail ? "YES" : "NO", detail, slots: {} });
+  }
+
   function updateSupplementSlot(questionId: string, slotId: string, value: string, status: "CANDIDATE" | "CONFIRMED" = "CONFIRMED", evidenceText?: string) {
     const current = data.supplementAnswers[questionId] ?? { answer: "YES" as const, detail: "", slots: {} };
     const slots = { ...(current.slots ?? {}) };
     if (!value.trim()) delete slots[slotId];
     else slots[slotId] = { value, status, evidenceText, updatedAt: new Date().toISOString() };
-    updateSupplement(questionId, { slots });
+    updateSupplement(questionId, { answer: Object.keys(slots).length || current.detail.trim() ? "YES" : "NO", slots });
+  }
+
+  function toggleSupplementSlotPreset(questionId: string, slotId: string, value: string, presets: readonly string[]) {
+    const current = data.supplementAnswers[questionId]?.slots?.[slotId]?.value ?? "";
+    const parts = current.split("；").map((item) => item.trim()).filter(Boolean);
+    const next = parts.includes(value) ? parts.filter((item) => item !== value) : [...parts, value];
+    updateSupplementSlot(questionId, slotId, next.join("；"));
+  }
+
+  function updateSupplementSlotOther(questionId: string, slotId: string, value: string, presets: readonly string[]) {
+    const current = data.supplementAnswers[questionId]?.slots?.[slotId]?.value ?? "";
+    const selectedPresets = current.split("；").map((item) => item.trim()).filter((item) => presets.includes(item));
+    const other = value.split(/[；\n]/).map((item) => item.trim()).filter(Boolean);
+    updateSupplementSlot(questionId, slotId, [...selectedPresets, ...other].join("；"));
   }
 
   async function extractSupplementSlots(questionId: string) {
@@ -823,65 +1444,99 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     }
   }
 
-  async function runDraftGeneration(id: string, generationId: string, input: DraftFormInput) {
-    const acknowledgedPreflightReviewToken = resolveAcknowledgedReviewToken(
-      preflightReviewToken,
-      preflightIssues.filter((issue) => issue.severity === "BLOCKING").map((issue) => issue.fingerprint),
-      acknowledgedPreflightIssues,
-    );
-    commit({ generated: { status: "GENERATING", generationId, createdAt: new Date().toISOString() } }, "正在检查填写内容并准备法规关键词查询");
+  async function runDraftGeneration(id: string, idempotencyKey: string) {
+    setPreflightIssues([]);
+    const startedAt = Date.now();
+    setLiveGeneration({
+      startedAt,
+      stages: INITIAL_GENERATION_STAGES.map((stage) => ({ ...stage, status: "WAITING" })),
+      completedSections: 0,
+      totalSections: 8,
+      currentSection: "任务已加入生成队列",
+      characterCount: 0,
+      phase: "THINKING",
+      activityCount: 0,
+    });
+    setGenerationElapsed(0);
+
     try {
-      const response = await fetch("/api/draft/demo", {
+      const response = await fetch(`/api/v1/projects/${id}/generations`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
-        body: JSON.stringify({
-          projectId: id,
-          expectedRevision: data.revision,
-          generationId,
-          acknowledgedPreflightReviewToken,
-          ...input,
-        }),
+        body: JSON.stringify({ idempotencyKey }),
       });
-      if (!response.ok) {
-        const errorPayload = await response.json().catch(() => null) as { message?: string; code?: string; issues?: DisplayPreflightIssue[]; reviewToken?: string } | null;
-        if (errorPayload?.code === "FORM_SEMANTIC_REVIEW_REQUIRED" && errorPayload.issues?.length) {
-          // 兜底去重：模型可能返回语义相同的多条 issue，避免重复卡片和 React 重复 key。
-          const seen = new Set<string>();
-          const uniqueIssues = errorPayload.issues.filter((issue) => {
-            if (seen.has(issue.fingerprint)) return false;
-            seen.add(issue.fingerprint);
-            return true;
-          });
-          setPreflightIssues(uniqueIssues);
-          setPreflightReviewToken(errorPayload.reviewToken ?? null);
-          setAcknowledgedPreflightIssues([]);
-          setData((current) => ({ ...current, generated: { status: "PENDING", generationId, createdAt: new Date().toISOString() } }));
-          setStatusMessage("生成前发现需要核对的内容，请修改后重新生成");
+      const created = await response.json() as { data?: GenerationJobPayload; error?: { message?: string } };
+      if (!response.ok || !created.data) throw new Error(created.error?.message || "生成任务创建失败");
+      const generationId = created.data.id;
+      commit({ generated: { status: "GENERATING", generationId, createdAt: created.data.createdAt }, generatedMarkdown: "" }, "任务已加入生成队列");
+
+      for (;;) {
+        const poll = await fetch(`/api/v1/projects/${id}/generations/${generationId}`, {
+          headers: { "x-persona-id": CLIENT_PERSONA_ID },
+          cache: "no-store",
+        });
+        const payload = await poll.json() as { data?: GenerationJobPayload; error?: { message?: string } };
+        if (!poll.ok || !payload.data) throw new Error(payload.error?.message || "生成状态加载失败");
+        const job = payload.data;
+        const currentStageIndex = INITIAL_GENERATION_STAGES.findIndex((stage) => stage.key === job.stage);
+        setLiveGeneration((current) => current ? {
+          ...current,
+          stages: current.stages.map((stage, index) => ({
+            ...stage,
+            status: job.state === "FAILED" && index === currentStageIndex ? "FAILED"
+              : index < currentStageIndex || job.stage === "COMPLETED" ? "COMPLETED"
+                : index === currentStageIndex ? "ACTIVE" : "WAITING",
+            message: index === currentStageIndex && job.progress?.message ? job.progress.message : stage.message,
+          })),
+          completedSections: job.progress?.completedSections ?? current.completedSections,
+          totalSections: job.progress?.totalSections ?? current.totalSections,
+          currentSection: job.progress?.currentSection ?? job.progress?.message ?? current.currentSection,
+          characterCount: job.progress?.characterCount ?? current.characterCount,
+          phase: job.progress?.phase ?? current.phase,
+          activityCount: job.progress?.activityCount ?? current.activityCount,
+        } : current);
+        if (job.previewMarkdown) setData((current) => ({ ...current, generatedMarkdown: job.previewMarkdown ?? "" }));
+
+        if (job.state === "SUCCEEDED" && job.reportId) {
+          const reportResponse = await fetch(`/api/v1/projects/${id}/reports/${job.reportId}`, { headers: { "x-persona-id": CLIENT_PERSONA_ID } });
+          const reportPayload = await reportResponse.json() as { data?: { id: string; createdAt: string; markdown: string; downloadUrl: string }; error?: { message?: string } };
+          if (!reportResponse.ok || !reportPayload.data) throw new Error(reportPayload.error?.message || "生成结果加载失败");
+          const item: SnapshotItem = { ...reportPayload.data, state: "SUCCEEDED" };
+          setHistory([item]);
+          setData((current) => ({ ...current, generated: { status: "SUCCEEDED", generationId, createdAt: item.createdAt }, generatedMarkdown: item.markdown }));
+          setStatusMessage("隐私政策已生成，可在线预览或下载 Word");
           return;
         }
-        const publicFailure = failureMessages[errorPayload?.code ?? ""];
-        throw new Error(publicFailure?.title || "本次生成未完成，请稍后重试");
+        if (job.state === "SUPERSEDED") {
+          throw new Error("生成期间项目内容已更新，请按当前版本重新生成。");
+        }
+        if (job.state === "FAILED") {
+          if (job.error?.code === "FORM_SEMANTIC_REVIEW_REQUIRED") {
+            const details = job.error.details as { issues?: PreflightIssue[] } | undefined;
+            const issues = (details?.issues ?? []).map((issue) => ({
+              ...issue,
+              fingerprint: JSON.stringify([issue.id, issue.category, [...issue.relatedPaths].sort()]),
+            }));
+            setPreflightIssues(issues);
+          }
+          const failure = failureMessages[job.error?.code ?? ""];
+          throw new Error(job.error?.message || failure?.detail || "本次生成未完成，请稍后重试");
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 1_500));
       }
-      const payload = await response.json() as { markdown?: string; docxBase64?: string };
-      if (!payload.markdown || !payload.docxBase64) throw new Error("生成结果不完整，请重新生成");
-      const binary = window.atob(payload.docxBase64);
-      const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-      const blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-      setDownloadUrl(URL.createObjectURL(blob));
-      setPreflightIssues([]);
-      setPreflightReviewToken(null);
-      setAcknowledgedPreflightIssues([]);
-      setData((current) => ({ ...current, generated: { status: "SUCCEEDED", generationId, createdAt: new Date().toISOString() }, generatedMarkdown: payload.markdown }));
-      setStatusMessage("隐私政策草稿已生成，可在线预览或下载 Word");
     } catch (error) {
       const message = error instanceof Error ? error.message : "生成失败，可使用同一份表单重试";
-      setData((current) => ({ ...current, generated: { status: "FAILED", generationId, createdAt: new Date().toISOString(), message } }));
+      setLiveGeneration((current) => current ? {
+        ...current,
+        stages: current.stages.map((stage) => stage.status === "ACTIVE" ? { ...stage, status: "FAILED", message } : stage),
+      } : current);
+      setData((current) => ({ ...current, generated: { status: "FAILED", generationId: idempotencyKey, createdAt: new Date().toISOString(), message } }));
       setStatusMessage(message);
     }
   }
 
   function editPreflightIssue(issue: PreflightIssue) {
-    const target: StepIndex = issue.targetStep === "profile" ? 1 : issue.targetStep === "features" ? 2 : issue.targetStep === "review" ? 3 : 4;
+    const target: StepIndex = issue.targetStep === "profile" ? 0 : issue.targetStep === "features" || issue.targetStep === "review" ? 1 : 5;
     goToStep(target);
     setStatusMessage(issue.questionForUser);
   }
@@ -889,28 +1544,6 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   function acknowledgePreflightIssue(issue: DisplayPreflightIssue) {
     setAcknowledgedPreflightIssues((current) => [...new Set([...current, issue.fingerprint])].slice(-20));
     setStatusMessage("已保留当前填写。该选择只对当前表单版本有效，请重新生成");
-  }
-
-  function retrySnapshot(item: SnapshotItem) {
-    if (!data.projectId) {
-      setStatusMessage("项目尚未创建，无法重新生成");
-      return;
-    }
-    const input = item.inputJson ?? {
-      profile: data.profile,
-      selected: data.selected,
-      activityDetails: data.activityDetails,
-      customFeatures: data.customFeatures,
-      customDetails: data.customDetails,
-      confirmedFields: data.confirmedFields,
-      fieldAnswers: data.fieldAnswers,
-      additionalNotes: data.additionalNotes,
-      scopeAnswers: data.scopeAnswers,
-      supplementAnswers: data.supplementAnswers,
-    };
-    if (!item.inputJson) setStatusMessage("旧记录没有输入副本，将使用当前项目表单重新生成");
-    const generationId = `${data.projectId}-r${Date.now().toString(36)}`;
-    void runDraftGeneration(data.projectId, generationId, input);
   }
 
   async function handleDraftAction() {
@@ -932,130 +1565,149 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     }
     // Project revision tracks form writes, not generation attempts. A new
     // generation therefore always gets its own id even if facts did not change.
-    const generationId = createGenerationId(id);
-    await runDraftGeneration(id, generationId, {
-      profile: data.profile,
-      selected: data.selected,
-      activityDetails: data.activityDetails,
-      customFeatures: data.customFeatures,
-      customDetails: data.customDetails,
-      confirmedFields: data.confirmedFields,
-      fieldAnswers: data.fieldAnswers,
-      additionalNotes: data.additionalNotes,
-      scopeAnswers: data.scopeAnswers,
-      supplementAnswers: data.supplementAnswers,
-    });
+    const saved = await persistNow("generate");
+    if (!saved.ok) return;
+    const generationId = `web_${crypto.randomUUID()}`;
+    await runDraftGeneration(id, generationId);
   }
 
   const draftFields = useMemo(() => selectedFieldItems.map((field) => ({ ...field, selected: fieldAnswer(field.id) === "PROCESS" })), [selectedFieldItems, data.fieldAnswers, data.confirmedFields]);
+  const displayedGenerationStages = liveGeneration?.stages ?? INITIAL_GENERATION_STAGES;
+  const activeGenerationStage = displayedGenerationStages.find((stage) => stage.status === "ACTIVE");
+  const generationChapterProgress = liveGeneration?.totalSections
+    ? Math.min(100, Math.round((liveGeneration.completedSections / liveGeneration.totalSections) * 100))
+    : 0;
+
+  const renderSupplementQuestion = (questionId: string) => {
+    const question = supplementQuestions.find((item) => item.id === questionId);
+    if (!question) return null;
+    const answer = data.supplementAnswers[question.id];
+    const slotScenario = getSlotScenario(question.id);
+    const detailPresets = QUESTION_DETAIL_PRESETS[question.id] ?? [];
+    const detailValues = (answer?.detail ?? "").split("；").map((item) => item.trim()).filter(Boolean);
+    const detailOther = detailValues.filter((value) => !detailPresets.includes(value)).join("；");
+    return <article className="supplement-question compact-question" key={question.id} data-answer={answer?.answer ?? "EMPTY"}>
+      <div><strong>{question.title}</strong><p>请选择产品实际存在的情况；未选择的内容不会写入政策。</p><small>{question.help}</small></div>
+      {slotScenario ? <div className="slot-workspace"><div className="slot-workspace-heading"><div><strong>{slotScenario.title}</strong></div></div><div className="slot-fields">{slotScenario.slots.map((slotItem) => {
+          const slotAnswer = answer?.slots?.[slotItem.id];
+          const presets = SLOT_PRESETS[slotScenario.scenarioId]?.[slotItem.id] ?? [];
+          const values = (slotAnswer?.value ?? "").split("；").map((item) => item.trim()).filter(Boolean);
+          const otherValue = values.filter((value) => !presets.includes(value)).join("；");
+          return <section className="slot-field" data-status={slotAnswer?.status ?? "EMPTY"} key={slotItem.id}><span><strong>{slotItem.label}{slotItem.required ? " *" : ""}</strong>{slotAnswer?.status === "CANDIDATE" ? <em>待核对</em> : slotAnswer?.status === "CONFIRMED" ? <em>已填写</em> : null}</span>{presets.length ? <div className="preset-chips">{presets.map((preset) => <button type="button" key={preset} data-selected={values.includes(preset)} onClick={() => toggleSupplementSlotPreset(question.id, slotItem.id, preset, presets)}>{values.includes(preset) ? <Check weight="bold" /> : null}{preset}</button>)}</div> : null}<label><span>{presets.length ? "其他（可选）" : slotItem.prompt}</span>{slotItem.inputType === "textarea" ? <textarea value={presets.length ? otherValue : slotAnswer?.value ?? ""} onChange={(event) => presets.length ? updateSupplementSlotOther(question.id, slotItem.id, event.target.value, presets) : updateSupplementSlot(question.id, slotItem.id, event.target.value)} placeholder={presets.length ? "如有其他情况，请补充说明。" : slotItem.prompt} /> : <input type={slotItem.inputType === "url" ? "url" : "text"} value={slotAnswer?.value ?? ""} onChange={(event) => updateSupplementSlot(question.id, slotItem.id, event.target.value)} placeholder={slotItem.prompt} />}</label>{slotAnswer?.status === "CANDIDATE" ? <button type="button" onClick={() => updateSupplementSlot(question.id, slotItem.id, slotAnswer.value, "CONFIRMED", slotAnswer.evidenceText)}><Check weight="bold" /> 采用此内容</button> : null}</section>;
+        })}</div><label className="supplement-detail"><span>其他整体说明（可选）</span><textarea value={answer?.detail ?? ""} onChange={(event) => updateSupplement(question.id, { answer: event.target.value.trim() || Object.keys(answer?.slots ?? {}).length ? "YES" : "NO", detail: event.target.value })} placeholder="如有其他情况，请补充说明。" /></label><button type="button" className="slot-extract-button" disabled={extractingQuestionId === question.id || !answer?.detail.trim()} onClick={() => void extractSupplementSlots(question.id)}><BracketsCurly weight="bold" /> {extractingQuestionId === question.id ? "正在整理…" : "从说明中智能整理"}</button></div> : <div className="supplement-choice-detail"><div className="preset-chips">{detailPresets.map((preset) => <button type="button" key={preset} data-selected={detailValues.includes(preset)} onClick={() => toggleQuestionDetailPreset(question.id, preset, detailPresets)}>{detailValues.includes(preset) ? <Check weight="bold" /> : null}{preset}</button>)}</div><label className="supplement-detail"><span>其他（可选）</span><textarea value={detailOther} onChange={(event) => updateQuestionDetailOther(question.id, event.target.value, detailPresets)} placeholder="如有其他情况，请补充说明。" /></label></div>}
+    </article>;
+  };
 
   return (
-    <main className="workspace-page workspace-section w-full max-w-full overflow-x-hidden bg-paper-light text-ink">
-      <div className="workspace-shell">
-        <aside className="workspace-sidebar">
-          <div className="workspace-project"><span className="project-icon"><MapPin weight="fill" /></span><div><strong>{data.profile.productName || "新地图项目"}</strong><span>隐私政策信息填写</span></div></div>
-          <ol className="step-list">
-            {steps.map((step, index) => <li key={step}><button type="button" data-active={activeStep === index} data-complete={index < activeStep} onClick={() => goToStep(index as StepIndex)}><span>{index < activeStep ? <Check weight="bold" /> : index + 1}</span>{step}</button></li>)}
-          </ol>
-          <div className="workspace-help"><ShieldCheck weight="duotone" /><span>系统不会输出“已合规”结论</span></div>
-        </aside>
+    <main className="workspace-page workspace-v3 w-full max-w-full">
+      <header className="workspace-v3-header">
+        <BaijianBrand />
+        <div className="workspace-v3-header-actions">
+          {saveState === "saving" ? <span className="status-pending">保存中…</span> : saveState === "saved" ? <span className="status-complete"><CheckCircle weight="fill" /> 已保存</span> : saveState === "error" ? <span className="status-error">保存失败</span> : null}
+          <button type="button" className="workspace-v3-exit" onClick={handleSaveAndExit}>暂存退出</button>
+        </div>
+      </header>
 
-        <div className="workspace-main">
-          <ol className="workspace-stepper" aria-label="表单流程">
-            {steps.map((step, index) => <li key={step} data-active={activeStep === index} data-complete={index < activeStep}><button type="button" onClick={() => goToStep(index as StepIndex)}><span className="stepper-node">{index < activeStep ? <Check weight="bold" /> : index + 1}</span><span className="stepper-label">{step}</span></button></li>)}
-          </ol>
-          <div className="workspace-toolbar">
-            <div className="workspace-toolbar-actions"><button type="button" className="toolbar-ai-button" aria-expanded={explainerOpen} onClick={toggleExplainer}><Sparkle weight="fill" /> 术语怎么理解</button>{saveState === "saving" ? <span className="status-pending">保存中…</span> : saveState === "saved" ? <span className="status-complete">已保存到服务器</span> : null}<button type="button" onClick={handleSaveAndExit}>保存并退出</button>{explainerOpen && <div className="explainer-popover"><div className="explainer-head"><strong>AI 助手 · 术语解释</strong><span>对功能术语做通俗解释，不代替法律意见。</span></div><ul className="explainer-terms">{EXPLAINABLE_TERMS.map((term) => <li key={term.key}><button type="button" disabled={explainingTerm !== null} onClick={() => requestExplanation(term.key)}>{term.label}{explainingTerm === term.key ? <span className="explainer-loading">解释中…</span> : <CaretRight weight="bold" />}</button></li>)}</ul>{explanation ? <div className="explainer-result"><strong>{explanation.term}</strong><p>{explanation.text}</p></div> : null}{explainError ? <div className="explainer-result explainer-error"><p>{explainError}</p></div> : null}</div>}</div>
-          </div>
+      <div className="workspace-v3-breadcrumb">项目 <span>/</span> {data.profile.productName || "新地图项目"} <em className="category-pill">地图导航类</em></div>
+
+      <section className="workspace-v3-progress">
+        <div className="workspace-v3-progress-heading">
+          <h1>{data.profile.productName ? `${data.profile.productName}隐私政策` : "地图类隐私政策"}</h1>
+          <div><strong>第 {activeStep + 1} / {steps.length} 步 · {steps[activeStep]}</strong><span>完成度 {completionPercent}%</span></div>
+        </div>
+        <div className="workspace-v3-progress-line" aria-label={`项目完成度 ${completionPercent}%`}><span style={{ width: `${completionPercent}%` }} /></div>
+        <ol className="workspace-stepper" aria-label="表单流程">
+          {steps.map((step, index) => <li key={step} data-active={activeStep === index} data-complete={completedSteps[index]}><button type="button" onClick={() => goToStep(index as StepIndex)}><span className="stepper-node">{completedSteps[index] ? <Check weight="bold" /> : index + 1}</span><span className="stepper-label">{step}</span></button></li>)}
+        </ol>
+      </section>
+
+      <div className="workspace-v3-content" data-assistant-open={explainerOpen}>
+        <div className="workspace-v3-form">
           <div className="workspace-status" role="status" aria-live="polite">{statusMessage}</div>
 
-          {activeStep === 0 && <section className="workspace-panel panel-enter"><div className="panel-heading"><p>确认适用范围</p><h2>这个项目是否适合地图类首期试点？</h2><span>四项都满足后才进入地图类工作区；回答不会被 AI 自动补齐。</span></div><div className="scope-list">{mapV1Content.payload.scopeGates.map((gate) => <label key={gate.id} className="scope-item"><input type="checkbox" checked={data.scopeAnswers[gate.id] === true} onChange={() => updateScope(gate.id)} /><span className="custom-checkbox"><Check weight="bold" /></span><span>{gate.label}</span></label>)}</div><div className="rule-callout"><Gavel weight="duotone" /><div><strong>地图类必要信息规则</strong><span>基本功能：定位和导航；必要信息：位置信息、出发地、到达地。</span></div><a href="https://www.gov.cn/zhengce/zhengceku/2021-03/23/content_5595088.htm" target="_blank" rel="noreferrer">查看原文</a></div><div className="panel-actions"><button type="button" className="button button-ghost" onClick={handleScopeStop}>暂存并退出</button><button type="button" className="button button-primary" disabled={!scopeConfirmed} onClick={handleScopeContinue}>确认并继续 <ArrowRight weight="bold" /></button></div></section>}
+          {activeStep === 0 && <BasicInformationStep data={data} complete={basicProfileComplete} onUpdate={updateProfile} onTogglePreset={toggleProfilePreset} onUpdateOther={updateProfileOther} onNext={() => void goToStep(1)} />}
 
-          {activeStep === 1 && <section className="workspace-panel panel-enter"><div className="panel-heading"><p>通用披露信息</p><h2>先把政策的主体和适用范围说清楚。</h2><span>以下内容来自客户填写，不会由模板自动补齐。</span></div><div className="form-grid">{profileFields.map(([key, label, placeholder]) => <label key={key} className={key === "rightsEntry" ? "full-field" : ""}><span>{label}</span><input type={key === "contactEmail" ? "email" : key === "policyEffectiveDate" ? "date" : "text"} value={data.profile[key] ?? ""} onChange={(event) => updateProfile(key, event.target.value)} placeholder={placeholder} /></label>)}</div><div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(0)}><ArrowLeft weight="bold" /> 返回</button><button type="button" className="button button-primary" disabled={!profileComplete} onClick={() => goToStep(2)}>保存并选择功能 <ArrowRight weight="bold" /></button></div></section>}
+          {activeStep === 1 && <ProcessingActivitiesStep data={data} selectedScenarios={selectedScenarios} selectedCustomFeatures={selectedCustomFeatures} draftFields={draftFields} customOpen={customOpen} customName={customName} canContinue={canReview} onToggleFeature={toggleFeature} onTogglePresetFeature={togglePresetFeature} onSetCustomOpen={setCustomOpen} onSetCustomName={setCustomName} onAddCustomFeature={addCustomFeature} onRemoveCustomFeature={removeCustomFeature} onToggleField={toggleField} onUpdateInformationOther={updateInformationOther} onTogglePurposePreset={togglePurposePreset} onUpdatePurposeOther={updatePurposeOther} onToggleCustomInformationPreset={toggleCustomInformationPreset} onToggleCustomPurposePreset={toggleCustomPurposePreset} onUpdateCustomPurposeOther={updateCustomPurposeOther} onUpdateNotes={(value) => commit({ additionalNotes: value }, "补充信息已保存")} onBack={() => void goToStep(0)} onNext={() => void goToStep(2)} />}
 
-          {activeStep === 2 && <section className="workspace-panel panel-enter">
-            <div className="panel-heading"><p>功能与信息</p><h2>确认产品实际提供的功能。</h2><span>候选项默认不选；选中后必须填写处理活动目的和保存期限。</span></div>
-            <div className="workspace-feature-list">{scenarios.map((scenario) => { const checked = data.selected.includes(scenario.id); return <button key={scenario.id} type="button" className="workspace-feature-card group" data-selected={checked} onClick={() => toggleFeature(scenario.id)}><span className="feature-check">{checked && <Check weight="bold" />}</span><span><strong>{scenario.title}</strong><small>{scenario.group}</small></span><CaretRight weight="bold" /></button>; })}{data.customFeatures.map((feature) => <div key={feature} className="workspace-feature-card" data-selected="true"><span className="feature-check"><Check weight="bold" /></span><span><strong>{feature}</strong><small>客户自定义功能</small></span><button type="button" className="remove-feature" onClick={() => commit({ customFeatures: data.customFeatures.filter((item) => item !== feature), customDetails: Object.fromEntries(Object.entries(data.customDetails).filter(([key]) => key !== feature)) }, "自定义功能已删除")} aria-label={`删除${feature}`}><X weight="bold" /></button></div>)}</div>
-            {customOpen ? <div className="custom-form"><input autoFocus value={customName} onChange={(event) => setCustomName(event.target.value)} placeholder="例如：收藏常用地点" onKeyDown={(event) => event.key === "Enter" && addCustomFeature()} /><button type="button" onClick={addCustomFeature}>添加</button><button type="button" onClick={() => setCustomOpen(false)}>取消</button></div> : <button type="button" className="add-feature" onClick={() => setCustomOpen(true)}><Plus weight="bold" /> 添加表单中没有的功能</button>}
-            <label className="additional-notes"><span>表单外补充信息（可选）</span><small>把表单没有覆盖、但产品实际存在的功能、SDK、第三方或处理规则写在这里。模型只会将其作为客户原文，不会自动变成未经确认的事实。</small><textarea value={data.additionalNotes} onChange={(event) => commit({ additionalNotes: event.target.value }, "补充信息已保存")} placeholder="例如：使用定位 SDK，仅在用户点击开始导航后获取前台定位；不做后台持续定位。" /></label>
-            {(selectedScenarios.length > 0 || selectedCustomFeatures.length > 0) && <div className="activity-details"><div className="field-confirm-heading"><strong>处理活动详情</strong><span>这些内容必须来自客户实际产品。</span></div>{selectedScenarios.map((scenario) => <div className="activity-detail-card" key={scenario.id}><div><strong>{scenario.title}</strong><small>{scenario.fields.join("、")}</small></div><label><span>实际处理目的</span><input value={data.activityDetails[scenario.id]?.purpose ?? ""} onChange={(event) => updateActivityDetail(scenario.id, "purpose", event.target.value)} placeholder="例如：提供路线规划" /></label><label><span>保存期限规则</span><input value={data.activityDetails[scenario.id]?.retention ?? ""} onChange={(event) => updateActivityDetail(scenario.id, "retention", event.target.value)} placeholder="例如：导航结束后删除或去标识化" /></label></div>)}{selectedCustomFeatures.map((feature) => <div className="activity-detail-card" key={feature}><div><strong>{feature}</strong><small>客户自定义功能 · 至少填写实际目的和保存期限</small></div><label><span>实际处理目的</span><input value={data.customDetails[feature]?.purpose ?? ""} onChange={(event) => commit({ customDetails: { ...data.customDetails, [feature]: { purpose: event.target.value, retention: data.customDetails[feature]?.retention ?? "" } } }, "自定义功能目的已保存")} placeholder="例如：收藏常用地点" /></label><label><span>保存期限规则</span><input value={data.customDetails[feature]?.retention ?? ""} onChange={(event) => commit({ customDetails: { ...data.customDetails, [feature]: { purpose: data.customDetails[feature]?.purpose ?? "", retention: event.target.value } } }, "自定义功能保存期限已保存")} placeholder="例如：用户删除后清除" /></label></div>)}</div>}
-            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(1)}><ArrowLeft weight="bold" /> 返回</button><button type="button" className="button button-primary" disabled={!selectedCount || !selectedDetailsComplete} onClick={() => goToStep(3)}>选择个人信息 <ArrowRight weight="bold" /></button></div>
-          </section>}
+          {activeStep === 2 && <DevicePermissionsStep data={data} complete={permissionDetailsComplete} renderSupplementQuestion={(id) => renderSupplementQuestion(id)} onTogglePermission={togglePermission} onAddCustomPermission={addCustomPermission} onUpdateCustomPermission={updateCustomPermission} onRemovePermission={removePermission} onToggleScene={togglePermissionScene} onUpdateScene={updatePermissionScene} onBack={() => void goToStep(1)} onNext={() => void goToStep(3)} />}
 
-          {activeStep === 3 && <section className="workspace-panel panel-enter">
-            <div className="panel-heading"><p>信息选择</p><h2>勾选产品实际处理的信息。</h2><span>已勾选的信息会写入隐私政策草稿；未勾选的信息不会写入。</span></div>
-            <div className="review-summary-grid"><div><span>已选功能</span><strong>{selectedCount}</strong></div><div><span>已勾选信息</span><strong>{processedFieldCount}</strong></div><div data-warning={warningCount > 0}><span>重点提示</span><strong>{warningCount}</strong></div></div>
-            <div className="field-confirm-list" aria-label="个人信息选择"><div className="field-confirm-heading"><strong>个人信息</strong><span>按产品实际情况勾选即可。</span></div>{draftFields.map((field) => <label key={field.id} className="field-confirm-item"><input type="checkbox" checked={field.selected} onChange={() => toggleField(field.id)} /><span className="custom-checkbox"><Check weight="bold" /></span><span><strong>{field.label}</strong><small>{field.feature}</small></span></label>)}</div>
-            {warningCount > 0 && <div className="warning-callout"><Warning weight="fill" /><div><strong>请留意高敏感或非核心场景</strong><span>请结合产品实际配置选择信息项；系统不会自动作出法律结论。</span></div></div>}
-            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(2)}><ArrowLeft weight="bold" /> 返回修改</button><button type="button" className="button button-primary" disabled={!canReview || processedFieldCount === 0} onClick={() => goToStep(4)}>进入补充信息 <ArrowRight weight="bold" /></button></div>
-          </section>}
+          {activeStep === 3 && <PartnersStep data={data} renderSupplementQuestion={(id) => renderSupplementQuestion(id)} onConfirm={confirmPartners} onAdd={addPartner} onRemove={removePartner} onUpdate={updatePartner} onTogglePurpose={togglePartnerPurpose} onToggleListValue={togglePartnerListValue} onUpdateOtherValues={updatePartnerOtherValues} onBack={() => void goToStep(2)} onNext={() => void goToStep(4)} />}
 
-          {activeStep === 4 && <section className="workspace-panel panel-enter">
-            <div className="panel-heading"><p>补充信息</p><h2>根据已选功能补齐容易遗漏的产品情况。</h2><span>请按产品实际情况选择“有”或“没有”；暂时不清楚时可选“不确定”，补齐后即可继续。</span></div>
-            <div className="supplement-progress" aria-label="补充信息进度"><div><span>当前轮次</span><strong>{activeSupplementRound} / 3</strong></div><div><span>已完成</span><strong>{completedSupplementCount} / {supplementQuestions.length}</strong></div><div className="supplement-progress-line"><span style={{ width: `${supplementQuestions.length ? Math.round(completedSupplementCount / supplementQuestions.length * 100) : 100}%` }} /></div></div>
-            <div className="supplement-question-list">
-              {visibleSupplementRounds.map((round) => <section className="supplement-round" key={round} data-active={round === activeSupplementRound}>
-                <div className="supplement-round-heading"><span>第 {round} 轮</span><strong>{round === 1 ? "先核对权限、存储和基础数据流" : round === 2 ? "再检查 SDK、日志和扩展功能" : "最后补齐用户控制和特殊场景"}</strong></div>
-                {supplementQuestions.filter((question) => question.round === round).map((question) => {
-                const answer = data.supplementAnswers[question.id];
-                const slotScenario = getSlotScenario(question.id);
-                return <article className="supplement-question" key={question.id} data-answer={answer?.answer ?? "EMPTY"}>
-                  <div><strong>{question.title}</strong><p>{question.prompt}</p><small>{question.help}</small></div>
-                  <div className="supplement-answer-options" role="group" aria-label={question.title}>
-                    {(["YES", "NO", "UNKNOWN"] as const).map((value) => <button key={value} type="button" className={answer?.answer === value ? "selected" : ""} onClick={() => updateSupplement(question.id, { answer: value, detail: value === "YES" ? answer?.detail ?? "" : "", slots: value === "YES" ? answer?.slots ?? {} : {} })}>{value === "YES" ? "有" : value === "NO" ? "没有" : "不确定"}</button>)}
-                  </div>
-                  {answer?.answer === "YES" ? <>
-                    <label className="supplement-detail"><span>{slotScenario ? "先用一段话描述产品实际情况（可选）" : question.yesDetailLabel}</span><textarea value={answer.detail} onChange={(event) => updateSupplement(question.id, { detail: event.target.value })} placeholder="仅填写本产品的实际配置和处理方式" /></label>
-                    {slotScenario ? <div className="slot-workspace">
-                      <div className="slot-workspace-heading">
-                        <div><strong>{slotScenario.title}</strong><span>下列问题来自固定题库。您可以直接填写，也可以让系统从上方描述中预填。</span></div>
-                        <button type="button" className="slot-extract-button" disabled={extractingQuestionId === question.id || !answer.detail.trim()} onClick={() => void extractSupplementSlots(question.id)}><BracketsCurly weight="bold" /> {extractingQuestionId === question.id ? "正在整理…" : "智能整理描述"}</button>
-                      </div>
-                      <div className="slot-fields">{slotScenario.slots.map((slot) => {
-                        const slotAnswer = answer.slots?.[slot.id];
-                        return <label className="slot-field" data-status={slotAnswer?.status ?? "EMPTY"} key={slot.id}>
-                          <span><strong>{slot.label}{slot.required ? " *" : ""}</strong>{slotAnswer?.status === "CANDIDATE" ? <em>待核对</em> : slotAnswer?.status === "CONFIRMED" ? <em>已填写</em> : null}</span>
-                          {slot.inputType === "textarea"
-                            ? <textarea value={slotAnswer?.value ?? ""} onChange={(event) => updateSupplementSlot(question.id, slot.id, event.target.value)} placeholder={slot.prompt} />
-                            : <input type={slot.inputType === "url" ? "url" : "text"} value={slotAnswer?.value ?? ""} onChange={(event) => updateSupplementSlot(question.id, slot.id, event.target.value)} placeholder={slot.prompt} />}
-                          {slotAnswer?.status === "CANDIDATE" ? <button type="button" onClick={() => updateSupplementSlot(question.id, slot.id, slotAnswer.value, "CONFIRMED", slotAnswer.evidenceText)}><Check weight="bold" /> 采用此内容</button> : null}
-                        </label>;
-                      })}</div>
-                    </div> : null}
-                  </> : null}
-                  {answer?.answer === "UNKNOWN" ? <p className="supplement-unknown"><WarningCircle weight="fill" /> {question.unknownMessage}</p> : null}
-                </article>;
-                })}
-              </section>)}
-            </div>
-            <label className="additional-notes"><span>其他补充说明（可选）</span><small>可补充以上问题未覆盖的实际处理情况。内容会以客户原文送入生成流程，不会被自动改写成未经确认的事实。</small><textarea value={data.additionalNotes} onChange={(event) => commit({ additionalNotes: event.target.value }, "补充说明已保存")} placeholder="例如：用户主动开启云端同步后，才同步收藏地点；用户可在设置中关闭。" /></label>
-            {formalReadiness.diagnostics.length > 0 ? <div className="warning-callout"><Warning weight="fill" /><div><strong>生成前还有待完成事项</strong><span>{formalReadiness.diagnostics.filter((item) => item.severity === "BLOCKING").map((item) => item.message).join("；") || "已完成客户侧事实确认。"}</span></div></div> : null}
-            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(3)}><ArrowLeft weight="bold" /> 返回信息选择</button><button type="button" className="button button-primary" disabled={!formalReadiness.ready} onClick={() => goToStep(5)}>进入政策生成 <ArrowRight weight="bold" /></button></div>
-          </section>}
+          {activeStep === 4 && <StorageSecurityStep data={data} complete={storageDetailsComplete} renderSupplementQuestion={(id) => renderSupplementQuestion(id)} onToggleValue={toggleStorageValue} onUpdateText={updateStorageText} onToggleSecurityMeasure={toggleSecurityMeasure} onUpdateSecurityOther={updateSecurityOther} onBack={() => void goToStep(3)} onNext={() => void confirmStorageAndContinue()} />}
 
-          {activeStep === 5 && <section className="workspace-panel draft-panel panel-enter">
-            <div className="panel-heading">
-              <p>隐私政策草稿</p>
-              <h2>{data.generated?.status === "SUCCEEDED" ? "草稿已生成，可直接预览、编辑或下载。" : data.generated?.status === "GENERATING" ? "正在生成隐私政策草稿。" : data.generated?.status === "FAILED" ? "本次生成未完成，填写内容已保存。" : "完成填写后，生成隐私政策草稿。"}</h2>
-              <span>{data.generated?.status === "FAILED" ? "可在生成记录中查看原因和当次填写内容，然后直接重新生成。" : "系统仅使用客户确认的事实生成草稿，不作合规结论。"}</span>
-            </div>
-            {preflightIssues.length > 0 ? <section className="preflight-review" aria-live="polite">
-              <div className="preflight-review-heading"><WarningCircle weight="fill" /><div><strong>生成前请先核对 {preflightIssues.length} 项产品事实</strong><span>系统没有替您修改答案。请回到对应表单补充或修正后，再重新生成。</span></div></div>
-              <div className="preflight-issue-list">{preflightIssues.map((issue) => <article key={issue.fingerprint} data-acknowledged={acknowledgedPreflightIssues.includes(issue.fingerprint)}>
-                <div><span>{issue.severity === "WARNING" ? "优化建议" : issue.category === "THIRD_PARTY" ? "第三方信息" : issue.category === "CONTRADICTION" ? "内容矛盾" : issue.category === "IMPLAUSIBLE" ? "信息异常" : "信息待补充"}</span><strong>{issue.title}</strong><p>{issue.description}</p><small>{issue.questionForUser}</small></div>
-                <div className="preflight-issue-actions"><button type="button" onClick={() => editPreflightIssue(issue)}>返回修改 <ArrowRight weight="bold" /></button>{issue.severity === "BLOCKING" ? <button type="button" className="preflight-keep" disabled={acknowledgedPreflightIssues.includes(issue.fingerprint)} onClick={() => acknowledgePreflightIssue(issue)}>{acknowledgedPreflightIssues.includes(issue.fingerprint) ? "已保留当前填写" : "信息无误，保留当前填写"}</button> : null}</div>
-              </article>)}</div>
-            </section> : null}
-            <div className="generation-process" aria-label="隐私政策草稿生成流程">
-              <div><span>1</span><strong>检查产品事实</strong><small>发现矛盾或明显不可用信息时，先返回给您修改。</small></div>
-              <div><span>2</span><strong>关键词查询法规</strong><small>根据当前产品场景生成关键词，只调用法规快捷查询。</small></div>
-              <div><span>3</span><strong>生成并制作 Word</strong><small>按固定结构生成政策，并加入目录、表格和正式排版。</small></div>
-            </div>
-            <div className="draft-preview"><div className="draft-page"><span className="draft-watermark">隐私政策草稿</span><MarkdownPreview markdown={data.generatedMarkdown} fallback={<><h3>{data.profile.productName} 隐私政策</h3><p>完成信息填写后，系统会在这里展示可预览和下载的隐私政策草稿。</p><h4>生成范围</h4><p>已选择 {selectedCount} 项产品功能和 {processedFieldCount} 项实际处理的个人信息。</p></>} /><p className="draft-footnote">{processedFieldCount} 项实际处理信息 · {supplementQuestions.length} 项补充信息</p></div><aside className="draft-audit"><FileDoc weight="duotone" /><strong>{data.generated?.status === "GENERATING" ? "正在生成草稿" : "草稿预览"}</strong><span>{selectedCount} 项产品功能</span><span>{processedFieldCount} 项实际处理信息</span><span>{supplementQuestions.length} 项补充信息</span><span>{warningCount} 项重点核对提示</span></aside></div>
-            {latestSuccessfulHistory.length > 0 && <div className="draft-history"><div className="field-confirm-heading"><strong>生成记录</strong><span>显示最新一份成功生成的隐私政策。</span></div><GenerationHistory history={latestSuccessfulHistory} generating={data.generated?.status === "GENERATING"} onRetry={retrySnapshot} onDownload={downloadSnapshotDocx} /></div>}
-            <div className="panel-actions"><button type="button" className="button button-ghost" onClick={() => goToStep(4)}><ArrowLeft weight="bold" /> 返回补充信息</button><button type="button" className="button button-primary" disabled={data.generated?.status === "GENERATING" || !canGenerate} onClick={handleDraftAction}>{data.generated?.status === "SUCCEEDED" ? <><ArrowClockwise weight="bold" /> 重新生成</> : <><FileDoc weight="bold" /> {data.generated?.status === "GENERATING" ? "正在生成…" : data.generated?.status === "FAILED" ? "重新生成" : "生成隐私政策草稿"}</>}</button></div>
-          </section>}
+          {activeStep === 5 && <RightsGenerationStep data={data} renderSupplementQuestion={(id) => renderSupplementQuestion(id)} selectedCount={selectedCount} processedFieldCount={processedFieldCount} completedSupplementCount={completedSupplementCount} supplementCount={supplementQuestions.length} blockingDiagnostic={formalReadiness.diagnostics.filter((item) => item.severity === "BLOCKING").map((item) => item.message).join("；")} warningCount={warningCount} preflightIssues={preflightIssues} acknowledgedIssues={acknowledgedPreflightIssues} generationStages={displayedGenerationStages} activeGenerationStage={activeGenerationStage} liveGeneration={liveGeneration} generationElapsed={generationElapsed} generationChapterProgress={generationChapterProgress} history={latestSuccessfulHistory} canGenerate={canGenerate} onUpdateProfile={updateProfile} onToggleProfilePreset={toggleProfilePreset} onUpdateProfileOther={updateProfileOther} onUpdateNotes={(value) => commit({ additionalNotes: value }, "补充信息已保存")} onEditIssue={editPreflightIssue} onAcknowledgeIssue={acknowledgePreflightIssue} onDownload={downloadSnapshotDocx} onBack={() => void goToStep(4)} onGenerate={() => void handleDraftAction()} />}
         </div>
+
+        <aside className="workspace-ai-panel" aria-label="AI 助手">
+          <div className="workspace-ai-heading">
+            <span><Sparkle weight="fill" /></span>
+            {explainerOpen ? <strong>AI 助手</strong> : null}
+            {explainerOpen && assistantMessages.length > 0 ? <button type="button" className="workspace-ai-new" onClick={clearAssistantConversation} disabled={assistantSending}>新对话</button> : null}
+            <button type="button" aria-label={explainerOpen ? "收起 AI 助手" : "展开 AI 助手"} aria-expanded={explainerOpen} onClick={toggleExplainer}><CaretRight weight="bold" /></button>
+          </div>
+          {explainerOpen ? <div className="workspace-ai-body">
+            {assistantMessages.length === 0 ? <div className="workspace-ai-empty">
+              <div className="workspace-ai-empty-icon"><Sparkle weight="fill" /></div>
+              <strong>我可以帮你填写当前表单</strong>
+              <p>直接提问，或上传产品说明、SDK 文档和截图。我会整理为待确认内容，不会自动写入隐私政策。</p>
+              <div className="workspace-ai-examples" aria-label="示例问题">
+                {ASSISTANT_EXAMPLES.map((example) => <button type="button" key={example} disabled={assistantSending} onClick={() => void sendAssistantMessage(example)}><span>{example}</span><CaretRight weight="bold" /></button>)}
+              </div>
+            </div> : <div className="workspace-ai-messages" aria-live="polite">
+              {assistantMessages.map((message) => <article key={message.id} className="workspace-ai-message" data-role={message.role}>
+                {message.role === "assistant" ? <div className="workspace-ai-message-label"><span><Sparkle weight="fill" /> AI 助手</span><button type="button" aria-label="复制回答" onClick={() => void copyAssistantMessage(message.content)}><Copy weight="bold" /></button></div> : null}
+                {message.role === "user" && message.attachmentNames?.length ? <div className="workspace-ai-message-files">{message.attachmentNames.map((name, index) => <span key={`${name}-${index}`}><Paperclip weight="bold" /> {name}</span>)}</div> : null}
+                <p>{message.content}</p>
+                {message.suggestedText ? <div className="workspace-ai-suggestion"><span>{message.suggestedText}</span><button type="button" disabled={message.applied} onClick={() => applyAssistantSuggestion(message)}>{message.applied ? "已填入表单" : "填入表单"}</button></div> : null}
+              </article>)}
+              {assistantSending ? <div className="workspace-ai-loading" role="status"><span /><span /><span /><em>AI 正在整理回答</em></div> : null}
+              {assistantError ? <div className="workspace-ai-chat-error" role="alert"><span>{assistantError}</span><button type="button" onClick={() => void sendAssistantMessage(assistantMessages.filter((message) => message.role === "user").at(-1)?.content ?? "", false)}>重试</button></div> : null}
+              <div ref={assistantEndRef} />
+            </div>}
+            <div className="workspace-ai-composer">
+              {assistantAttachments.length > 0 ? <section className="workspace-ai-attachment-tray" data-collapsed={attachmentsCollapsed}>
+                <div className="workspace-ai-attachment-heading">
+                  <span>已加入资料 <b>{assistantAttachments.length}/5</b></span>
+                  <button type="button" onClick={() => setAttachmentsCollapsed((collapsed) => !collapsed)}>{attachmentsCollapsed ? <><CaretRight weight="bold" /> 展开</> : <><CaretUp weight="bold" /> 收起</>}</button>
+                </div>
+                {!attachmentsCollapsed ? <div className="workspace-ai-attachment-list">{assistantAttachments.map((attachment) => <article key={attachment.id} className="workspace-ai-attachment" data-status={attachment.status}>
+                  <span className="workspace-ai-attachment-icon"><AssistantAttachmentIcon attachment={attachment} /></span>
+                  <div><strong title={attachment.name}>{attachment.name}</strong><small>{formatAttachmentSize(attachment.size)} · {attachment.status === "READING" ? "正在读取" : attachment.status === "READY" ? attachment.kind === "IMAGE" ? "已提取图片文字" : attachment.truncated ? "已读取（部分内容）" : "已读取" : attachment.error ?? "读取失败"}</small>{attachment.status === "READY" ? <button type="button" className="workspace-ai-attachment-fact-use" data-active={attachment.useForFormFilling} onClick={() => toggleAssistantAttachmentFactUse(attachment.id)}>{attachment.useForFormFilling ? "本产品资料，可用于补充" : "仅供问答参考"}</button> : null}</div>
+                  {attachment.status === "READING" ? <SpinnerGap className="workspace-ai-attachment-spinner" weight="bold" /> : attachment.status === "READY" ? <i aria-label="已理解" /> : <WarningCircle className="workspace-ai-attachment-warning" weight="fill" />}
+                  <button type="button" className="workspace-ai-attachment-remove" aria-label={`删除 ${attachment.name}`} onClick={() => removeAssistantAttachment(attachment.id)}><X weight="bold" /></button>
+                </article>)}</div> : null}
+              </section> : null}
+              <div className="workspace-ai-input-shell">
+                <textarea
+                  rows={3}
+                  value={assistantInput}
+                  disabled={assistantSending}
+                  placeholder="输入问题，或上传文件后提问…"
+                  onChange={(event) => setAssistantInput(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      void sendAssistantMessage();
+                    }
+                  }}
+                />
+                <input
+                  ref={assistantFileInputRef}
+                  className="workspace-ai-file-input"
+                  type="file"
+                  multiple
+                  accept=".pdf,.docx,.txt,.md,.markdown,.json,.csv,.png,.jpg,.jpeg,.webp"
+                  onChange={(event) => {
+                    handleAssistantFiles(event.target.files);
+                    event.target.value = "";
+                  }}
+                />
+                <button type="button" className="workspace-ai-upload" title="上传 PDF、Word、TXT、CSV 或图片；单文件 20 MB，最多 5 个" aria-label="上传文件或图片" disabled={assistantSending || assistantAttachments.length >= 5} onClick={() => assistantFileInputRef.current?.click()}><Paperclip weight="bold" /></button>
+                <button type="button" className="workspace-ai-send" aria-label="发送问题" disabled={assistantSending || assistantHasReadingAttachment || (!assistantInput.trim() && readyAssistantAttachments.length === 0)} onClick={() => void sendAssistantMessage()}><PaperPlaneTilt weight="fill" /></button>
+              </div>
+            </div>
+          </div> : null}
+        </aside>
       </div>
     </main>
   );

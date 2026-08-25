@@ -3,9 +3,9 @@ import { FormPayloadSchema, ModelMarkdownSchema, POLICY_SECTION_TITLES, parsePol
 
 describe("DeepSeek contract", () => {
   it("accepts a citation-bearing Markdown draft", () => {
-    const markdown = `# 地图隐私政策\n\n${POLICY_SECTION_TITLES.map((title, index) => `## ${index + 1}. ${title}\n本章节内容待律师复核。\n<!-- assertions: ${index === 1 ? "navigation.location" : ""} -->`).join("\n\n")}`;
+    const markdown = `# 地图隐私政策\n\n${POLICY_SECTION_TITLES.map((title, index) => `## ${index + 1}. ${title}\n${index === 0 ? "| 功能 | 个人信息 | 处理目的 |\n|---|---|---|\n| 定位 | 位置信息 | 提供定位 |" : "本章节依据已填写信息生成。"}\n<!-- assertions: ${index === 0 ? "navigation.location" : ""} -->`).join("\n\n")}`;
     const result = parsePolicyMarkdown(markdown, new Set(["navigation.location"]));
-    expect(result.markdown).toContain("## 9.");
+    expect(result.markdown).toContain("## 8.");
   });
 
   it("rejects Markdown with an incomplete section contract", () => {
@@ -22,7 +22,7 @@ describe("DeepSeek contract", () => {
       selected: ["navigation"],
       customFeatures: [],
       customDetails: {},
-      activityDetails: { navigation: { purpose: "导航", retention: "导航结束后" } },
+      activityDetails: { navigation: { purpose: "导航" } },
       confirmedFields: [],
       additionalNotes: "",
     });

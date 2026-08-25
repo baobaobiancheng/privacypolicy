@@ -11,9 +11,8 @@ const base = FormPayloadSchema.parse({
     incidentChannel: "隐私邮箱与 App 公告", policyEffectiveDate: "2026-08-13", policyUpdateNotice: "App 弹窗和政策页提示",
   },
   selected: ["navigation"], customFeatures: [], customDetails: {},
-  activityDetails: { navigation: { purpose: "提供定位和路线规划", retention: "导航结束后删除或去标识化" } },
+  activityDetails: { navigation: { purpose: "提供定位和路线规划" } },
   confirmedFields: ["navigation.0", "navigation.1", "navigation.2"], additionalNotes: "",
-  scopeAnswers: { "single-product": true, "map-primary": true, "single-category": true, "no-cross-border": true },
   supplementAnswers: Object.fromEntries(getRequiredSupplementQuestions({ selected: ["navigation"], customFeatures: [] })
     .map((question) => [question.id, { answer: "NO" as const, detail: "" }])),
 });

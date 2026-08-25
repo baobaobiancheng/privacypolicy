@@ -1,5 +1,5 @@
-import { PrivacyWorkspace } from "@/components/privacy-workspace";
+import { redirect } from "next/navigation";
 
 export default function NewProjectScopePage() {
-  return <PrivacyWorkspace initialStep={0} />;
+  redirect("/projects/new/category");
 }

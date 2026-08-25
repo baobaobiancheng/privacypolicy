@@ -4,19 +4,24 @@ import { authorizeProject, type Actor } from "@/src/application/authorization";
 const project = {
   tenantId: "tenant-a",
   ownerId: "client-a",
-  access: [{ userId: "lawyer-a", role: "LAWYER_REVIEWER" as const }],
+  access: [{ userId: "product-a", role: "PRODUCT_TECH" as const }],
 };
 
-describe("项目授权边界", () => {
-  it("同租户已分配律师可读和复核，但不能修改事实", () => {
-    const lawyer: Actor = { userId: "lawyer-a", tenantId: "tenant-a", role: "LAWYER_REVIEWER" };
-    expect(() => authorizeProject(lawyer, project, "READ")).not.toThrow();
-    expect(() => authorizeProject(lawyer, project, "REVIEW")).not.toThrow();
-    expect(() => authorizeProject(lawyer, project, "EDIT")).toThrowError(expect.objectContaining({ code: "PROJECT_FORBIDDEN" }));
+describe("project authorization", () => {
+  it("allows the owner to read, edit and export", () => {
+    const owner: Actor = { userId: "client-a", tenantId: "tenant-a", role: "CLIENT_EDITOR" };
+    expect(() => authorizeProject(owner, project, "READ")).not.toThrow();
+    expect(() => authorizeProject(owner, project, "EDIT")).not.toThrow();
+    expect(() => authorizeProject(owner, project, "EXPORT")).not.toThrow();
   });
 
-  it("跨租户即使猜中项目 ID 也被拒绝", () => {
-    const actor: Actor = { userId: "lawyer-a", tenantId: "tenant-b", role: "LAWYER_REVIEWER" };
-    expect(() => authorizeProject(actor, project, "READ")).toThrowError(expect.objectContaining({ code: "PROJECT_FORBIDDEN" }));
+  it("allows an explicitly granted product user to edit", () => {
+    const product: Actor = { userId: "product-a", tenantId: "tenant-a", role: "PRODUCT_TECH" };
+    expect(() => authorizeProject(product, project, "EDIT")).not.toThrow();
+  });
+
+  it("rejects cross-tenant access without making it retryable", () => {
+    const actor: Actor = { userId: "client-a", tenantId: "tenant-b", role: "CLIENT_EDITOR" };
+    expect(() => authorizeProject(actor, project, "READ")).toThrowError(expect.objectContaining({ code: "PROJECT_FORBIDDEN", retryable: false }));
   });
 });

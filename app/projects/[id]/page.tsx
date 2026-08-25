@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
+import { ProjectOverview } from "@/components/project-overview";
 
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  redirect(`/projects/${id}/scope`);
+  return <ProjectOverview projectId={id} />;
 }

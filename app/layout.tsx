@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "知证 · 隐私政策协作生成器",
-  description: "先确认产品事实，再生成可追溯、可复核的隐私政策工作草稿。",
+  title: "百鉴 · 隐私政策",
+  description: "结构化收集产品事实，智能补充遗漏信息，生成可预览和下载的隐私政策。",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" data-scroll-behavior="smooth">
       <body>{children}</body>
     </html>
   );

@@ -30,7 +30,7 @@ describe("policy Markdown document contract", () => {
     expect(cleanMarkdownText("**重点** [链接](https://example.com)")).toBe("重点 链接");
   });
 
-  it("renders a visible Word table of contents, tables and hyperlinks", async () => {
+  it("renders the production Word layout with cover, table of contents, hierarchy, table, Chinese fonts, header, footer and page number", async () => {
     const markdown = `# 示例隐私政策
 
 ## 1. 基本功能与扩展功能
@@ -52,12 +52,24 @@ describe("policy Markdown document contract", () => {
     const zip = await JSZip.loadAsync(buffer);
     const documentXml = await zip.file("word/document.xml")!.async("string");
     const relationshipsXml = await zip.file("word/_rels/document.xml.rels")!.async("string");
+    const stylesXml = await zip.file("word/styles.xml")!.async("string");
+    const headerXml = await zip.file("word/header1.xml")!.async("string");
+    const footerXml = await zip.file("word/footer1.xml")!.async("string");
 
+    expect(documentXml).toContain("个人信息保护政策");
+    expect(documentXml).toContain("适用产品：示例地图 1.0");
     expect(documentXml).toContain("目 录");
     expect(documentXml).toContain("TOC1");
     expect(documentXml).toContain("1. 基本功能与扩展功能");
     expect(documentXml).toContain("<w:tbl>");
     expect(documentXml).toContain("重点说明");
     expect(relationshipsXml).toContain("https://example.com/privacy");
+    expect(stylesXml).toContain("宋体");
+    expect(stylesXml).toContain("黑体");
+    expect(headerXml).toContain("示例地图 · 隐私政策");
+    expect(footerXml).toContain("第 ");
+    expect(footerXml).toContain("w:fldCharType=\"begin\"");
+    expect(footerXml).toContain("PAGE");
+    expect(footerXml).toContain("页");
   });
 });

@@ -5,7 +5,7 @@ import { getDevPersona, isDevPersonaEnabled, type DevPersona } from "./dev-perso
 export const SessionActorSchema = z.object({
   userId: z.string().min(1),
   tenantId: z.string().min(1),
-  role: z.enum(["CLIENT_EDITOR", "PRODUCT_TECH", "LAWYER_REVIEWER", "ADMIN"]),
+  role: z.enum(["CLIENT_EDITOR", "PRODUCT_TECH", "ADMIN"]),
 }).strict();
 
 export type SessionActor = z.infer<typeof SessionActorSchema>;
@@ -14,7 +14,7 @@ export type SessionActor = z.infer<typeof SessionActorSchema>;
 export function actorFromSession(session: unknown): SessionActor {
   const parsed = SessionActorSchema.safeParse(session);
   if (!parsed.success) {
-    throw new DomainError("PROJECT_FORBIDDEN", "登录会话无效或已过期。", { retryable: true });
+    throw new DomainError("PROJECT_FORBIDDEN", "登录会话无效或已过期。", { retryable: false });
   }
   return parsed.data;
 }

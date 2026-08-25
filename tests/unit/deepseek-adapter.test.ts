@@ -20,7 +20,7 @@ const input: PolicyGenerationInput = {
     selected: ["navigation"],
     customFeatures: [],
     customDetails: {},
-    activityDetails: { navigation: { purpose: "导航", retention: "导航结束后" } },
+    activityDetails: { navigation: { purpose: "导航" } },
     confirmedFields: ["navigation.0"],
     additionalNotes: "",
     supplementAnswers: { "third-party-services": { answer: "YES", detail: "定位 SDK，用于路线规划" } },
@@ -32,7 +32,7 @@ const input: PolicyGenerationInput = {
   allowedFactKeys: ["navigation.location", "operatorName"],
 };
 
-const completeMarkdown = `# 地图隐私政策\n\n| 功能 | 信息 | 目的 |\n| --- | --- | --- |\n| 定位导航 | 位置信息 | 路线规划 |\n\n${POLICY_SECTION_TITLES.map((title, index) => `## ${index + 1}. ${title}\n本章节基于已填写事实生成，供法务继续编辑使用。\n<!-- assertions: ${index === 1 ? "navigation.location" : ""} -->`).join("\n\n")}`;
+const completeMarkdown = `# 地图隐私政策\n\n${POLICY_SECTION_TITLES.map((title, index) => `## ${index + 1}. ${title}\n${index === 0 ? "| 功能 | 个人信息 | 处理目的 |\n| --- | --- | --- |\n| 定位导航 | 位置信息 | 路线规划 |" : "本章节基于已填写事实生成，供法务继续编辑使用。"}\n<!-- assertions: ${index === 0 ? "navigation.location" : ""} -->`).join("\n\n")}`;
 
 describe("DeepSeek adapter", () => {
   afterEach(() => {
@@ -47,7 +47,7 @@ describe("DeepSeek adapter", () => {
 
     const result = await generatePolicyDraft(input);
 
-    expect(result.markdown).toContain("## 9.");
+    expect(result.markdown).toContain("## 8.");
     expect(fetchMock).toHaveBeenCalledWith("https://api.deepseek.com/chat/completions", expect.objectContaining({
       method: "POST",
       headers: expect.objectContaining({ Authorization: "Bearer test-key" }),
@@ -57,7 +57,7 @@ describe("DeepSeek adapter", () => {
     const requestBody = JSON.parse(requestCall[1].body as string) as { messages: Array<{ content: string }>; max_tokens: number };
     expect(requestBody.messages[1].content).toContain("THIRD_PARTY_FACTS_STATUS:\nNO_CONFIRMED_FACTS");
     expect(requestBody.messages[1].content).not.toContain("定位 SDK，用于路线规划");
-    expect(requestBody.max_tokens).toBe(65_536);
+    expect(requestBody.max_tokens).toBe(131_072);
   });
 
   it("accepts a structurally complete short policy without a hidden expansion request", async () => {
@@ -69,7 +69,62 @@ describe("DeepSeek adapter", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(result.markdown).not.toContain("<!-- assertions:");
-    expect(result.markdown).toContain("## 9. 政策更新、联系我们及适用法律");
+    expect(result.markdown).toContain("## 8. 联系我们");
+  });
+
+  it("streams a customer-safe preview before validating the final document", async () => {
+    process.env.DEEPSEEK_API_KEY = "test-key";
+    const sse = [
+      `data: ${JSON.stringify({ choices: [{ delta: { content: completeMarkdown }, finish_reason: null }] })}\n\n`,
+      `data: ${JSON.stringify({ choices: [{ delta: {}, finish_reason: "stop" }] })}\n\n`,
+      "data: [DONE]\n\n",
+    ].join("");
+    const fetchMock = vi.fn(async () => new Response(new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(sse));
+        controller.close();
+      },
+    }), { status: 200, headers: { "Content-Type": "text/event-stream" } }));
+    vi.stubGlobal("fetch", fetchMock);
+    const previews: Array<{ previewMarkdown: string; completedSections: number; characterCount: number }> = [];
+
+    const result = await generatePolicyDraft(input, { onProgress: (progress) => previews.push(progress) });
+
+    expect(result.markdown).toContain("## 8. 联系我们");
+    expect(previews.length).toBeGreaterThan(0);
+    expect(previews.at(-1)?.previewMarkdown).toContain("# 地图隐私政策");
+    expect(previews.at(-1)?.previewMarkdown).not.toContain("assertions:");
+    expect(previews.at(-1)?.completedSections).toBe(9);
+    expect(previews.at(-1)?.characterCount).toBeGreaterThan(0);
+    const requestBody = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string) as { stream: boolean };
+    expect(requestBody.stream).toBe(true);
+  });
+
+  it("reports safe activity during reasoning and completes sections only after validation", async () => {
+    process.env.DEEPSEEK_API_KEY = "test-key";
+    const reasoningEvent = `data: ${JSON.stringify({ choices: [{ delta: { content: null, reasoning_content: "internal reasoning that must stay hidden" }, finish_reason: null }] })}\n\n`;
+    const contentEvent = `data: ${JSON.stringify({ choices: [{ delta: { content: completeMarkdown }, finish_reason: null }] })}\n\n`;
+    const finishEvent = `data: ${JSON.stringify({ choices: [{ delta: {}, finish_reason: "stop" }] })}\n\ndata: [DONE]\n\n`;
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder();
+        controller.enqueue(encoder.encode(reasoningEvent));
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        controller.enqueue(encoder.encode(contentEvent));
+        controller.enqueue(encoder.encode(finishEvent));
+        controller.close();
+      },
+    }), { status: 200, headers: { "Content-Type": "text/event-stream" } })));
+    const progress: Array<{ phase: string; previewMarkdown: string; completedSections: number; activityCount: number }> = [];
+
+    await generatePolicyDraft(input, { onProgress: (event) => progress.push(event) });
+
+    expect(progress[0]).toMatchObject({ phase: "THINKING", previewMarkdown: "", completedSections: 0 });
+    expect(progress[0].activityCount).toBeGreaterThan(0);
+    expect(progress.some((event) => event.phase === "WRITING" && event.previewMarkdown.includes("# 地图隐私政策"))).toBe(true);
+    expect(progress.filter((event) => event.phase !== "VALIDATED").every((event) => event.completedSections < 9)).toBe(true);
+    expect(progress.at(-1)).toMatchObject({ phase: "VALIDATED", completedSections: 9 });
+    expect(progress.map((event) => event.previewMarkdown).join("\n")).not.toContain("internal reasoning");
   });
 
   it("classifies an aborted response body as a service timeout instead of invalid model output", async () => {

@@ -3,33 +3,27 @@ import { authorizeProject, type Actor, type ProjectAction } from "@/src/applicat
 import { DomainError } from "@/src/domain/errors";
 import { getPrisma } from "./prisma";
 
-export async function loadProjectSnapshot(actor: Actor, projectId: string, action: ProjectAction, prisma: PrismaClient = getPrisma()) {
+export async function loadProject(
+  actor: Actor,
+  projectId: string,
+  action: ProjectAction,
+  prisma: PrismaClient = getPrisma(),
+) {
   const project = await prisma.project.findFirst({
     where: {
       id: projectId,
       tenantId: actor.tenantId,
-      OR: [
-        { ownerId: actor.userId },
-        { access: { some: { userId: actor.userId } } },
-      ],
+      OR: [{ ownerId: actor.userId }, { access: { some: { userId: actor.userId } } }],
     },
-    include: {
-      access: true,
-      activities: {
-        include: {
-          assertions: { where: { current: true }, include: { confirmations: true, provenance: { include: { evidence: true } } } },
-          recipients: { include: { assertions: { where: { current: true } } } },
-          tasks: true,
-        },
-      },
-      assertions: { where: { current: true }, include: { confirmations: true, provenance: { include: { evidence: true } } } },
-      recipients: { include: { assertions: { where: { current: true } } } },
-      tasks: true,
-      snapshots: { orderBy: { createdAt: "desc" }, take: 20 },
-    },
+    include: { access: true },
   });
 
-  if (!project) throw new DomainError("PROJECT_FORBIDDEN", "你无权访问该项目。", { retryable: true });
+  if (!project) {
+    throw new DomainError("PROJECT_NOT_FOUND", "项目不存在或你无权访问。", { retryable: false });
+  }
   authorizeProject(actor, project, action);
   return project;
 }
+
+/** Temporary alias while the workspace UI is migrated to the v1 API. */
+export const loadProjectSnapshot = loadProject;

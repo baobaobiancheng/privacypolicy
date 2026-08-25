@@ -1,207 +1,86 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CaretRight,
-  ClipboardText,
-  Database,
-  Gavel,
-  ShieldCheck,
-} from "@phosphor-icons/react";
+import { ArrowRight, Check, DownloadSimple, FileDoc, ShieldCheck, Sparkle } from "@phosphor-icons/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
-import { reviewNotes, scenarios } from "@/src/content/map-v1/ui-content";
-
-gsap.registerPlugin(ScrollTrigger);
+import { BaijianBrand } from "@/components/baijian-brand";
 
 export function PrivacyLanding() {
   const pageRef = useRef<HTMLElement>(null);
-  const [activeScenario, setActiveScenario] = useState(scenarios[0]?.id ?? "");
-  const [reviewIndex, setReviewIndex] = useState(0);
 
-  useGSAP(
-    () => {
-      const media = gsap.matchMedia();
-
-      media.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from(".hero-reveal", {
-          y: 44,
-          opacity: 0,
-          duration: 1.05,
-          stagger: 0.11,
-          ease: "power3.out",
-        });
-
-        ScrollTrigger.matchMedia({
-          "(min-width: 1024px)": () => {
-            ScrollTrigger.create({
-              trigger: ".flow-shell",
-              start: "top 112px",
-              end: "bottom bottom",
-              pin: ".flow-copy",
-              pinSpacing: false,
-            });
-          },
-        });
-
-        gsap.utils.toArray<HTMLElement>(".stack-card").forEach((card, index) => {
-          gsap.fromTo(
-            card,
-            { y: 72 + index * 12, scale: 0.92, opacity: 0.32 },
-            {
-              y: 0,
-              scale: 1,
-              opacity: 1,
-              ease: "none",
-              scrollTrigger: {
-                trigger: card,
-                start: "top 88%",
-                end: "top 46%",
-                scrub: 0.8,
-              },
-            },
-          );
-        });
-
-        gsap.utils.toArray<HTMLElement>(".word-reveal span").forEach((word) => {
-          gsap.fromTo(
-            word,
-            { opacity: 0.12 },
-            {
-              opacity: 1,
-              scrollTrigger: {
-                trigger: word,
-                start: "top 88%",
-                end: "top 62%",
-                scrub: true,
-              },
-            },
-          );
-        });
-      });
-
-      return () => media.revert();
-    },
-    { scope: pageRef },
-  );
+  useGSAP(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    gsap.from(".landing-reveal", { y: 24, opacity: 0, duration: 0.72, stagger: 0.08, ease: "power2.out" });
+    gsap.from(".landing-product-stage", { y: 34, opacity: 0, scale: 0.985, duration: 0.9, delay: 0.18, ease: "power3.out" });
+  }, { scope: pageRef });
 
   return (
-    <main ref={pageRef} className="landing-page w-full max-w-full overflow-x-hidden bg-paper text-ink">
-      <nav className="site-nav" aria-label="主导航">
-        <a href="#top" className="brand" aria-label="知证首页">
-          <span className="brand-mark"><ShieldCheck weight="fill" /></span>
-          <span>知证</span>
-        </a>
-        <div className="nav-center" aria-label="页面章节">
-          <a href="#evidence">证据边界</a>
-          <a href="#workflow">填写流程</a>
-          <a href="#review">律师复核</a>
+    <main ref={pageRef} className="landing-v3">
+      <nav className="landing-v3-nav" aria-label="主导航">
+        <BaijianBrand />
+        <div className="landing-v3-links">
+          <a href="#capabilities">产品能力</a>
+          <a href="#workflow">工作原理</a>
+          <a href="#boundary">安全与责任边界</a>
         </div>
-        <Link className="nav-cta" href="/projects/new/scope">开始填写 <ArrowRight weight="bold" /></Link>
+        <div className="landing-v3-actions">
+          <Link href="/projects">已有项目</Link>
+          <Link className="v3-primary-button" href="/projects/new/category">开始创建</Link>
+        </div>
       </nav>
 
-      <section id="top" className="hero-section">
-        <div className="hero-ambient" aria-hidden="true" />
-        <div className="hero-grid landing-hero-grid">
-          <div className="hero-copy">
-            <p className="hero-kicker hero-reveal">证据驱动的隐私政策协作生成器</p>
-            <h1 className="hero-reveal max-w-5xl">先确认产品事实，再生成经得起复核的隐私政策草稿</h1>
-            <p className="hero-lede hero-reveal">
-              把法规要求、行业示例和客户真实情况分开。客户法务完成事实收集，产品与技术补充未知项，律师只处理真正需要法律判断的部分。
-            </p>
-            <div className="hero-actions hero-reveal">
-              <Link className="button button-primary" href="/projects/new/scope">开始填写 <ArrowRight weight="bold" /></Link>
-              <a className="button button-secondary" href="#evidence">查看证据边界</a>
+      <section className="landing-v3-hero" id="top">
+        <div className="landing-v3-hero-copy">
+          <h1 className="landing-reveal">把零散的产品事实，<br />整理成一份可用的隐私政策</h1>
+          <p className="landing-reveal">通过结构化表单、智能补充与法规知识支持，帮助企业法务和产品团队更高效地形成隐私政策草稿。</p>
+          <div className="landing-v3-hero-actions landing-reveal">
+            <Link className="v3-primary-button v3-large-button" href="/projects/new/category">开始生成隐私政策 <ArrowRight weight="bold" /></Link>
+            <a className="v3-secondary-button v3-large-button" href="#capabilities">查看生成示例</a>
+          </div>
+        </div>
+
+        <div className="landing-product-stage" aria-label="隐私政策产品流程预览">
+          <div className="landing-product-window">
+            <div className="preview-progress-copy"><strong>第 4 / 6 步 · 补充产品信息</strong><span>完成度 68%</span></div>
+            <div className="preview-progress"><span /></div>
+            <div className="preview-steps"><span><Check weight="bold" />基本信息</span><span><Check weight="bold" />功能与个人信息</span><span>3 设备权限</span><strong>4 SDK 与合作方</strong><span>5 存储与安全</span><span>6 用户权利与生成</span></div>
+            <div className="preview-form">
+              <div><strong>后台定位</strong><small>触发场景</small><p>导航进行中、偏离路线、语音播报期间</p><small>停止条件</small><p>退出导航后立即停止</p></div>
+              <div className="preview-ai"><span><Sparkle weight="fill" /> AI 助手</span><p>退出导航后，后台定位是否立即停止？</p><span className="preview-choice">立即停止</span><span className="preview-choice">继续用于轨迹记录</span></div>
             </div>
-            <p className="landing-note hero-reveal">地图导航类首期试点 · 客户填写，律师复核 · 生成工作草稿</p>
+          </div>
+          <div className="landing-document-card">
+            <FileDoc weight="duotone" />
+            <strong>行迹地图隐私政策</strong>
+            <small>目录</small>
+            <ol><li>我们如何收集和使用个人信息</li><li>我们如何使用 Cookie 和同类技术</li><li>我们如何共享、转让个人信息</li></ol>
           </div>
         </div>
       </section>
 
-      <section id="evidence" className="evidence-section">
-        <div className="section-intro">
-          <p>同一段文字，先问它凭什么成立</p>
-          <h2>五层证据边界，让系统提醒遗漏，却不替客户编造事实。</h2>
-        </div>
-
-        <div className="evidence-bento grid grid-cols-12 grid-rows-2 grid-flow-dense">
-          <article className="evidence-card evidence-main col-span-7 row-span-2 group">
-            <div className="evidence-image-wrap overflow-hidden">
-              <div className="evidence-image group-hover:scale-105" role="img" aria-label="城市地图纹理" />
-            </div>
-            <div className="evidence-card-content">
-              <span className="evidence-icon"><Gavel weight="duotone" /></span>
-              <div><p>法规规则是边界，不是产品事实</p><h3>地图类法定必要信息只有位置信息、出发地和到达地。</h3></div>
-            </div>
-          </article>
-          <article className="evidence-card evidence-client col-span-5 row-span-1 group">
-            <span className="evidence-icon"><Database weight="duotone" /></span>
-            <div><p>客户事实</p><h3>只有逐字段确认的真实处理活动，才能进入工作草稿正文。</h3></div>
-          </article>
-          <article className="evidence-card evidence-review col-span-5 row-span-1 group">
-            <span className="evidence-icon"><ClipboardText weight="duotone" /></span>
-            <div><p>律师判断</p><h3>必要性与处理依据单独复核，不覆盖事实来源。</h3></div>
-          </article>
+      <section id="capabilities" className="landing-capabilities">
+        <div className="landing-section-heading"><h2>从产品事实到可下载文档</h2><p>系统负责组织问题和文档结构，客户始终掌握产品事实。</p></div>
+        <div className="landing-capability-grid">
+          <article><span className="capability-number">1</span><div><h3>结构化收集</h3><p>按场景收集产品、数据、目的、期限和第三方信息。</p></div><dl><div><dt>业务类型</dt><dd>地图与导航</dd></div><div><dt>数据类型</dt><dd>定位信息、设备信息</dd></div><div><dt>保存期限</dt><dd>90 天</dd></div></dl></article>
+          <article><span className="capability-number capability-ai">2</span><div><h3>智能发现遗漏</h3><p>读取客户描述，针对仍不明确的产品事实继续追问。</p></div><div className="capability-ai-card"><span><Sparkle weight="fill" /> AI 助手</span><strong>退出导航后，定位是否立即停止？</strong><span className="preview-choice">立即停止</span></div></article>
+          <article><span className="capability-number">3</span><div><h3>生成与下载</h3><p>生成结构完整的隐私政策草稿，并提供 Word 下载。</p></div><div className="capability-file"><FileDoc weight="duotone" /><div><strong>行迹地图隐私政策.docx</strong><small>2026-08-20 · 24.7 KB</small></div><DownloadSimple weight="bold" /></div></article>
         </div>
       </section>
 
-      <section id="workflow" className="workflow-section">
-        <div className="flow-shell">
-          <div className="flow-copy">
-            <p>从法规锚点到客户事实</p>
-            <h2>五组场景，一项一项确认。</h2>
-            <p className="flow-description">先浏览适用的地图类场景，进入试点后再在独立工作区填写。展示页的说明不会预先创建项目，也不会保存选择。</p>
-            <Link className="text-link" href="/projects/new/scope">进入地图类试点 <ArrowRight weight="bold" /></Link>
-          </div>
-
-          <div className="scenario-accordion" aria-label="地图类五组场景说明">
-            {scenarios.map((scenario, index) => {
-              const isActive = activeScenario === scenario.id;
-              return (
-                <article key={scenario.id} className="scenario-panel group" data-active={isActive}>
-                  <button type="button" className="scenario-trigger" aria-expanded={isActive} onClick={() => setActiveScenario(scenario.id)}>
-                    <span className="scenario-index">{String(index + 1).padStart(2, "0")}</span>
-                    <span className="scenario-vertical-title">{scenario.title}</span>
-                  </button>
-                  <div className="scenario-detail" aria-hidden={!isActive}>
-                    <div><p className="scenario-group">{scenario.group}</p><h3>{scenario.title}</h3><p>{scenario.summary}</p></div>
-                    <div className="field-chips">{scenario.fields.map((field) => <span key={field}>{field}</span>)}</div>
-                    {scenario.risk && <p className="scenario-risk">{scenario.risk}</p>}
-                    <div className="scenario-footer"><span className="scenario-readonly"><CaretRight weight="bold" /> 进入工作区后填写</span></div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </div>
+      <section id="boundary" className="landing-trust-strip">
+        <span><ShieldCheck weight="duotone" />客户事实由客户确认</span>
+        <span><ShieldCheck weight="duotone" />参考资料不作为客户事实</span>
+        <span><ShieldCheck weight="duotone" />支持 Word 下载</span>
       </section>
 
-      <section id="review" className="review-section">
-        <div className="review-copy">
-          <p>协作不是把同一张表发给所有人</p>
-          <h2 className="word-reveal">{"客户确认事实 律师判断依据 系统保留证据 每个人只回答自己真正知道的问题".split(" ").map((word) => <span key={word}>{word} </span>)}</h2>
-        </div>
-        <div className="review-carousel">
-          <div className="review-portraits" aria-hidden="true">{["lawyer-one", "product-two", "engineer-three"].map((seed, index) => <div key={seed} className="portrait" data-active={index === reviewIndex} style={{ backgroundImage: `url(https://picsum.photos/seed/${seed}/320/420)` }} />)}</div>
-          <blockquote><span>“</span>{reviewNotes[reviewIndex].quote}</blockquote>
-          <div className="review-controls"><div><strong>{reviewNotes[reviewIndex].role}</strong><span>{reviewIndex + 1} / {reviewNotes.length}</span></div><div><button type="button" aria-label="上一条" onClick={() => setReviewIndex((index) => (index - 1 + reviewNotes.length) % reviewNotes.length)}><ArrowLeft weight="bold" /></button><button type="button" aria-label="下一条" onClick={() => setReviewIndex((index) => (index + 1) % reviewNotes.length)}><ArrowRight weight="bold" /></button></div></div>
-        </div>
+      <section id="workflow" className="landing-v3-cta">
+        <div><span><Sparkle weight="duotone" /></span><div><h2>准备好开始了吗？</h2><p>创建项目后，按步骤填写产品信息，系统会帮助你形成一份可继续修改的隐私政策草稿。</p></div></div>
+        <Link className="v3-primary-button v3-large-button" href="/projects/new/category">创建第一个项目 <ArrowRight weight="bold" /></Link>
       </section>
 
-      <section className="action-section">
-        <div className="stack-cards" aria-hidden="true">
-          <div className="stack-card stack-one"><span>客户事实</span><strong>逐字段确认</strong></div>
-          <div className="stack-card stack-two"><span>确定性规则</span><strong>阻断与风险</strong></div>
-          <div className="stack-card stack-three"><span>不可变快照</span><strong>可追溯草稿</strong></div>
-        </div>
-        <div className="action-copy"><h2>先完成一次真实填写，再决定要不要让 AI 参与。</h2><p>地图类首期先验证事实收集、证据边界和律师复核是否真正减少沟通轮次。</p><Link className="button button-light" href="/projects/new/scope">进入地图类试点 <ArrowRight weight="bold" /></Link></div>
-      </section>
-
-      <footer className="site-footer"><a href="#top" className="brand"><span className="brand-mark"><ShieldCheck weight="fill" /></span><span>知证</span></a><p>隐私政策工作草稿生成器 · 客户填写，律师复核</p><div><a href="#evidence">证据边界</a><a href="#workflow">填写流程</a><a href="#top">返回顶部</a></div></footer>
+      <footer className="landing-v3-footer"><BaijianBrand compact /><p>隐私政策 · 企业隐私政策生成工具</p><a href="#top">返回顶部</a></footer>
     </main>
   );
 }
