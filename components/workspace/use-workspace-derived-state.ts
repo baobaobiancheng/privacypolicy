@@ -81,7 +81,6 @@ function deriveWorkspaceState(data: ProjectData, activeStep: StepIndex, history:
     additionalNotes: data.additionalNotes,
     supplementAnswers: effectiveSupplementAnswers,
   });
-  const warningCount = selectedScenarios.filter((scenario) => scenario.risk).length;
   const hasBasicFeature = data.selected.some((feature) => BASIC_FEATURE_IDS.has(feature))
     || data.processingActivities.some((activity) => activity.kind === "BASIC" && data.customFeatures.includes(activity.title));
   const canReview = basicProfileComplete && hasBasicFeature && selectedDetailsComplete && processedFieldCount > 0;
@@ -158,7 +157,6 @@ function deriveWorkspaceState(data: ProjectData, activeStep: StepIndex, history:
     effectiveSupplementAnswers,
     completedSupplementCount,
     formalReadiness,
-    warningCount,
     hasBasicFeature,
     canReview,
     permissionDetailsComplete,

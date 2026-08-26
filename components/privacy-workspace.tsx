@@ -143,7 +143,6 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     supplementQuestions,
     completedSupplementCount,
     formalReadiness,
-    warningCount,
     canReview,
     permissionDetailsComplete,
     storageDetailsComplete,
@@ -579,7 +578,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
 
           {activeStep === 5 && <RightsStep data={data} renderSupplementQuestion={(id) => renderSupplementQuestion(id)} complete={canGenerate} blockingDiagnostic={formalReadiness.diagnostics.filter((item) => item.severity === "BLOCKING").map((item) => item.message).join("；")} onUpdateProfile={updateProfile} onToggleProfilePreset={toggleProfilePreset} onUpdateProfileOther={updateProfileOther} onUpdateNotes={(value) => commit({ additionalNotes: value }, "补充信息已保存")} onBack={() => void goToStep(4)} onNext={() => void goToStep(6)} />}
 
-          {activeStep === 6 && <GenerationStep data={data} selectedCount={selectedCount} processedFieldCount={processedFieldCount} completedSupplementCount={completedSupplementCount} supplementCount={supplementQuestions.length} blockingDiagnostic={formalReadiness.diagnostics.filter((item) => item.severity === "BLOCKING").map((item) => item.message).join("；")} warningCount={warningCount} preflightIssues={preflightIssues} acknowledgedIssues={acknowledgedPreflightIssues} generationStages={displayedGenerationStages} activeGenerationStage={activeGenerationStage} liveGeneration={liveGeneration} generationElapsed={generationElapsed} generationChapterProgress={generationChapterProgress} history={latestSuccessfulHistory} canGenerate={canGenerate} onEditIssue={editPreflightIssue} onAcknowledgeIssue={acknowledgePreflightIssue} onDownload={(item) => downloadReport(item.downloadUrl)} onBack={() => void goToStep(5)} onGenerate={() => void handleDraftAction()} />}
+          {activeStep === 6 && <GenerationStep data={data} selectedCount={selectedCount} processedFieldCount={processedFieldCount} completedSupplementCount={completedSupplementCount} supplementCount={supplementQuestions.length} blockingDiagnostic={formalReadiness.diagnostics.filter((item) => item.severity === "BLOCKING").map((item) => item.message).join("；")} preflightIssues={preflightIssues} acknowledgedIssues={acknowledgedPreflightIssues} generationStages={displayedGenerationStages} activeGenerationStage={activeGenerationStage} liveGeneration={liveGeneration} generationElapsed={generationElapsed} generationChapterProgress={generationChapterProgress} history={latestSuccessfulHistory} canGenerate={canGenerate} onEditIssue={editPreflightIssue} onAcknowledgeIssue={acknowledgePreflightIssue} onDownload={(item) => downloadReport(item.downloadUrl)} onBack={() => void goToStep(5)} onGenerate={() => void handleDraftAction()} />}
         </div>
 
         <AssistantPanel

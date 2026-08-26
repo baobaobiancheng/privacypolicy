@@ -13,7 +13,6 @@ type Props = {
   completedSupplementCount: number;
   supplementCount: number;
   blockingDiagnostic: string;
-  warningCount: number;
   preflightIssues: DisplayPreflightIssue[];
   acknowledgedIssues: string[];
   generationStages: GenerationStageItem[];
@@ -115,9 +114,9 @@ export function GenerationStep(props: Props) {
         </article>;
       })}</div>
     </section> : null}
-    <section className="generation-live" data-running={generating} aria-live="polite">
+    {data.generated?.status !== "SUCCEEDED" ? <section className="generation-live" data-running={generating} aria-live="polite">
       <div className="generation-live-heading">
-        <div><strong>{generating ? props.activeGenerationStage?.label ?? "正在生成" : data.generated?.status === "SUCCEEDED" ? "本次生成已完成" : "生成时将实时展示进度"}</strong><span>{generating ? props.activeGenerationStage?.message : "每一阶段都由服务端实际状态驱动"}</span></div>
+        <div><strong>{generating ? props.activeGenerationStage?.label ?? "正在生成" : "生成时将实时展示进度"}</strong><span>{generating ? props.activeGenerationStage?.message : "每一阶段都由服务端实际状态驱动"}</span></div>
         {generating ? <time>已等待 {formatGenerationTime(props.generationElapsed)}</time> : null}
       </div>
       <div className="generation-stage-track">{props.generationStages.map((stage, index) => <div key={stage.key} data-status={stage.status.toLowerCase()}>
@@ -130,9 +129,16 @@ export function GenerationStep(props: Props) {
         <div><span>已生成正文</span><strong>{props.liveGeneration.characterCount.toLocaleString("zh-CN")} 字</strong></div>
         <div className="generation-chapter-line" aria-label={`已完成 ${props.liveGeneration.completedSections} / ${props.liveGeneration.totalSections} 个章节`}><span style={{ width: `${props.generationChapterProgress}%` }} /></div>
       </div> : null}
-    </section>
-    <div className="draft-preview"><div className="draft-page" data-streaming={generating && draftingStarted}><span className="draft-watermark">{generating ? stageCopy.previewLabel : "隐私政策"}</span><MarkdownPreview markdown={data.generatedMarkdown} fallback={<><h3>{data.profile.productName} 隐私政策</h3><p>{generating ? draftingStarted ? "智能体正在组织正文，首段内容生成后会实时显示在这里。" : `${stageCopy.title}完成准备后将自动开始编写正文。` : "完成信息填写后，系统会在这里展示可预览和下载的隐私政策。"}</p><h4>生成范围</h4><p>已选择 {props.selectedCount} 项产品功能和 {props.processedFieldCount} 项实际处理的个人信息。</p></>} />{generating && draftingStarted && data.generatedMarkdown ? <span className="draft-streaming-caret" aria-hidden="true" /> : null}<p className="draft-footnote">{generating ? draftingStarted ? "正文会持续更新，完成校验后即可下载 Word" : "完成事实检查和法规查询后开始生成正文" : `${props.processedFieldCount} 项实际处理信息 · ${props.supplementCount} 项补充信息`}</p></div><aside className="draft-audit"><FileDoc weight="duotone" /><strong>{generating ? draftingStarted ? "正文实时预览" : "生成准备进度" : "政策预览"}</strong><span>{props.selectedCount} 项产品功能</span><span>{props.processedFieldCount} 项实际处理信息</span><span>{props.supplementCount} 项补充信息</span><span>{generating ? draftingStarted ? "完成校验后开放 Word" : stageCopy.previewLabel : `${props.warningCount} 项重点核对提示`}</span></aside></div>
-    {props.history.length > 0 && <div className="draft-history"><div className="field-confirm-heading"><strong>生成记录</strong><span>显示最新一份成功生成的隐私政策。</span></div><GenerationHistory history={props.history} onDownload={props.onDownload} /></div>}
+    </section> : null}
+    <div className="draft-preview">
+      <div className="draft-page" data-streaming={generating && draftingStarted}>
+        <span className="draft-watermark">{generating ? stageCopy.previewLabel : "隐私政策"}</span>
+        <MarkdownPreview markdown={data.generatedMarkdown} fallback={<><h3>{data.profile.productName} 隐私政策</h3><p>{generating ? draftingStarted ? "智能体正在组织正文，首段内容生成后会实时显示在这里。" : `${stageCopy.title}完成准备后将自动开始编写正文。` : "完成信息填写后，系统会在这里展示可预览和下载的隐私政策。"}</p><h4>生成范围</h4><p>已选择 {props.selectedCount} 项产品功能和 {props.processedFieldCount} 项实际处理的个人信息。</p></>} />
+        {generating && draftingStarted && data.generatedMarkdown ? <span className="draft-streaming-caret" aria-hidden="true" /> : null}
+        <p className="draft-footnote">{generating ? draftingStarted ? "正文会持续更新，完成校验后即可下载 Word" : "完成事实检查和法规查询后开始生成正文" : `${props.processedFieldCount} 项实际处理信息 · ${props.supplementCount} 项补充信息`}</p>
+      </div>
+    </div>
+    {props.history.length > 0 && <div className="draft-history"><div className="field-confirm-heading"><strong>生成记录</strong></div><GenerationHistory history={props.history} onDownload={props.onDownload} /></div>}
     <div className="panel-actions"><button type="button" className="button button-ghost" disabled={generating} onClick={props.onBack}><ArrowLeft weight="bold" /> 返回用户权利</button><button type="button" className="button button-primary" data-analytics-id={data.generated?.status === "SUCCEEDED" || data.generated?.status === "FAILED" ? "generation.retry" : "generation.start"} disabled={generating || !props.canGenerate} onClick={props.onGenerate}>{data.generated?.status === "SUCCEEDED" ? <><ArrowClockwise weight="bold" /> 重新生成</> : <><FileDoc weight="bold" /> {generating ? `正在生成 · ${formatGenerationTime(props.generationElapsed)}` : data.generated?.status === "FAILED" ? "重新生成" : "生成隐私政策"}</>}</button></div>
   </section>;
 }

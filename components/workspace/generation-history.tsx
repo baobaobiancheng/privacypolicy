@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle, DownloadSimple, Eye } from "@phosphor-icons/react";
+import { DownloadSimple, Eye, FileDoc } from "@phosphor-icons/react";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import type { SnapshotItem } from "./workspace-model";
 
@@ -14,19 +14,18 @@ export function GenerationHistory({ history, onDownload }: Props) {
 
   return <div className="generation-records">{history.map((item) => {
     const expanded = expandedId === item.id;
-    return <article key={item.id} className="generation-record" data-state="success">
-      <div className="generation-record-status" aria-hidden="true"><CheckCircle weight="fill" /></div>
-      <div className="generation-record-content">
-        <div className="generation-record-heading">
-          <div><strong>隐私政策已生成</strong><span>{new Date(item.createdAt).toLocaleString("zh-CN", { hour12: false })}</span></div>
-          <p>隐私政策已生成，可在线预览或下载 Word。</p>
+    return <article key={item.id} className="generation-record">
+      <div className="generation-record-toolbar">
+        <div className="generation-record-summary">
+          <span className="generation-record-icon" aria-hidden="true"><FileDoc weight="duotone" /></span>
+          <div><strong>隐私政策已生成</strong><span>生成于 {new Date(item.createdAt).toLocaleString("zh-CN", { hour12: false })}</span></div>
         </div>
         <div className="generation-record-actions">
           <button type="button" className="history-action" data-analytics-id="report.preview" aria-expanded={expanded} onClick={() => setExpandedId((current) => current === item.id ? null : item.id)}><Eye weight="bold" /> 预览 Markdown</button>
           <button type="button" className="history-action history-action-primary" data-analytics-id="report.download" onClick={() => onDownload(item)}><DownloadSimple weight="bold" /> 下载 Word</button>
         </div>
-        {expanded && item.markdown ? <div className="generation-record-detail markdown-detail"><MarkdownPreview markdown={item.markdown} fallback={null} /></div> : null}
       </div>
+      {expanded && item.markdown ? <div className="generation-record-detail markdown-detail"><MarkdownPreview markdown={item.markdown} fallback={null} /></div> : null}
     </article>;
   })}</div>;
 }
