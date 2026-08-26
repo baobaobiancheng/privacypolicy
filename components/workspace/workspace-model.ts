@@ -28,7 +28,7 @@ export const rightsProfileFields = [
 
 export const profileFields = [...basicProfileFields, ...rightsProfileFields, ["securityMeasures", "安全措施概述", "例如：访问控制、传输加密、最小权限"] as const] as const;
 
-export type StepIndex = 0 | 1 | 2 | 3 | 4 | 5;
+export type StepIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export type GeneratedState = { status: "PENDING" | "GENERATING" | "FAILED" | "SUCCEEDED"; generationId: string; message?: string; createdAt: string };
 export type GenerationStageKey = "FACT_CHECK" | "LAW_SEARCH" | "DRAFTING" | "FINALIZING";
 export type GenerationStageStatus = "WAITING" | "ACTIVE" | "COMPLETED" | "FAILED";
@@ -43,7 +43,7 @@ export type LiveGenerationState = {
   phase: "THINKING" | "WRITING" | "VALIDATED";
   activityCount: number;
 };
-export type DisplayPreflightIssue = PreflightIssue & { fingerprint: string };
+export type DisplayPreflightIssue = PreflightIssue & { fingerprint: string; preflightRound?: number };
 export type AssistantMessage = {
   id: string;
   role: "user" | "assistant";

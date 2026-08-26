@@ -1,15 +1,19 @@
 import { requireDevActor } from "@/src/auth/session";
+import { recordAnalyticsEventSafely } from "@/src/analytics/server";
 import { getPrisma } from "@/src/data/prisma";
 import { loadProject } from "@/src/data/project-repository";
 import { DomainError } from "@/src/domain/errors";
 import { apiError, getRequestId } from "@/src/http/api-error";
 import { MysqlReportStorage } from "@/src/storage/report-storage";
 import { requireEntityId } from "@/src/http/route-params";
+import { after } from "next/server";
+import { withApiTiming } from "@/src/http/request-timing";
 
 export const runtime = "nodejs";
 type RouteContext = { params: Promise<{ projectId: string; reportId: string }> };
 
 export async function GET(request: Request, { params }: RouteContext) {
+  return withApiTiming(request, "/api/v1/projects/{projectId}/reports/{reportId}/content", async () => {
   try {
     const actor = requireDevActor(request);
     const routeParams = await params;
@@ -20,6 +24,13 @@ export async function GET(request: Request, { params }: RouteContext) {
     const report = await prisma.report.findFirst({ where: { id: reportId, projectId }, select: { id: true, filename: true } });
     if (!report) throw new DomainError("REPORT_NOT_FOUND", "报告不存在。", { retryable: false });
     const content = await new MysqlReportStorage(prisma).read(report.id);
+    after(() => recordAnalyticsEventSafely({
+        actor,
+        eventName: "WORD_DOWNLOADED",
+        projectId,
+        pagePath: `/projects/${projectId}`,
+        properties: { reportId },
+      }, prisma));
     const requestId = getRequestId(request);
     return new Response(new Blob([new Uint8Array(content)]), {
       headers: {
@@ -34,4 +45,5 @@ export async function GET(request: Request, { params }: RouteContext) {
   } catch (error) {
     return apiError(error, request, "报告下载失败。");
   }
+  });
 }

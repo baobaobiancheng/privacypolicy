@@ -30,7 +30,10 @@ type Credential = { appKey: string; appSecret: string };
  * Uses only lawstar's deterministic keyword query. It never invokes semantic
  * search or a detail endpoint, keeping the cost and retrieval scope bounded.
  */
-export async function searchLawsByKeywords(keywords: string[]): Promise<LawKeywordSearchResult[]> {
+export async function searchLawsByKeywords(
+  keywords: string[],
+  options: { signal?: AbortSignal } = {},
+): Promise<LawKeywordSearchResult[]> {
   const normalized = [...new Set(keywords.map(normalizeKeyword).filter(Boolean))].slice(0, MAX_KEYWORDS);
   if (normalized.length === 0) return [];
   const credential = await loadCredential();
@@ -40,15 +43,18 @@ export async function searchLawsByKeywords(keywords: string[]): Promise<LawKeywo
     while (nextIndex < normalized.length) {
       const index = nextIndex;
       nextIndex += 1;
-      results[index] = await keywordSearch(normalized[index], credential);
+      results[index] = await keywordSearch(normalized[index], credential, options.signal);
     }
   });
   await Promise.all(workers);
   return results;
 }
 
-async function keywordSearch(keyword: string, credential: Credential): Promise<LawKeywordSearchResult> {
+async function keywordSearch(keyword: string, credential: Credential, externalSignal?: AbortSignal): Promise<LawKeywordSearchResult> {
   const controller = new AbortController();
+  const abortFromExternal = () => controller.abort(externalSignal?.reason);
+  if (externalSignal?.aborted) abortFromExternal();
+  else externalSignal?.addEventListener("abort", abortFromExternal, { once: true });
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
     const response = await fetch(ENDPOINT, {
@@ -81,10 +87,12 @@ async function keywordSearch(keyword: string, credential: Credential): Promise<L
       issuingOrgan: stripHtml(law.issuingOrgan),
     }));
     return { keyword, laws };
-  } catch {
+  } catch (error) {
+    if (externalSignal?.aborted) throw externalSignal.reason ?? error;
     throw new DomainError("LAW_SEARCH_FAILED", `法规关键词“${keyword}”查询失败，请稍后重新生成。`, { retryable: true });
   } finally {
     clearTimeout(timeout);
+    externalSignal?.removeEventListener("abort", abortFromExternal);
   }
 }
 

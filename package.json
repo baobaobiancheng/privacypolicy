@@ -7,12 +7,17 @@
     "build": "next build --webpack",
     "start": "next start",
     "worker": "node --env-file-if-exists=.env.local --import tsx scripts/generation-worker.ts",
+    "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:integration": "node --env-file-if-exists=.env.local node_modules/vitest/vitest.mjs run tests/integration",
+    "test:e2e": "playwright test",
+    "benchmark:api": "node --env-file-if-exists=.env.local --import tsx scripts/benchmark-api-queries.ts",
+    "check": "npm run lint && npm run typecheck && npm test && npm run db:validate && npm run build",
     "db:validate": "prisma validate",
     "db:generate": "prisma generate",
-    "db:migrate:deploy": "node --env-file-if-exists=.env.local node_modules/prisma/build/index.js migrate deploy"
+    "db:migrate:deploy": "node --env-file-if-exists=.env.local node_modules/prisma/build/index.js migrate deploy",
+    "db:backfill:project-progress": "node --env-file-if-exists=.env.local --import tsx scripts/backfill-project-progress.ts"
   },
   "dependencies": {
     "@gsap/react": "2.1.2",
@@ -31,10 +36,13 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "1.55.1",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.2.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
+    "eslint": "9.39.1",
+    "eslint-config-next": "16.3.0",
     "prisma": "7.9.1",
     "tailwindcss": "4.3.3",
     "tsx": "4.20.5",

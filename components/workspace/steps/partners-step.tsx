@@ -40,6 +40,6 @@ export function PartnersStep(props: Props) {
     {answer !== "NO" ? <button type="button" className="add-feature" onClick={props.onAdd}><Plus weight="bold" /> 添加 SDK 或合作方</button> : null}
     {data.partners.length > 0 ? <button type="button" className="button button-ghost partner-confirm" onClick={() => props.onConfirm("YES")}>确认当前清单</button> : null}
     <div className="supplement-question-list section-questions">{["third-party-initialization", "sharing-transfer-public"].map(props.renderSupplementQuestion)}</div>
-    <div className="panel-actions"><button type="button" className="button button-ghost" onClick={props.onBack}><ArrowLeft weight="bold" /> 返回设备权限</button><button type="button" className="button button-primary" disabled={!data.supplementAnswers["third-party-services"]} onClick={props.onNext}>进入存储与安全 <ArrowRight weight="bold" /></button></div>
+    <div className="panel-actions"><button type="button" className="button button-ghost" onClick={props.onBack}><ArrowLeft weight="bold" /> 返回设备权限</button><button type="button" className="button button-primary" data-analytics-id="partners.next" disabled={!data.supplementAnswers["third-party-services"]} onClick={props.onNext}>进入存储与安全 <ArrowRight weight="bold" /></button></div>
   </section>;
 }

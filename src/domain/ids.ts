@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 
-export const ENTITY_ID_PREFIXES = ["prj", "gen", "rpt", "req", "aud"] as const;
+export const ENTITY_ID_PREFIXES = ["prj", "gen", "rpt", "req", "aud", "evt"] as const;
 
 export type EntityIdPrefix = (typeof ENTITY_ID_PREFIXES)[number];
 

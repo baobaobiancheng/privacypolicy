@@ -115,8 +115,11 @@ integration("MySQL core v2 API and worker", () => {
     const project = await prisma.project.findFirstOrThrow({ where: { tenantId: actor.tenantId } });
     const first = await enqueueGeneration(prisma, actor, project.id, "integration-idempotency-1");
     const repeated = await enqueueGeneration(prisma, actor, project.id, "integration-idempotency-1");
+    const repeatedFromAnotherWindow = await enqueueGeneration(prisma, actor, project.id, "integration-idempotency-2");
     expect(repeated.job.id).toBe(first.job.id);
     expect(repeated.reused).toBe(true);
+    expect(repeatedFromAnotherWindow.job.id).toBe(first.job.id);
+    expect(repeatedFromAnotherWindow.reused).toBe(true);
 
     await prisma.project.update({ where: { id: project.id }, data: { revision: { increment: 1 } } });
     const processed = await processNextGenerationJob(prisma, "integration-worker", {
@@ -147,21 +150,20 @@ integration("MySQL core v2 API and worker", () => {
     const actor = { userId: "demo-client", tenantId: "demo-tenant", role: "CLIENT_EDITOR" as const };
     const project = await prisma.project.findFirstOrThrow({ where: { tenantId: actor.tenantId } });
     const queued = await enqueueGeneration(prisma, actor, project.id, "integration-lease-takeover");
-    let releaseGeneration!: () => void;
     let generationStarted!: () => void;
     const started = new Promise<void>((resolve) => { generationStarted = resolve; });
-    const release = new Promise<void>((resolve) => { releaseGeneration = resolve; });
+    let externalRequestAborted = false;
     const processing = processNextGenerationJob(prisma, "worker-that-loses-lease", {
-      generatePolicy: async () => {
+      heartbeatMs: 20,
+      generatePolicy: async (_reportId, _formData, callbacks) => {
         generationStarted();
-        await release;
-        return {
-          filename: "不得落库.docx",
-          markdown: "# 不得落库的报告\n\n" + "正文。".repeat(50),
-          docx: Buffer.from("PK-lost-lease"),
-          model: "mock",
-          inputHash: "sha256:test",
-        };
+        const signal = callbacks?.signal;
+        if (!signal) throw new Error("worker did not pass an abort signal");
+        await new Promise<never>((_resolve, reject) => signal.addEventListener("abort", () => {
+          externalRequestAborted = true;
+          reject(signal.reason);
+        }, { once: true }));
+        throw new Error("unreachable");
       },
     });
     await started;
@@ -169,14 +171,30 @@ integration("MySQL core v2 API and worker", () => {
       where: { id: queued.job.id },
       data: { leaseOwner: "replacement-worker", leaseExpiresAt: new Date(Date.now() + 90_000) },
     });
-    releaseGeneration();
     await processing;
 
+    expect(externalRequestAborted).toBe(true);
     expect(await prisma.report.count({ where: { generationId: queued.job.id } })).toBe(0);
     expect(await prisma.generationJob.findUniqueOrThrow({ where: { id: queued.job.id } })).toMatchObject({
       state: "RUNNING",
       leaseOwner: "replacement-worker",
     });
+  });
+
+  it("requeues retryable failures with a future next-attempt time", async () => {
+    const { enqueueGeneration, processNextGenerationJob } = await import("@/src/application/generation/job-service");
+    const actor = { userId: "demo-client", tenantId: "demo-tenant", role: "CLIENT_EDITOR" as const };
+    const project = await prisma.project.findFirstOrThrow({ where: { tenantId: actor.tenantId } });
+    const queued = await enqueueGeneration(prisma, actor, project.id, "integration-retry-backoff");
+    const before = Date.now();
+    await processNextGenerationJob(prisma, "integration-retry-worker", {
+      generatePolicy: async () => {
+        throw new DomainError("MODEL_REQUEST_FAILED", "provider unavailable", { retryable: true });
+      },
+    });
+    const retried = await prisma.generationJob.findUniqueOrThrow({ where: { id: queued.job.id } });
+    expect(retried).toMatchObject({ state: "QUEUED", attemptCount: 1, leaseOwner: null });
+    expect(retried.nextAttemptAt.getTime()).toBeGreaterThanOrEqual(before + 24_000);
   });
 
   it("persists structured preflight failures for the client review screen", async () => {
@@ -199,5 +217,19 @@ integration("MySQL core v2 API and worker", () => {
       details: { issues: [{ id: "conflict-1" }] },
     });
     expect(await prisma.auditEvent.count({ where: { projectId: project.id, action: "GENERATION_FAILED" } })).toBe(1);
+
+    const issue = (failed.error?.details as { issues: Array<{ id: string; category: string; relatedPaths: string[] }> }).issues[0];
+    const fingerprint = JSON.stringify([issue.id, issue.category, [...issue.relatedPaths].sort()]);
+    const confirmed = await enqueueGeneration(
+      prisma,
+      actor,
+      project.id,
+      "integration-preflight-confirmed",
+      undefined,
+      { acknowledgedPreflightIssues: [fingerprint] },
+    );
+    expect(confirmed.reused).toBe(false);
+    const confirmedInput = await prisma.generationJob.findUniqueOrThrow({ where: { id: confirmed.job.id }, select: { inputJson: true } });
+    expect(confirmedInput.inputJson).toMatchObject({ acknowledgedPreflightIssues: [fingerprint] });
   });
 });

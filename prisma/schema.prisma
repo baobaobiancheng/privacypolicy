@@ -46,50 +46,54 @@ enum ReportStorageKind {
 }
 
 model User {
-  id             String          @id @db.VarChar(64)
-  tenantId       String          @db.VarChar(64)
-  email          String?         @db.VarChar(255)
-  displayName    String          @db.VarChar(120)
-  role           UserRole
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  projects       Project[]       @relation("ProjectOwner")
-  access         ProjectAccess[]
-  generationJobs GenerationJob[] @relation("GenerationRequestedBy")
-  auditEvents    AuditEvent[]
+  id              String           @id @db.VarChar(64)
+  tenantId        String           @db.VarChar(64)
+  email           String?          @db.VarChar(255)
+  displayName     String           @db.VarChar(120)
+  role            UserRole
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  projects        Project[]        @relation("ProjectOwner")
+  access          ProjectAccess[]
+  generationJobs  GenerationJob[]  @relation("GenerationRequestedBy")
+  auditEvents     AuditEvent[]
+  analyticsEvents AnalyticsEvent[]
 
   @@index([tenantId, role])
   @@map("users")
 }
 
 model Project {
-  id                String          @id @db.VarChar(64)
-  tenantId          String          @db.VarChar(64)
-  ownerId           String          @db.VarChar(64)
-  creationKey       String?         @db.VarChar(128)
-  name              String          @db.VarChar(160)
-  productName       String?         @db.VarChar(160)
-  status            ProjectStatus   @default(INFORMATION_COLLECTING)
-  revision          Int             @default(0)
-  formSchemaVersion String          @default("privacy-form-v2.0.0") @db.VarChar(64)
-  contentVersion    String          @db.VarChar(64)
-  contentHash       String          @db.Char(71)
-  categoryKey       String          @default("map-navigation") @db.VarChar(64)
-  categoryVersion   String          @default("app-categories-v1.0.0") @db.VarChar(64)
-  currentStepKey    String          @default("profile") @db.VarChar(64)
+  id                String           @id @db.VarChar(64)
+  tenantId          String           @db.VarChar(64)
+  ownerId           String           @db.VarChar(64)
+  creationKey       String?          @db.VarChar(128)
+  name              String           @db.VarChar(160)
+  productName       String?          @db.VarChar(160)
+  status            ProjectStatus    @default(INFORMATION_COLLECTING)
+  revision          Int              @default(0)
+  formSchemaVersion String           @default("privacy-form-v2.0.0") @db.VarChar(64)
+  contentVersion    String           @db.VarChar(64)
+  contentHash       String           @db.Char(71)
+  categoryKey       String           @default("map-navigation") @db.VarChar(64)
+  categoryVersion   String           @default("app-categories-v1.0.0") @db.VarChar(64)
+  currentStepKey    String           @default("profile") @db.VarChar(64)
+  progressPercent   Int              @default(0)
   formData          Json
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  owner             User            @relation("ProjectOwner", fields: [ownerId], references: [id])
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  owner             User             @relation("ProjectOwner", fields: [ownerId], references: [id])
   access            ProjectAccess[]
   generationJobs    GenerationJob[]
   reports           Report[]
   auditEvents       AuditEvent[]
+  analyticsEvents   AnalyticsEvent[]
 
+  @@unique([tenantId, ownerId, creationKey])
   @@index([tenantId, status, updatedAt])
+  @@index([tenantId, createdAt])
   @@index([ownerId, updatedAt])
   @@index([tenantId, categoryKey])
-  @@unique([tenantId, ownerId, creationKey])
   @@map("projects")
 }
 
@@ -121,6 +125,7 @@ model GenerationJob {
   projectRevision Int
   idempotencyKey  String             @db.VarChar(128)
   inputHash       String             @db.Char(71)
+  activeInputKey  String?            @unique @db.Char(71)
   inputJson       Json
   state           GenerationJobState @default(QUEUED)
   stage           GenerationStage    @default(QUEUED)
@@ -130,6 +135,7 @@ model GenerationJob {
   errorMessage    String?            @db.Text
   errorDetails    Json?
   attemptCount    Int                @default(0)
+  nextAttemptAt   DateTime           @default(now())
   leaseOwner      String?            @db.VarChar(128)
   leaseExpiresAt  DateTime?
   heartbeatAt     DateTime?
@@ -143,7 +149,9 @@ model GenerationJob {
 
   @@unique([projectId, idempotencyKey])
   @@index([state, leaseExpiresAt, createdAt])
+  @@index([state, nextAttemptAt, leaseExpiresAt, createdAt], map: "generation_jobs_state_next_attempt_lease_idx")
   @@index([projectId, createdAt])
+  @@index([projectId, state, completedAt])
   @@map("generation_jobs")
 }
 
@@ -181,6 +189,33 @@ model AuditEvent {
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([projectId, createdAt])
+  @@index([projectId, action, createdAt])
   @@index([requestId])
   @@map("audit_events")
+}
+
+/// Product analytics intentionally stores operational metadata only. Customer
+/// form values, assistant prompts, attachment text and policy content must
+/// never be copied into this table.
+model AnalyticsEvent {
+  id         String   @id @db.VarChar(64)
+  tenantId   String   @db.VarChar(64)
+  userId     String   @db.VarChar(64)
+  projectId  String?  @db.VarChar(64)
+  sessionId  String?  @db.VarChar(64)
+  eventName  String   @db.VarChar(64)
+  pagePath   String?  @db.VarChar(500)
+  durationMs Int?
+  properties Json?
+  occurredAt DateTime
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project    Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, eventName, occurredAt])
+  @@index([occurredAt])
+  @@index([projectId, occurredAt])
+  @@index([userId, occurredAt])
+  @@index([sessionId, occurredAt])
+  @@map("analytics_events")
 }

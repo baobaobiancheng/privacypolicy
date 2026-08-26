@@ -31,8 +31,8 @@ npm run db:migrate:deploy
 ## 核心架构
 
 - `src/workspace/contract.ts`：`privacy-form-v2.0.0` 问卷合同，前端、API、Worker 和测试共享。
-- `components/workspace/steps/`：六步事实收集界面按步骤物理拆分；`privacy-workspace.tsx` 只负责工作区状态、导航与跨步骤编排。
-- `components/workspace/workspace-model.ts`：六步组件共享的显示模型、选项和类型定义。
+- `components/workspace/steps/`：前六个事实收集环节与第七个政策生成环节按步骤物理拆分；`privacy-workspace.tsx` 只负责工作区状态、导航与跨步骤编排。
+- `components/workspace/workspace-model.ts`：七环节组件共享的显示模型、选项和类型定义。
 - `src/application/generation/`：任务入队、租约、心跳、幂等、事实预检、法规检索和报告落库。
 - `scripts/generation-worker.ts`：独立 Worker 进程；过期租约可重新领取，最多重试三次。
 - `src/storage/report-storage.ts`：报告存储抽象；开发阶段使用 MySQL `LongBlob`，后续可替换对象存储。

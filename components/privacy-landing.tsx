@@ -27,7 +27,7 @@ export function PrivacyLanding() {
         </div>
         <div className="landing-v3-actions">
           <Link href="/projects">已有项目</Link>
-          <Link className="v3-primary-button" href="/projects/new/category">开始创建</Link>
+          <Link className="v3-primary-button" data-analytics-id="landing.start" href="/projects/new/category">开始创建</Link>
         </div>
       </nav>
 
@@ -43,9 +43,9 @@ export function PrivacyLanding() {
 
         <div className="landing-product-stage" aria-label="隐私政策产品流程预览">
           <div className="landing-product-window">
-            <div className="preview-progress-copy"><strong>第 4 / 6 步 · 补充产品信息</strong><span>完成度 68%</span></div>
+            <div className="preview-progress-copy"><strong>第 4 / 7 步 · SDK 与合作方</strong><span>完成度 57%</span></div>
             <div className="preview-progress"><span /></div>
-            <div className="preview-steps"><span><Check weight="bold" />基本信息</span><span><Check weight="bold" />功能与个人信息</span><span>3 设备权限</span><strong>4 SDK 与合作方</strong><span>5 存储与安全</span><span>6 用户权利与生成</span></div>
+            <div className="preview-steps"><span><Check weight="bold" />基本信息</span><span><Check weight="bold" />功能与个人信息</span><span>3 设备权限</span><strong>4 SDK 与合作方</strong><span>5 存储与安全</span><span>6 用户权利</span><span>7 隐私政策生成</span></div>
             <div className="preview-form">
               <div><strong>后台定位</strong><small>触发场景</small><p>导航进行中、偏离路线、语音播报期间</p><small>停止条件</small><p>退出导航后立即停止</p></div>
               <div className="preview-ai"><span><Sparkle weight="fill" /> AI 助手</span><p>退出导航后，后台定位是否立即停止？</p><span className="preview-choice">立即停止</span><span className="preview-choice">继续用于轨迹记录</span></div>

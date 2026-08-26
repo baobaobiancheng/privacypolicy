@@ -6,8 +6,8 @@ import { renderDraftDocx } from "@/src/documents/render-draft";
 import {
   analyzeFormBeforeGeneration,
   generatePolicyDraft,
+  type GenerationPreflight,
   type PolicyGenerationProgress,
-  type PreflightIssue,
 } from "@/src/ai/deepseek";
 import { evaluateFormalPolicyReadiness, resolveFieldAnswer } from "@/src/knowledge/readiness";
 import { getSlotScenario, mapCnKnowledgePackage } from "@/src/knowledge/map-cn";
@@ -15,12 +15,18 @@ import { searchLawsByKeywords, type LawKeywordSearchResult } from "@/src/law/bai
 import { DomainError } from "@/src/domain/errors";
 import type { ProjectFormData } from "@/src/workspace/contract";
 import { toGenerationForm } from "@/src/workspace/form-adapter";
+import { buildPolicyGenerationContext, type PolicyGenerationContext } from "./policy-generation-context";
+import { filterAcknowledgedBlockingIssues } from "./preflight-acknowledgements";
 
 export type PolicyGeneratorStage = "FACT_CHECK" | "LAW_SEARCH" | "DRAFTING" | "FINALIZING";
 
 export type PolicyGeneratorCallbacks = {
   onStage?: (stage: PolicyGeneratorStage, message: string) => void | Promise<void>;
   onProgress?: (progress: PolicyGenerationProgress) => void;
+  signal?: AbortSignal;
+  acknowledgedPreflightIssues?: readonly string[];
+  preflightRound?: number;
+  cachedPreflight?: GenerationPreflight;
 };
 
 export type PolicyGeneratorResult = {
@@ -37,6 +43,7 @@ export async function generatePolicyFromProjectFacts(
   callbacks: PolicyGeneratorCallbacks = {},
 ): Promise<PolicyGeneratorResult> {
   const form = toGenerationForm(formData);
+  const generationContext = buildPolicyGenerationContext(formData);
   const readiness = evaluateFormalPolicyReadiness(form);
   if (!readiness.ready) {
     throw new DomainError("FORM_NOT_READY", "请先完成必填信息，再生成隐私政策。", {
@@ -45,21 +52,34 @@ export async function generatePolicyFromProjectFacts(
     });
   }
 
-  await callbacks.onStage?.("FACT_CHECK", "正在核对已填写的产品信息");
-  const preflight = await analyzeFormBeforeGeneration(form);
-  const blockingIssues = deduplicateIssues(preflight.issues)
-    .filter((issue) => issue.severity === "BLOCKING");
+  const preflightRound = Math.min(3, Math.max(1, callbacks.preflightRound ?? 1));
+  await callbacks.onStage?.(
+    "FACT_CHECK",
+    callbacks.cachedPreflight
+      ? "三轮事实核对已完成，正在读取已确认结果"
+      : `正在进行第 ${preflightRound}/3 轮产品事实核对`,
+  );
+  const preflight = callbacks.cachedPreflight
+    ?? await analyzeFormBeforeGeneration(form, callbacks.signal, generationContext);
+  const blockingIssues = filterAcknowledgedBlockingIssues(
+    preflight.issues,
+    callbacks.acknowledgedPreflightIssues ?? [],
+  );
   if (blockingIssues.length > 0) {
     throw new DomainError("FORM_SEMANTIC_REVIEW_REQUIRED", "生成前发现需要核对的产品事实。", {
       retryable: false,
-      details: { issues: blockingIssues },
+      details: {
+        issues: blockingIssues,
+        lawKeywords: preflight.lawKeywords,
+        preflightRound,
+      },
     });
   }
 
   await callbacks.onStage?.("LAW_SEARCH", "正在根据产品场景查询相关法规");
-  const legalSearchResults = await searchLawsByKeywords(preflight.lawKeywords);
+  const legalSearchResults = await searchLawsByKeywords(preflight.lawKeywords, { signal: callbacks.signal });
   await callbacks.onStage?.("DRAFTING", "智能体正在组织政策正文");
-  const result = await renderPolicy(reportId, form, legalSearchResults, callbacks);
+  const result = await renderPolicy(reportId, form, generationContext, legalSearchResults, callbacks);
   return {
     ...result,
     inputHash: `sha256:${createHash("sha256").update(JSON.stringify(formData)).digest("hex")}`,
@@ -69,11 +89,12 @@ export async function generatePolicyFromProjectFacts(
 async function renderPolicy(
   reportId: string,
   form: ReturnType<typeof toGenerationForm>,
+  generationContext: PolicyGenerationContext,
   legalSearchResults: LawKeywordSearchResult[],
   callbacks: PolicyGeneratorCallbacks,
 ): Promise<Omit<PolicyGeneratorResult, "inputHash">> {
   const input = form;
-  const structuredFactKeys = collectFactPaths(input.projectFacts, "projectFacts");
+  const structuredFactKeys = collectFactPaths(generationContext, "");
   const selectedFeatures = verifiedMapV1Content.payload.features.filter((feature) => input.selected.includes(feature.key));
   const confirmedSupplementFactKeys = Object.entries(input.supplementAnswers).flatMap(([questionId, answer]) => [
     ...(answer.answer !== "UNKNOWN" ? [`supplementAnswers.${questionId}`, `supplementAnswers.${questionId}.answer`] : []),
@@ -117,6 +138,7 @@ async function renderPolicy(
   });
   const generatedDraft = await generatePolicyDraft({
     form: input,
+    generationContext,
     contentVersion: verifiedMapV1Content.contentVersion,
     contentHash: verifiedMapV1Content.contentHash,
     knowledgeContext: {
@@ -141,11 +163,6 @@ async function renderPolicy(
       ...confirmedSupplementFactKeys,
       ...verifiedMapV1Content.payload.commonDisclosureFields.map((field) => field.key),
       "additionalNotes",
-      "projectFacts.processingActivities",
-      "projectFacts.permissions",
-      "projectFacts.partners",
-      "projectFacts.storageAndSecurity",
-      "projectFacts.rightsAndGovernance",
       ...structuredFactKeys,
       "THIRD_PARTY_FACTS_STATUS",
     ],
@@ -157,11 +174,6 @@ async function renderPolicy(
       ...Object.keys(input.profile).flatMap((key) => [key, `profile.${key}`]),
       ...confirmedSupplementFactKeys,
       "additionalNotes",
-      "projectFacts.processingActivities",
-      "projectFacts.permissions",
-      "projectFacts.partners",
-      "projectFacts.storageAndSecurity",
-      "projectFacts.rightsAndGovernance",
       ...structuredFactKeys,
       "THIRD_PARTY_FACTS_STATUS",
     ],
@@ -177,7 +189,7 @@ async function renderPolicy(
       { id: "updates", title: "隐私政策的查阅和修订", summary: "披露政策入口和更新通知方式。" },
       { id: "contact", title: "联系我们", summary: "披露公司公共联系方式和响应期限。" },
     ],
-  }, { onProgress: callbacks.onProgress });
+  }, { onProgress: callbacks.onProgress, signal: callbacks.signal });
 
   await callbacks.onStage?.("FINALIZING", "正在核对结构并制作 Word");
   const docx = await renderDraftDocx(plan, {
@@ -198,16 +210,6 @@ async function renderPolicy(
   };
 }
 
-function deduplicateIssues(issues: PreflightIssue[]): PreflightIssue[] {
-  const seen = new Set<string>();
-  return issues.filter((issue) => {
-    const key = JSON.stringify([issue.id, issue.category, [...issue.relatedPaths].sort()]);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
 function safeFilename(value: string): string {
   return value.replace(/[\\/:*?"<>|]/g, "-").trim() || "隐私政策";
 }
@@ -218,7 +220,7 @@ function collectFactPaths(value: unknown, prefix: string): string[] {
   const entries = Array.isArray(value) ? value.entries() : Object.entries(value);
   const paths: string[] = [];
   for (const [key, child] of entries) {
-    paths.push(...collectFactPaths(child, `${prefix}.${key}`));
+    paths.push(...collectFactPaths(child, prefix ? `${prefix}.${key}` : String(key)));
   }
   return paths;
 }

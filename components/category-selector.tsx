@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, CheckCircle, LockSimple, MagnifyingGlass, MapPin, X } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { BaijianBrand } from "@/components/baijian-brand";
 import { appCategoryRegistry, type AppCategory } from "@/src/categories";
+import { clearProjectCreationKey, projectCreationStorage, resolveProjectCreationKey } from "@/src/workspace/project-creation-key";
 
 const PERSONA_ID = "client-editor";
 const CREATE_TIMEOUT_MS = 15_000;
@@ -52,7 +54,8 @@ export function CategorySelector() {
     setCreating(true);
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), CREATE_TIMEOUT_MS);
-    creationKeyRef.current ??= createProjectIdempotencyKey();
+    const creationStorage = projectCreationStorage();
+    creationKeyRef.current = resolveProjectCreationKey(creationStorage, creationKeyRef.current, createProjectIdempotencyKey);
     try {
       const response = await fetch("/api/v1/projects", {
         method: "POST",
@@ -62,9 +65,12 @@ export function CategorySelector() {
       });
       const payload = await response.json() as { data?: { id: string }; error?: { message?: string } };
       if (!response.ok || !payload.data?.id) throw new Error(payload.error?.message || "项目创建失败，请稍后重试。");
+      clearProjectCreationKey(creationStorage);
       const target = `/projects/${payload.data.id}/profile`;
       router.push(target);
       navigationFallbackRef.current = window.setTimeout(() => {
+        // Hard navigation is an intentional recovery path when the client router stalls.
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
         window.location.assign(target);
       }, NAVIGATION_FALLBACK_MS);
     } catch (cause) {
@@ -81,7 +87,7 @@ export function CategorySelector() {
     <main className="category-page workspace-v3">
       <header className="category-header">
         <BaijianBrand />
-        <nav><a href="/">产品首页</a><a href="/projects">我的项目</a></nav>
+        <nav><Link href="/">产品首页</Link><Link href="/projects">我的项目</Link></nav>
       </header>
       <section className="category-hero">
         <p className="hero-kicker">新建隐私政策项目</p>
@@ -101,6 +107,7 @@ export function CategorySelector() {
             {group.categories.map((category) => <button
               type="button"
               className="category-card"
+              data-analytics-id={`category.${category.key}.select`}
               data-open={category.availability === "OPEN"}
               disabled={creating}
               key={category.key}

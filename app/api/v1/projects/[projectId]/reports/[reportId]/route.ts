@@ -5,11 +5,13 @@ import { loadProject } from "@/src/data/project-repository";
 import { DomainError } from "@/src/domain/errors";
 import { apiError, getRequestId } from "@/src/http/api-error";
 import { requireEntityId } from "@/src/http/route-params";
+import { withApiTiming } from "@/src/http/request-timing";
 
 export const runtime = "nodejs";
 type RouteContext = { params: Promise<{ projectId: string; reportId: string }> };
 
 export async function GET(request: Request, { params }: RouteContext) {
+  return withApiTiming(request, "/api/v1/projects/{projectId}/reports/{reportId}", async () => {
   try {
     const actor = requireDevActor(request);
     const routeParams = await params;
@@ -34,4 +36,5 @@ export async function GET(request: Request, { params }: RouteContext) {
   } catch (error) {
     return apiError(error, request, "报告加载失败。");
   }
+  });
 }

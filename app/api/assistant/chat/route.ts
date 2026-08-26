@@ -1,8 +1,10 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { AssistantChatRequestSchema, chatWithPrivacyAssistant } from "@/src/ai/privacy-assistant";
+import { recordAnalyticsEventSafely } from "@/src/analytics/server";
 import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
 import { requireDevActor, type SessionActor } from "@/src/auth/session";
 import { isDomainError } from "@/src/domain/errors";
+import { withApiTiming } from "@/src/http/request-timing";
 
 export const runtime = "nodejs";
 
@@ -23,6 +25,7 @@ function rateLimited(key: string) {
 }
 
 export async function POST(request: Request) {
+  return withApiTiming(request, "/api/assistant/chat", async () => {
   if (!isDevPersonaEnabled()) return NextResponse.json({ code: "PROJECT_FORBIDDEN" }, { status: 404 });
   let actor: SessionActor;
   try {
@@ -38,14 +41,23 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ code: "FIELD_INVALID", message: "对话内容格式不正确。", retryable: false }, { status: 400 });
   }
+  const recordQuestion = (success: boolean, errorCode?: string) => recordAnalyticsEventSafely({
+    actor,
+    eventName: "AI_ASSISTANT_QUESTION",
+    properties: { success, ...(errorCode ? { errorCode } : {}) },
+  });
   try {
     const result = await chatWithPrivacyAssistant(parsed.data);
+    after(() => recordQuestion(true));
     return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     if (isDomainError(error)) {
+      after(() => recordQuestion(false, error.code));
       const status = error.code === "MODEL_NOT_CONFIGURED" ? 503 : 502;
       return NextResponse.json({ code: error.code, message: error.message, retryable: error.retryable }, { status });
     }
+    after(() => recordQuestion(false, "MODEL_REQUEST_FAILED"));
     return NextResponse.json({ code: "MODEL_REQUEST_FAILED", message: "AI 助手暂时无法连接，请稍后重试。", retryable: true }, { status: 502 });
   }
+  });
 }

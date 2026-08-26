@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { FormPayloadSchema } from "@/src/ai/deepseek";
+import { FormPayloadSchema } from "@/src/ai/form-payload";
+import { GenerationPreflightSchema } from "@/src/ai/policy-preflight";
 import { getMapFeature } from "@/src/content/map-v1";
 import { FORM_SCHEMA_VERSION, ProjectFormDataSchema, type ProjectFormData } from "./contract";
 
@@ -78,7 +79,6 @@ export function toGenerationForm(formData: ProjectFormData): z.output<typeof For
     fieldAnswers,
     additionalNotes: formData.additionalNotes,
     supplementAnswers: formData.supplementAnswers,
-    projectFacts: formData,
   });
 }
 
@@ -116,6 +116,9 @@ export const GenerationInputSchema = z.object({
   schemaVersion: z.literal(FORM_SCHEMA_VERSION),
   projectRevision: z.number().int().nonnegative(),
   formData: ProjectFormDataSchema,
+  acknowledgedPreflightIssues: z.array(z.string().trim().min(1).max(1_000)).max(20).default([]),
+  preflightRound: z.number().int().min(1).max(3).default(1),
+  cachedPreflight: GenerationPreflightSchema.optional(),
 }).strict();
 
 export type GenerationInput = z.output<typeof GenerationInputSchema>;

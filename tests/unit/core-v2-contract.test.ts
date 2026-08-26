@@ -59,7 +59,7 @@ describe("canonical project form", () => {
         informationItems: ["位置信息"], informationOther: [], purposes: ["路线规划"], purposeOther: "",
       }],
     });
-    expect(calculateProjectProgress(form)).toBe(33);
+    expect(calculateProjectProgress(form)).toBe(29);
   });
 });
 

@@ -5,6 +5,7 @@ import { fallbackTermExplanation, isExplainableTerm } from "@/src/ai/explain-ter
 import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
 import { requireDevActor, type SessionActor } from "@/src/auth/session";
 import { isDomainError } from "@/src/domain/errors";
+import { withApiTiming } from "@/src/http/request-timing";
 
 export const runtime = "nodejs";
 
@@ -34,6 +35,7 @@ function rateLimited(actor: SessionActor): boolean {
 }
 
 export async function POST(request: Request) {
+  return withApiTiming(request, "/api/explain", async () => {
   if (!isDevPersonaEnabled()) {
     return NextResponse.json({ code: "PROJECT_FORBIDDEN" }, { status: 404 });
   }
@@ -61,4 +63,5 @@ export async function POST(request: Request) {
     if (isDomainError(error)) return NextResponse.json({ code: error.code, message: error.message, retryable: error.retryable }, { status: 502 });
     return NextResponse.json({ code: "EXPLAIN_FAILED", message: "解释生成失败，请稍后重试。", retryable: true }, { status: 502 });
   }
+  });
 }

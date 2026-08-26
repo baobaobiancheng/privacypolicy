@@ -3,6 +3,7 @@ import { z } from "zod";
 import { extractSupplementSlots } from "@/src/ai/deepseek";
 import { isDevPersonaEnabled } from "@/src/auth/dev-personas";
 import { isDomainError } from "@/src/domain/errors";
+import { withApiTiming } from "@/src/http/request-timing";
 
 export const runtime = "nodejs";
 
@@ -12,6 +13,7 @@ const InputSchema = z.object({
 }).strict();
 
 export async function POST(request: Request) {
+  return withApiTiming(request, "/api/knowledge/extract-slots", async () => {
   if (!isDevPersonaEnabled()) return NextResponse.json({ code: "PROJECT_FORBIDDEN" }, { status: 404 });
   const parsed = InputSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ code: "INVALID_SLOT_INPUT", message: "请先填写产品实际情况。" }, { status: 400 });
@@ -25,4 +27,5 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ code: "MODEL_REQUEST_FAILED", message: "智能整理暂时不可用，请直接填写固定字段。" }, { status: 502 });
   }
+  });
 }

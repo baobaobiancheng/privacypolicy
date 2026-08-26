@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FormPayloadSchema } from "@/src/ai/deepseek";
+import { FormPayloadSchema } from "@/src/ai/form-payload";
 import { SupplementAnswerSchema } from "@/src/knowledge/map-cn/schema";
 
 /**
@@ -12,7 +12,8 @@ export const WORKSPACE_STEPS = [
   { step: 2, slug: "permissions", label: "设备权限" },
   { step: 3, slug: "partners", label: "SDK 与合作方" },
   { step: 4, slug: "storage", label: "存储与安全" },
-  { step: 5, slug: "generate", label: "用户权利与生成" },
+  { step: 5, slug: "rights", label: "用户权利" },
+  { step: 6, slug: "generate", label: "隐私政策生成" },
 ] as const;
 
 export type WorkspaceStep = (typeof WORKSPACE_STEPS)[number]["step"];
@@ -113,7 +114,8 @@ export type ProjectFormData = z.output<typeof ProjectFormDataSchema>;
 
 /** 入库/入哈希前剥离本地细节（如生成预览），避免它污染修订与表单哈希。 */
 export function stripProjectLocalExtras<T extends Record<string, unknown>>(form: T): Omit<T, (typeof projectLocalExtras)[number]> {
-  const { generatedMarkdown: _generatedMarkdown, ...rest } = form;
+  const rest = { ...form };
+  delete rest.generatedMarkdown;
   return rest;
 }
 
@@ -139,6 +141,8 @@ export function calculateProjectProgress(form: Partial<ProjectFormData>): number
     && rights.updateNotices?.length
     && rights.minorMode,
   );
+  // 第七环节是生成结果，不能仅凭 formData 判定完成。事实全部填写完时
+  // 项目进度为 6/7；报告成功落库后由生成事务推进到 100%。
   const stages = [profileDone, hasActivity, permissionsDone, partnersDone, storageDone, rightsDone];
-  return Math.round(stages.filter(Boolean).length / stages.length * 100);
+  return Math.round(stages.filter(Boolean).length / WORKSPACE_STEPS.length * 100);
 }

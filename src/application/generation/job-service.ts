@@ -1,114 +1,34 @@
 import { createHash } from "node:crypto";
-import { Prisma, type GenerationJob, type GenerationStage, type PrismaClient } from "@prisma/client";
+import { Prisma, type GenerationStage, type PrismaClient } from "@prisma/client";
 import { DomainError, isDomainError } from "@/src/domain/errors";
 import { createEntityId } from "@/src/domain/ids";
-import type { SessionActor } from "@/src/auth/session";
-import { loadProject } from "@/src/data/project-repository";
-import { ProjectFormDataSchema } from "@/src/workspace/contract";
 import { GenerationInputSchema } from "@/src/workspace/form-adapter";
 import { generatePolicyFromProjectFacts, type PolicyGeneratorResult, type PolicyGeneratorStage } from "./policy-generator";
 import { MysqlReportStorage } from "@/src/storage/report-storage";
+import { commitGenerationReport } from "./report-commit";
+import {
+  claimNextGenerationJob,
+  GENERATION_LEASE_MS,
+  generationRetryDelayMs,
+  renewGenerationLease,
+  shouldRetryGeneration,
+  updateGenerationProgress,
+} from "./job-lease";
 
-const LEASE_MS = 90_000;
+export { generationRetryDelayMs } from "./job-lease";
+export { enqueueGeneration, getGeneration, getLatestGenerationForRevision } from "./job-commands";
+export type { GenerationJobView } from "./job-view";
+
 const HEARTBEAT_MS = 20_000;
-const MAX_ATTEMPTS = 3;
 const PROGRESS_WRITE_INTERVAL_MS = 1_500;
 const PREVIEW_WRITE_INTERVAL_MS = 5_000;
 const PREVIEW_WRITE_CHARACTER_DELTA = 4_096;
-
-export type GenerationJobView = {
-  id: string;
-  projectId: string;
-  projectRevision: number;
-  state: GenerationJob["state"];
-  stage: GenerationJob["stage"];
-  progress: unknown;
-  previewMarkdown: string | null;
-  error: { code: string; message: string; details: unknown } | null;
-  reportId: string | null;
-  createdAt: string;
-  updatedAt: string;
-  completedAt: string | null;
-};
-
-export async function enqueueGeneration(
-  prisma: PrismaClient,
-  actor: SessionActor,
-  projectId: string,
-  idempotencyKey: string,
-  requestId?: string,
-): Promise<{ job: GenerationJobView; reused: boolean }> {
-  if (!idempotencyKey.trim() || idempotencyKey.length > 128) {
-    throw new DomainError("FIELD_INVALID", "缺少有效的幂等键。", { retryable: false });
-  }
-  const project = await loadProject(actor, projectId, "EDIT", prisma);
-  const formData = ProjectFormDataSchema.parse(project.formData);
-  const input = GenerationInputSchema.parse({
-    schemaVersion: formData.schemaVersion,
-    projectRevision: project.revision,
-    formData,
-  });
-  const inputHash = hashJson(input);
-  const existing = await prisma.generationJob.findUnique({
-    where: { projectId_idempotencyKey: { projectId, idempotencyKey } },
-    include: { report: { select: { id: true } } },
-  });
-  if (existing) {
-    if (existing.inputHash !== inputHash) {
-      throw new DomainError("PROJECT_REVISION_CONFLICT", "项目已更新，请使用新的生成请求。", { retryable: true });
-    }
-    return { job: toJobView(existing), reused: true };
-  }
-
-  try {
-    const created = await prisma.$transaction(async (tx) => {
-      const job = await tx.generationJob.create({ data: {
-        id: createEntityId("gen"),
-        projectId,
-        requestedById: actor.userId,
-        projectRevision: project.revision,
-        idempotencyKey,
-        inputHash,
-        inputJson: input as unknown as Prisma.InputJsonValue,
-        progressJson: { completedSections: 0, totalSections: 8, characterCount: 0 },
-      }, include: { report: { select: { id: true } } } });
-      await tx.auditEvent.create({ data: {
-        id: createEntityId("aud"), requestId, projectId, userId: actor.userId,
-        action: "GENERATION_QUEUED", metadata: { generationId: job.id, projectRevision: project.revision, inputHash },
-      } });
-      return job;
-    });
-    return { job: toJobView(created), reused: false };
-  } catch (error) {
-    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
-    const concurrent = await prisma.generationJob.findUnique({
-      where: { projectId_idempotencyKey: { projectId, idempotencyKey } },
-      include: { report: { select: { id: true } } },
-    });
-    if (!concurrent || concurrent.inputHash !== inputHash) {
-      throw new DomainError("PROJECT_REVISION_CONFLICT", "项目已更新，请使用新的生成请求。", { retryable: true });
-    }
-    return { job: toJobView(concurrent), reused: true };
-  }
-}
-
-export async function getGeneration(
-  prisma: PrismaClient,
-  actor: SessionActor,
-  projectId: string,
-  generationId: string,
-): Promise<GenerationJobView> {
-  await loadProject(actor, projectId, "READ", prisma);
-  const job = await prisma.generationJob.findFirst({
-    where: { id: generationId, projectId },
-    include: { report: { select: { id: true } } },
-  });
-  if (!job) throw new DomainError("GENERATION_NOT_FOUND", "生成任务不存在。", { retryable: false });
-  return toJobView(job);
-}
+const LEASE_ABORT_SAFETY_MS = 10_000;
 
 export type GenerationWorkerDependencies = {
   generatePolicy?: typeof generatePolicyFromProjectFacts;
+  /** Allows deterministic lease-loss tests without waiting for production heartbeat intervals. */
+  heartbeatMs?: number;
 };
 
 export async function processNextGenerationJob(
@@ -116,10 +36,13 @@ export async function processNextGenerationJob(
   workerId: string,
   dependencies: GenerationWorkerDependencies = {},
 ): Promise<boolean> {
-  const job = await claimNextJob(prisma, workerId);
+  const job = await claimNextGenerationJob(prisma, workerId);
   if (!job) return false;
 
   let heartbeat: ReturnType<typeof setInterval> | undefined;
+  const executionController = new AbortController();
+  let leaseValidUntil = Date.now() + GENERATION_LEASE_MS;
+  let heartbeatRunning = false;
   let lastProgressWrite = 0;
   let lastPreviewWrite = 0;
   let lastPreviewLength = 0;
@@ -131,9 +54,10 @@ export async function processNextGenerationJob(
     previewMarkdown?: string,
   ) => {
     progressWriteQueue = progressWriteQueue
-      .then(() => updateProgress(prisma, job.id, workerId, stage, progress, previewMarkdown))
+      .then(() => updateGenerationProgress(prisma, job.id, workerId, stage, progress, previewMarkdown))
       .catch((error) => {
         progressWriteError ??= error;
+        if (!executionController.signal.aborted) executionController.abort(error);
       });
     return progressWriteQueue;
   };
@@ -143,10 +67,26 @@ export async function processNextGenerationJob(
   };
   try {
     heartbeat = setInterval(() => {
-      void renewLease(prisma, job.id, workerId).catch((error) => {
-        console.error(JSON.stringify({ level: "error", event: "generation_heartbeat_failed", jobId: job.id, error: String(error) }));
-      });
-    }, HEARTBEAT_MS);
+      if (heartbeatRunning || executionController.signal.aborted) return;
+      heartbeatRunning = true;
+      void renewGenerationLease(prisma, job.id, workerId)
+        .then((renewed) => {
+          if (!renewed) {
+            executionController.abort(new DomainError("GENERATION_IN_PROGRESS", "生成任务租约已由其他 Worker 接管。", { retryable: true }));
+            return;
+          }
+          leaseValidUntil = Date.now() + GENERATION_LEASE_MS;
+        })
+        .catch((error) => {
+          console.error(JSON.stringify({ level: "error", event: "generation_heartbeat_failed", jobId: job.id, error: String(error) }));
+          if (Date.now() >= leaseValidUntil - LEASE_ABORT_SAFETY_MS && !executionController.signal.aborted) {
+            executionController.abort(new DomainError("DATABASE_UNAVAILABLE", "无法续约生成任务，已停止本次执行。", { retryable: true }));
+          }
+        })
+        .finally(() => {
+          heartbeatRunning = false;
+        });
+    }, dependencies.heartbeatMs ?? HEARTBEAT_MS);
 
     const input = GenerationInputSchema.parse(job.inputJson);
     const reportId = createEntityId("rpt");
@@ -171,61 +111,28 @@ export async function processNextGenerationJob(
         }
         void queueProgressWrite("DRAFTING", progress, previewDue ? progress.previewMarkdown : undefined);
       },
+      signal: executionController.signal,
+      acknowledgedPreflightIssues: input.acknowledgedPreflightIssues,
+      preflightRound: input.preflightRound,
+      cachedPreflight: input.cachedPreflight,
     });
     await flushProgressWrites();
+    executionController.signal.throwIfAborted();
     const docxHash = `sha256:${createHash("sha256").update(result.docx).digest("hex")}`;
     const storage = new MysqlReportStorage(prisma);
     const stored = await storage.prepare(reportId, result.docx, docxHash);
+    executionController.signal.throwIfAborted();
 
-    await prisma.$transaction(async (tx) => {
-      const currentProject = await tx.project.findUnique({ where: { id: job.projectId }, select: { revision: true } });
-      if (!currentProject) throw new DomainError("PROJECT_NOT_FOUND", "项目已不存在。", { retryable: false });
-      const superseded = currentProject.revision !== job.projectRevision;
-      const completed = await tx.generationJob.updateMany({
-        where: { id: job.id, state: "RUNNING", leaseOwner: workerId },
-        data: {
-          state: superseded ? "SUPERSEDED" : "SUCCEEDED",
-          stage: "COMPLETED",
-          previewMarkdown: result.markdown,
-          progressJson: { completedSections: 8, totalSections: 8, characterCount: result.markdown.length },
-          completedAt: new Date(),
-          leaseOwner: null,
-          leaseExpiresAt: null,
-        },
-      });
-      if (completed.count !== 1) {
-        throw new DomainError("GENERATION_IN_PROGRESS", "生成任务租约已由其他 Worker 接管。", { retryable: true });
-      }
-      if (!superseded) {
-        await tx.report.updateMany({ where: { projectId: job.projectId, state: "CURRENT" }, data: { state: "SUPERSEDED" } });
-      }
-      await tx.report.create({
-        data: {
-          id: reportId,
-          projectId: job.projectId,
-          generationId: job.id,
-          projectRevision: job.projectRevision,
-          inputHash: job.inputHash,
-          state: superseded ? "SUPERSEDED" : "CURRENT",
-          filename: result.filename,
-          markdown: result.markdown,
-          storageKind: stored.storageKind,
-          storageKey: stored.storageKey,
-          docx: stored.docx ? new Uint8Array(stored.docx) : null,
-          docxHash: stored.docxHash,
-        },
-      });
-      await tx.auditEvent.create({ data: {
-        id: createEntityId("aud"), projectId: job.projectId, userId: job.requestedById,
-        action: superseded ? "GENERATION_SUPERSEDED" : "GENERATION_SUCCEEDED",
-        metadata: { generationId: job.id, reportId, projectRevision: job.projectRevision },
-      } });
-    });
+    await commitGenerationReport({ prisma, job, workerId, reportId, result, stored });
   } catch (error) {
     const domainError = isDomainError(error)
       ? error
       : new DomainError("DOCX_GENERATION_FAILED", "隐私政策生成失败。", { retryable: true });
-    const retry = domainError.retryable && job.attemptCount < MAX_ATTEMPTS;
+    const leaseLost = executionController.signal.aborted
+      && executionController.signal.reason instanceof DomainError
+      && executionController.signal.reason.code === "GENERATION_IN_PROGRESS";
+    const retry = shouldRetryGeneration(domainError.retryable, job.attemptCount, leaseLost);
+    const nextAttemptAt = retry ? new Date(Date.now() + generationRetryDelayMs(job.attemptCount)) : new Date();
     await prisma.$transaction(async (tx) => {
       const updated = await tx.generationJob.updateMany({ where: { id: job.id, leaseOwner: workerId }, data: {
         state: retry ? "QUEUED" : "FAILED",
@@ -235,8 +142,10 @@ export async function processNextGenerationJob(
           ? domainError.details as Prisma.InputJsonValue
           : Prisma.DbNull,
         completedAt: retry ? null : new Date(),
+        nextAttemptAt,
         leaseOwner: null,
         leaseExpiresAt: null,
+        ...(retry ? {} : { activeInputKey: null }),
       } });
       if (updated.count === 1) {
         await tx.auditEvent.create({ data: {
@@ -248,112 +157,11 @@ export async function processNextGenerationJob(
     });
   } finally {
     if (heartbeat) clearInterval(heartbeat);
+    if (!executionController.signal.aborted) executionController.abort();
   }
   return true;
 }
 
-async function claimNextJob(prisma: PrismaClient, workerId: string): Promise<GenerationJob | null> {
-  const expiredAt = new Date();
-  await prisma.generationJob.updateMany({
-    where: { state: "RUNNING", leaseExpiresAt: { lte: expiredAt }, attemptCount: { gte: MAX_ATTEMPTS } },
-    data: {
-      state: "FAILED",
-      errorCode: "GENERATION_IN_PROGRESS",
-      errorMessage: "生成任务多次失去 Worker 心跳，已停止自动重试。",
-      completedAt: expiredAt,
-      leaseOwner: null,
-      leaseExpiresAt: null,
-    },
-  });
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const claimTime = new Date();
-    const candidate = await prisma.generationJob.findFirst({
-      where: {
-        attemptCount: { lt: MAX_ATTEMPTS },
-        OR: [
-          { state: "QUEUED" },
-          { state: "RUNNING", leaseExpiresAt: { lte: claimTime } },
-        ],
-      },
-      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-    });
-    if (!candidate) return null;
-    const claimed = await prisma.generationJob.updateMany({
-      where: {
-        id: candidate.id,
-        attemptCount: { lt: MAX_ATTEMPTS },
-        OR: [{ state: "QUEUED" }, { state: "RUNNING", leaseExpiresAt: { lte: claimTime } }],
-      },
-      data: {
-        state: "RUNNING",
-        leaseOwner: workerId,
-        leaseExpiresAt: new Date(Date.now() + LEASE_MS),
-        heartbeatAt: claimTime,
-        startedAt: candidate.startedAt ?? claimTime,
-        attemptCount: { increment: 1 },
-        errorCode: null,
-        errorMessage: null,
-        errorDetails: Prisma.DbNull,
-      },
-    });
-    if (claimed.count === 1) {
-      return prisma.generationJob.findUnique({ where: { id: candidate.id } });
-    }
-  }
-  return null;
-}
-
-async function renewLease(prisma: PrismaClient, jobId: string, workerId: string): Promise<void> {
-  const renewed = await prisma.generationJob.updateMany({
-    where: { id: jobId, state: "RUNNING", leaseOwner: workerId },
-    data: { heartbeatAt: new Date(), leaseExpiresAt: new Date(Date.now() + LEASE_MS) },
-  });
-  if (renewed.count !== 1) {
-    throw new DomainError("GENERATION_IN_PROGRESS", "生成任务租约已由其他 Worker 接管。", { retryable: true });
-  }
-}
-
-async function updateProgress(
-  prisma: PrismaClient,
-  jobId: string,
-  workerId: string,
-  stage: GenerationStage,
-  progress: unknown,
-  previewMarkdown?: string,
-): Promise<void> {
-  await prisma.generationJob.updateMany({
-    where: { id: jobId, state: "RUNNING", leaseOwner: workerId },
-    data: {
-      stage,
-      progressJson: progress as Prisma.InputJsonValue,
-      ...(previewMarkdown === undefined ? {} : { previewMarkdown }),
-    },
-  });
-}
-
 function stageToDatabase(stage: PolicyGeneratorStage): GenerationStage {
   return stage;
-}
-
-function hashJson(value: unknown): string {
-  return `sha256:${createHash("sha256").update(JSON.stringify(value)).digest("hex")}`;
-}
-
-function toJobView(job: GenerationJob & { report?: { id: string } | null }): GenerationJobView {
-  return {
-    id: job.id,
-    projectId: job.projectId,
-    projectRevision: job.projectRevision,
-    state: job.state,
-    stage: job.stage,
-    progress: job.progressJson,
-    previewMarkdown: job.previewMarkdown,
-    error: job.errorCode
-      ? { code: job.errorCode, message: job.errorMessage ?? "生成失败。", details: job.errorDetails }
-      : null,
-    reportId: job.report?.id ?? null,
-    createdAt: job.createdAt.toISOString(),
-    updatedAt: job.updatedAt.toISOString(),
-    completedAt: job.completedAt?.toISOString() ?? null,
-  };
 }

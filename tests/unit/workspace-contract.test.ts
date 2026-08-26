@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { calculateProjectProgress, FORM_SCHEMA_VERSION, ProjectFormDataSchema } from "@/src/workspace/contract";
+import { calculateProjectProgress, FORM_SCHEMA_VERSION, ProjectFormDataSchema, WORKSPACE_STEPS, parseWorkspaceStep } from "@/src/workspace/contract";
 import { toGenerationForm } from "@/src/workspace/form-adapter";
 
 describe("workspace progress", () => {
+  it("uses six fact-collection steps followed by a separate generation step", () => {
+    expect(WORKSPACE_STEPS).toHaveLength(7);
+    expect(WORKSPACE_STEPS[5]).toMatchObject({ slug: "rights", label: "用户权利" });
+    expect(WORKSPACE_STEPS[6]).toMatchObject({ slug: "generate", label: "隐私政策生成" });
+    expect(parseWorkspaceStep("rights")).toBe(5);
+    expect(parseWorkspaceStep("generate")).toBe(6);
+  });
+
   it("does not count empty section objects as completed", () => {
     expect(calculateProjectProgress({
       profile: {},
@@ -24,7 +32,7 @@ describe("workspace progress", () => {
         purposes: ["路线规划"],
         purposeOther: "",
       }],
-    })).toBe(17);
+    })).toBe(14);
   });
 
   it("passes every canonical Core v2 fact section to the model context", () => {
@@ -47,8 +55,6 @@ describe("workspace progress", () => {
     });
 
     const generation = toGenerationForm(form);
-    const projectFacts = generation.projectFacts as typeof form;
-    expect(projectFacts.processingActivities[0]?.informationOther).toEqual(["蓝牙信标信息"]);
-    expect(projectFacts.partners.map((partner) => partner.name)).toEqual(["定位 SDK", "推送 SDK"]);
+    expect(generation).not.toHaveProperty("projectFacts");
   });
 });

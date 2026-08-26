@@ -1,6 +1,7 @@
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "@prisma/client";
 import { DomainError } from "@/src/domain/errors";
+import { runtimeConfig } from "@/src/config/runtime";
 
 const globalForPrisma = globalThis as unknown as { privacyPolicyPrisma?: PrismaClient };
 
@@ -19,7 +20,7 @@ export function getPrisma(): PrismaClient {
   }
 
   if (url.protocol !== "mysql:" && url.protocol !== "mariadb:") {
-    throw new DomainError("DATABASE_UNAVAILABLE", "仅支持 MySQL 8.4 连接。", { retryable: true });
+    throw new DomainError("DATABASE_UNAVAILABLE", "仅支持项目兼容的 MySQL 8 连接。", { retryable: true });
   }
 
   const adapter = new PrismaMariaDb({
@@ -28,7 +29,8 @@ export function getPrisma(): PrismaClient {
     user: decodeURIComponent(url.username),
     password: decodeURIComponent(url.password),
     database: url.pathname.replace(/^\//, "") || undefined,
-    connectionLimit: 5,
+    connectionLimit: runtimeConfig.databaseConnectionLimit,
+    acquireTimeout: runtimeConfig.databaseAcquireTimeoutMs,
     allowPublicKeyRetrieval: true,
   });
   const client = new PrismaClient({ adapter });

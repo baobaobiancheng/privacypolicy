@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, CheckCircle, DownloadSimple, FileDoc, PencilSimple, SpinnerGap } from "@phosphor-icons/react";
 import { BaijianBrand } from "@/components/baijian-brand";
-import { ProjectFormDataSchema, WORKSPACE_STEPS, parseWorkspaceStep, type ProjectFormData } from "@/src/workspace/contract";
+import { ProjectFormDataSchema, parseWorkspaceStep, type ProjectFormData } from "@/src/workspace/contract";
 
 type ProjectResponse = {
   id: string;
@@ -56,7 +56,8 @@ export function ProjectOverview({ projectId }: { projectId: string }) {
     { label: "设备权限", slug: "permissions", text: readable(form.permissions) },
     { label: "SDK 与合作方", slug: "partners", text: readable(form.partners) },
     { label: "存储与安全", slug: "storage", text: readable(form.storageAndSecurity) },
-    { label: "用户权利", slug: "generate", text: readable(form.rightsAndGovernance) },
+    { label: "用户权利", slug: "rights", text: readable(form.rightsAndGovernance) },
+    { label: "隐私政策生成", slug: "generate", text: project.latestReport ? "隐私政策已生成，可在线预览或下载 Word" : "尚未生成隐私政策" },
   ];
 
   return <main className="project-overview-page workspace-v3">
@@ -67,7 +68,7 @@ export function ProjectOverview({ projectId }: { projectId: string }) {
     </section>
     <div className="project-overview-layout">
       <section className="project-overview-facts">
-        <div className="project-overview-section-heading"><div><p>填写内容</p><h2>按六个阶段回看项目事实</h2></div><span>每一项都可以返回原步骤修改</span></div>
+        <div className="project-overview-section-heading"><div><p>项目流程</p><h2>按七个环节回看填写与生成结果</h2></div><span>每一项都可以返回对应环节查看或修改</span></div>
         <div className="overview-fact-list">{sections.map((section, index) => <article key={section.slug}>
           <span>{index + 1}</span><div><strong>{section.label}</strong><p>{section.text || "尚未填写"}</p></div><Link href={`/projects/${project.id}/${section.slug}`}><PencilSimple weight="bold" /> 编辑</Link>
         </article>)}</div>
@@ -80,7 +81,7 @@ export function ProjectOverview({ projectId }: { projectId: string }) {
           <span><CheckCircle weight="fill" /> {new Date(project.latestReport.createdAt).toLocaleString("zh-CN")}</span>
           <Link className="button button-ghost" href={`/projects/${project.id}/generate`}>在线预览</Link>
           <a className="button button-primary" href={project.latestReport.downloadUrl}><DownloadSimple weight="bold" /> 下载 Word</a>
-        </> : <><h2>尚未生成报告</h2><span>完成六步事实收集后，即可生成和下载隐私政策。</span><Link className="button button-primary" href={`/projects/${project.id}/${continueSlug}`}>继续填写</Link></>}
+        </> : <><h2>尚未生成报告</h2><span>完成前六个事实收集环节后，在第七环节生成和下载隐私政策。</span><Link className="button button-primary" href={`/projects/${project.id}/${continueSlug}`}>继续填写</Link></>}
       </aside>
     </div>
   </main>;

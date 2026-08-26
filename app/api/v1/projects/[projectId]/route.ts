@@ -3,13 +3,15 @@ import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import { requireDevActor } from "@/src/auth/session";
 import { getPrisma } from "@/src/data/prisma";
-import { loadProject } from "@/src/data/project-repository";
+import { loadProject, loadProjectWithLatestReport } from "@/src/data/project-repository";
 import { apiError, getRequestId, invalidInput } from "@/src/http/api-error";
 import { DomainError } from "@/src/domain/errors";
 import { createEntityId } from "@/src/domain/ids";
 import { getAppCategory } from "@/src/categories";
-import { ProjectFormDataSchema } from "@/src/workspace/contract";
+import { calculateProjectProgress, ProjectFormDataSchema } from "@/src/workspace/contract";
 import { requireEntityId } from "@/src/http/route-params";
+import { withApiTiming } from "@/src/http/request-timing";
+import { getLatestGenerationForRevision } from "@/src/application/generation/job-service";
 
 export const runtime = "nodejs";
 type RouteContext = { params: Promise<{ projectId: string }> };
@@ -17,22 +19,18 @@ type RouteContext = { params: Promise<{ projectId: string }> };
 const SaveProjectSchema = z.object({
   expectedRevision: z.number().int().nonnegative(),
   formData: ProjectFormDataSchema,
-  currentStepKey: z.enum(["profile", "processing", "permissions", "partners", "storage", "generate"]).optional(),
+  currentStepKey: z.enum(["profile", "processing", "permissions", "partners", "storage", "rights", "generate"]).optional(),
 }).strict();
 
 export async function GET(request: Request, { params }: RouteContext) {
+  return withApiTiming(request, "/api/v1/projects/{projectId}", async () => {
   try {
     const actor = requireDevActor(request);
     const projectId = requireEntityId((await params).projectId, "prj", "项目 ID");
     const prisma = getPrisma();
-    const [project, latestReport] = await Promise.all([
-      loadProject(actor, projectId, "READ", prisma),
-      prisma.report.findFirst({
-        where: { projectId, state: "CURRENT" },
-        orderBy: { createdAt: "desc" },
-        select: { id: true, filename: true, createdAt: true },
-      }),
-    ]);
+    const project = await loadProjectWithLatestReport(actor, projectId, "READ", prisma);
+    const latestGeneration = await getLatestGenerationForRevision(prisma, projectId, project.revision);
+    const latestReport = project.reports[0];
     const category = getAppCategory(project.categoryKey);
     const requestId = getRequestId(request);
     return NextResponse.json({
@@ -55,15 +53,18 @@ export async function GET(request: Request, { params }: RouteContext) {
           previewUrl: `/api/v1/projects/${projectId}/reports/${latestReport.id}`,
           downloadUrl: `/api/v1/projects/${projectId}/reports/${latestReport.id}/content`,
         } : null,
+        latestGeneration,
       },
       requestId,
     }, { headers: { "x-request-id": requestId } });
   } catch (error) {
     return apiError(error, request, "项目加载失败。");
   }
+  });
 }
 
 export async function PUT(request: Request, { params }: RouteContext) {
+  return withApiTiming(request, "/api/v1/projects/{projectId}", async () => {
   try {
     const actor = requireDevActor(request);
     const projectId = requireEntityId((await params).projectId, "prj", "项目 ID");
@@ -76,6 +77,7 @@ export async function PUT(request: Request, { params }: RouteContext) {
       const result = await tx.project.updateMany({ where: { id: projectId, revision: parsed.data.expectedRevision }, data: {
         formData: parsed.data.formData as unknown as Prisma.InputJsonValue,
         formSchemaVersion: parsed.data.formData.schemaVersion,
+        progressPercent: calculateProjectProgress(parsed.data.formData),
         ...(parsed.data.currentStepKey ? { currentStepKey: parsed.data.currentStepKey } : {}),
         revision: { increment: 1 },
         ...(parsed.data.formData.profile.productName
@@ -102,4 +104,5 @@ export async function PUT(request: Request, { params }: RouteContext) {
   } catch (error) {
     return apiError(error, request, "项目保存失败。");
   }
+  });
 }

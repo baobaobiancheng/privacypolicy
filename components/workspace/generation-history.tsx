@@ -22,8 +22,8 @@ export function GenerationHistory({ history, onDownload }: Props) {
           <p>隐私政策已生成，可在线预览或下载 Word。</p>
         </div>
         <div className="generation-record-actions">
-          <button type="button" className="history-action" aria-expanded={expanded} onClick={() => setExpandedId((current) => current === item.id ? null : item.id)}><Eye weight="bold" /> 预览 Markdown</button>
-          <button type="button" className="history-action history-action-primary" onClick={() => onDownload(item)}><DownloadSimple weight="bold" /> 下载 Word</button>
+          <button type="button" className="history-action" data-analytics-id="report.preview" aria-expanded={expanded} onClick={() => setExpandedId((current) => current === item.id ? null : item.id)}><Eye weight="bold" /> 预览 Markdown</button>
+          <button type="button" className="history-action history-action-primary" data-analytics-id="report.download" onClick={() => onDownload(item)}><DownloadSimple weight="bold" /> 下载 Word</button>
         </div>
         {expanded && item.markdown ? <div className="generation-record-detail markdown-detail"><MarkdownPreview markdown={item.markdown} fallback={null} /></div> : null}
       </div>

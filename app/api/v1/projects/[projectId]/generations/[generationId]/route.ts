@@ -4,11 +4,13 @@ import { getPrisma } from "@/src/data/prisma";
 import { getGeneration } from "@/src/application/generation/job-service";
 import { apiError, getRequestId } from "@/src/http/api-error";
 import { requireEntityId } from "@/src/http/route-params";
+import { withApiTiming } from "@/src/http/request-timing";
 
 export const runtime = "nodejs";
 type RouteContext = { params: Promise<{ projectId: string; generationId: string }> };
 
 export async function GET(request: Request, { params }: RouteContext) {
+  return withApiTiming(request, "/api/v1/projects/{projectId}/generations/{generationId}", async () => {
   try {
     const actor = requireDevActor(request);
     const routeParams = await params;
@@ -20,4 +22,5 @@ export async function GET(request: Request, { params }: RouteContext) {
   } catch (error) {
     return apiError(error, request, "生成任务加载失败。");
   }
+  });
 }

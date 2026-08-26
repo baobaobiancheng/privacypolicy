@@ -60,6 +60,6 @@ export function ProcessingActivitiesStep(props: Props) {
       </article>;
     })}</div>
     <label className="additional-notes"><span>其他补充信息（可选）</span><textarea value={data.additionalNotes} onChange={(event) => props.onUpdateNotes(event.target.value)} placeholder="补充表单没有覆盖、但产品实际存在的功能或处理规则。" /></label>
-    <div className="panel-actions"><button type="button" className="button button-ghost" onClick={props.onBack}><ArrowLeft weight="bold" /> 返回基本信息</button><button type="button" className="button button-primary" disabled={!props.canContinue} onClick={props.onNext}>进入设备权限 <ArrowRight weight="bold" /></button></div>
+    <div className="panel-actions"><button type="button" className="button button-ghost" onClick={props.onBack}><ArrowLeft weight="bold" /> 返回基本信息</button><button type="button" className="button button-primary" data-analytics-id="processing.next" disabled={!props.canContinue} onClick={props.onNext}>进入设备权限 <ArrowRight weight="bold" /></button></div>
   </section>;
 }

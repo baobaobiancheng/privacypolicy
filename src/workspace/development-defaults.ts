@@ -11,8 +11,8 @@ const yes = (detail: string, slots: SupplementAnswer["slots"] = {}): SupplementA
 const no = (): SupplementAnswer => ({ answer: "NO", detail: "", slots: {} });
 
 /**
- * 开发期端到端测试数据。它只通过客户端开发开关装载，不属于知识包，
- * 也不会在 production 构建中成为新项目默认事实。
+ * 开发和演示期端到端测试数据。它只通过显式开关装载，不属于知识包；
+ * 正式上线前必须将 NEXT_PUBLIC_DEV_FORM_DEFAULTS 设为 false。
  */
 export function createDevelopmentProjectDefaults() {
   const selected = mapV1Content.payload.features.map((feature) => feature.key);
@@ -128,7 +128,13 @@ export function createDevelopmentProjectDefaults() {
         security: ["异常请求特征"],
       } as Record<string, string[]>)[feature.key] ?? [],
       purposes: [],
-      purposeOther: "",
+      purposeOther: ({
+        navigation: "确定当前位置；路线规划；实时导航与路线偏离提醒；辅助室内停车场定位",
+        traffic: "展示道路拥堵情况；优化路线计算；提供交通事件提醒；生成道路异常热力图",
+        discovery: "展示地点和附近服务；提供地点搜索；展示最近浏览内容；展示用户订阅地点的状态更新",
+        support: "回复咨询或投诉；核验用户身份；定位和处理产品故障；跟进用户主动提交的道路问题",
+        security: "保障账号与服务安全；识别异常请求；排查崩溃和运行故障；识别批量抓取地图数据的异常行为",
+      } as Record<string, string>)[feature.key] ?? "",
     })),
     confirmedFields: processedFieldIds,
     fieldAnswers,

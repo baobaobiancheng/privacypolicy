@@ -14,6 +14,8 @@ import {
   createDevelopmentProjectFormData,
   developmentFormDefaultsEnabled,
 } from "@/src/workspace/development-defaults";
+import { projectListSelect } from "@/src/data/project-list-query";
+import { withApiTiming } from "@/src/http/request-timing";
 
 export const runtime = "nodejs";
 
@@ -26,6 +28,7 @@ const CreateProjectSchema = z.object({
 const CursorSchema = z.object({ updatedAt: z.string().datetime(), id: z.string().min(1) }).strict();
 
 export async function POST(request: Request) {
+  return withApiTiming(request, "/api/v1/projects", async () => {
   try {
     const actor = requireDevActor(request);
     const parsed = CreateProjectSchema.safeParse(await request.json().catch(() => null));
@@ -66,6 +69,7 @@ export async function POST(request: Request) {
           categoryKey: category.key,
           categoryVersion: appCategoryRegistry.categoryVersion,
           currentStepKey: "profile",
+          progressPercent: calculateProjectProgress(formData),
           contentVersion: verifiedMapV1Content.contentVersion,
           contentHash: verifiedMapV1Content.contentHash,
           formData: formData as unknown as Prisma.InputJsonValue,
@@ -89,6 +93,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return apiError(error, request, "项目创建失败。");
   }
+  });
 }
 
 const projectCreationSelect = {
@@ -110,11 +115,15 @@ function projectCreationResponse(
 }
 
 export async function GET(request: Request) {
+  return withApiTiming(request, "/api/v1/projects", async () => {
   try {
     const actor = requireDevActor(request);
     await ensureDevUsers();
     const url = new URL(request.url);
-    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 20) || 20, 1), 100);
+    const requestedLimit = Number(url.searchParams.get("limit") ?? 20);
+    const limit = Number.isSafeInteger(requestedLimit)
+      ? Math.min(Math.max(requestedLimit, 1), 100)
+      : 20;
     const cursor = decodeCursor(url.searchParams.get("cursor"));
     const prisma = getPrisma();
     const projects = await prisma.project.findMany({
@@ -130,16 +139,11 @@ export async function GET(request: Request) {
       },
       orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
       take: limit + 1,
-      select: {
-        id: true, name: true, productName: true, status: true, revision: true, updatedAt: true,
-        formData: true, categoryKey: true, categoryVersion: true, currentStepKey: true,
-        reports: { where: { state: "CURRENT" }, orderBy: { createdAt: "desc" }, take: 1, select: { id: true, createdAt: true } },
-      },
+      select: projectListSelect,
     });
     const hasMore = projects.length > limit;
     const page = projects.slice(0, limit);
     const items = page.map((project) => {
-      const parsedForm = ProjectFormDataSchema.safeParse(project.formData);
       const category = getAppCategory(project.categoryKey);
       const latest = project.reports[0];
       return {
@@ -152,7 +156,7 @@ export async function GET(request: Request) {
         categoryVersion: project.categoryVersion,
         currentStepKey: project.currentStepKey,
         status: project.status,
-        progress: parsedForm.success ? calculateProjectProgress(parsedForm.data) : 0,
+        progress: project.progressPercent,
         latestReport: latest ? reportSummary(project.id, latest) : null,
         updatedAt: project.updatedAt.toISOString(),
       };
@@ -166,6 +170,7 @@ export async function GET(request: Request) {
   } catch (error) {
     return apiError(error, request, "项目列表加载失败。");
   }
+  });
 }
 
 function reportSummary(projectId: string, report: { id: string; createdAt: Date }) {
