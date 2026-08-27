@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
-import { getMobilityQuestionnaire, getQuestionnaireScenarios } from "@/src/questionnaires/mobility";
+import { getAppQuestionnaire, getQuestionnaireScenarios } from "@/src/questionnaires";
 import { createBrowserId } from "@/src/browser/random-id";
 import {
   CLIENT_PERSONA_ID,
@@ -254,7 +254,7 @@ export function useWorkspaceAssistant(options: WorkspaceAssistantOptions) {
     if (!message.suggestedText || message.applied) return;
     const target = message.suggestionTarget;
     const scenarios = getQuestionnaireScenarios(options.dataRef.current.categoryKey);
-    const questionnaire = getMobilityQuestionnaire(options.dataRef.current.categoryKey);
+    const questionnaire = getAppQuestionnaire(options.dataRef.current.categoryKey);
     const basicFeatureIds = new Set(questionnaire.features.filter((item) => item.kind === "BASIC").map((item) => item.key));
     const scenario = target?.featureName ? scenarios.find((item) => item.title === target.featureName) : undefined;
     const customFeature = target?.featureName && options.dataRef.current.customFeatures.includes(target.featureName) ? target.featureName : undefined;

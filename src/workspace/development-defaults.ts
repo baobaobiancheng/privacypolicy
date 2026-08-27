@@ -1,5 +1,5 @@
 import { mapV1Content } from "@/src/content/map-v1";
-import { getMobilityQuestionnaire } from "@/src/questionnaires/mobility";
+import { getAppQuestionnaire } from "@/src/questionnaires";
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
 import {
   FORM_SCHEMA_VERSION,
@@ -183,7 +183,7 @@ function createMapDevelopmentProjectDefaults() {
 export function createDevelopmentProjectDefaults(categoryKey = "map-navigation") {
   if (categoryKey === "map-navigation") return createMapDevelopmentProjectDefaults();
 
-  const questionnaire = getMobilityQuestionnaire(categoryKey);
+  const questionnaire = getAppQuestionnaire(categoryKey);
   const productName = `示例${questionnaire.categoryLabel}产品`;
   const processingActivities = questionnaire.features
     .filter((item) => item.defaultSelection)
@@ -214,7 +214,10 @@ export function createDevelopmentProjectDefaults(categoryKey = "map-navigation")
     "account-cloud-sync": no(),
     "notification-push": no(),
     "cookies-local-storage": no(),
-    "sensitive-information": questionnaire.features.some((item) => item.fields.some((itemField) => ["document", "driver-license", "location", "trajectory"].includes(itemField.key)))
+    "sensitive-information": questionnaire.features.some((item) => item.fields.some((itemField) => [
+      "document", "identity", "driver-license", "location", "trajectory", "health", "condition",
+      "voice-video", "bank-card", "credit", "face", "biometric",
+    ].some((keyword) => itemField.key.includes(keyword))))
       ? yes(`产品仅在用户使用${questionnaire.basicFunction}时处理表单中已勾选的相关信息，并用于对应服务。`)
       : no(),
     "user-control-paths": yes("用户可在“我的—设置—隐私中心”提交查阅、更正、删除、撤回同意或注销账号请求。"),
@@ -223,7 +226,7 @@ export function createDevelopmentProjectDefaults(categoryKey = "map-navigation")
   };
   return {
     profile: {
-      operatorName: "示例出行服务有限公司",
+      operatorName: `示例${questionnaire.categoryLabel}科技有限公司`,
       operatorContact: "浙江省杭州市西湖区示例路 88 号",
       productName,
       platform: "Android、iOS",

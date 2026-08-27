@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { buildPolicyGenerationContext } from "@/src/application/generation/policy-generation-context";
 import { createDevelopmentProjectFormData } from "@/src/workspace/development-defaults";
 import { toGenerationForm } from "@/src/workspace/form-adapter";
-import { getMobilityQuestionnaire } from "@/src/questionnaires/mobility";
+import { getAppQuestionnaire } from "@/src/questionnaires";
 
-const mapQuestionnaire = getMobilityQuestionnaire("map-navigation");
+const mapQuestionnaire = getAppQuestionnaire("map-navigation");
 
 describe("PolicyGenerationContext", () => {
   it("keeps canonical facts without transmitting legacy duplicates", () => {
@@ -27,7 +27,7 @@ describe("PolicyGenerationContext", () => {
   });
 
   it("carries the selected category baseline into generation context", () => {
-    const questionnaire = getMobilityQuestionnaire("ride-hailing");
+    const questionnaire = getAppQuestionnaire("ride-hailing");
     const form = createDevelopmentProjectFormData("ride-hailing");
     const context = buildPolicyGenerationContext(form, questionnaire);
 
@@ -37,6 +37,19 @@ describe("PolicyGenerationContext", () => {
     expect(context.category.necessaryInfoBaseline).toContain("乘车人出发地");
     expect(context.activities.map((activity) => activity.featureKey)).toContain("ride-booking");
     expect(context.activities.map((activity) => activity.featureKey)).not.toContain("navigation");
+  });
+
+  it("carries a non-mobility statutory baseline and facts into generation context", () => {
+    const questionnaire = getAppQuestionnaire("online-payment");
+    const form = createDevelopmentProjectFormData("online-payment");
+    const context = buildPolicyGenerationContext(form, questionnaire);
+
+    expect(context.category.key).toBe("online-payment");
+    expect(context.category.label).toBe("网络支付");
+    expect(context.category.necessaryInfoBaseline).toContain("银行卡");
+    expect(context.activities.map((activity) => activity.featureKey)).toContain("payment-transaction");
+    expect(context.activities.map((activity) => activity.featureKey)).not.toContain("navigation");
+    expect(context.profile.productName).toBe("示例网络支付产品");
   });
 
   it("only includes confirmed attachment contents and supplement slots", () => {

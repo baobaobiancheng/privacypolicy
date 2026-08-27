@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { FormPayloadSchema } from "@/src/ai/deepseek";
 import { getRequiredSupplementQuestions, getRuntimeSlotScenario, getSlotScenario, mapCnKnowledgePackage, mapSlotPackage } from "@/src/knowledge/map-cn";
 import { evaluateFormalPolicyReadiness, resolveFieldAnswer } from "@/src/knowledge/readiness";
+import { createDevelopmentProjectFormData } from "@/src/workspace/development-defaults";
+import { toGenerationForm } from "@/src/workspace/form-adapter";
 
 const base = FormPayloadSchema.parse({
   profile: {
@@ -107,6 +109,22 @@ describe("map local knowledge readiness", () => {
     });
     expect(noFields.ready).toBe(false);
     expect(noFields.diagnostics.some((item) => item.target === "fields" && item.severity === "BLOCKING")).toBe(true);
+  });
+
+  it("allows a statutory no-information basic function when the customer confirms that no field is processed", () => {
+    const form = createDevelopmentProjectFormData("browser");
+    form.processingActivities = form.processingActivities.map((activity) => ({
+      ...activity,
+      informationItems: [],
+      informationOther: [],
+    }));
+    const generation = toGenerationForm(form, "browser");
+    const result = evaluateFormalPolicyReadiness(generation, "browser");
+
+    expect(generation.selected).not.toHaveLength(0);
+    expect(Object.values(generation.fieldAnswers).every((answer) => answer === "NOT_PROCESS")).toBe(true);
+    expect(result.diagnostics.some((item) => item.target === "fields")).toBe(false);
+    expect(result.ready).toBe(true);
   });
 
   it("resolves legacy index-based field ids to their stable key after content reorders", () => {

@@ -1,8 +1,8 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, CaretRight, Check, Plus } from "@phosphor-icons/react";
-import type { MobilityQuestionnaire, QuestionnairePresetFeature } from "@/src/questionnaires/mobility";
-import { getQuestionnaireScenarios } from "@/src/questionnaires/mobility";
+import type { AppQuestionnaire, QuestionnairePresetFeature } from "@/src/questionnaires";
+import { getQuestionnaireScenarios } from "@/src/questionnaires";
 import type { ProjectData } from "../workspace-model";
 
 type Scenario = ReturnType<typeof getQuestionnaireScenarios>[number];
@@ -10,7 +10,7 @@ type PresetFeature = QuestionnairePresetFeature;
 type DraftField = { id: string; label: string; selected: boolean; featureId: string };
 type Props = {
   data: ProjectData;
-  questionnaire: MobilityQuestionnaire;
+  questionnaire: AppQuestionnaire;
   scenarios: Scenario[];
   basicFeatureIds: Set<string>;
   selectedScenarios: Scenario[];

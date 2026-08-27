@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { ArrowLeft, ArrowRight, Check, Plus } from "@phosphor-icons/react";
-import type { PermissionPreset } from "@/src/questionnaires/mobility";
+import type { PermissionPreset } from "@/src/questionnaires";
 import type { ProjectData } from "../workspace-model";
 
 type Props = {

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { PolicyGenerationContext } from "@/src/application/generation/policy-generation-context";
-import { getMobilityQuestionnaire, getQuestionnaireFeature } from "@/src/questionnaires/mobility";
+import { getAppQuestionnaire, getQuestionnaireFeature } from "@/src/questionnaires";
 import { DomainError } from "@/src/domain/errors";
 import { sanitizeConfirmedForm } from "./confirmed-form";
 import { configuredDeepSeekModel } from "./deepseek-config";
@@ -77,7 +77,7 @@ export async function analyzeFormBeforeGeneration(
     {
       role: "user",
       content: [
-        "PRODUCT_CATEGORY:", JSON.stringify(getMobilityQuestionnaire(categoryKey).categoryLabel),
+        "PRODUCT_CATEGORY:", JSON.stringify(getAppQuestionnaire(categoryKey).categoryLabel),
         "FORM_JSON:", JSON.stringify(generationContext ?? confirmedForm),
         "SEMANTIC_FEATURE_MAP:", JSON.stringify(semanticFeatureMap),
         "CURRENT_DATE:", new Date().toISOString().slice(0, 10),

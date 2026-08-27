@@ -1,6 +1,6 @@
 import type { FormPayload } from "@/src/ai/deepseek";
 import { mapV1Content } from "@/src/content/map-v1";
-import { getMobilityQuestionnaire } from "@/src/questionnaires/mobility";
+import { getAppQuestionnaire } from "@/src/questionnaires";
 import { getRequiredSupplementQuestions, getSlotScenario } from "./map-cn";
 import { SupplementAnswerSchema, type SupplementAnswer } from "./map-cn/schema";
 
@@ -76,9 +76,11 @@ export function evaluateFormalPolicyReadiness(input: FormPayload & { supplementA
   }
 
   // 至少确认一项实际处理的个人信息：未勾选任何信息项的草稿没有披露内容。
-  const selectedFeatures = getMobilityQuestionnaire(categoryKey).features.filter((feature) => input.selected.includes(feature.key));
+  const selectedFeatures = getAppQuestionnaire(categoryKey).features.filter((feature) => input.selected.includes(feature.key));
   const hasProcessedField = selectedFeatures.some((feature) => feature.fields.some((field, index) => resolveFieldAnswer(input, `${feature.key}.${field.key}`) === "PROCESS" || resolveFieldAnswer(input, `${feature.key}.${index}`) === "PROCESS"));
-  if (selectedFeatures.length > 0 && !hasProcessedField) {
+  const categoryAllowsBasicUseWithoutPersonalInformation = getAppQuestionnaire(categoryKey)
+    .necessaryInfoSummary === "无需个人信息即可使用基本功能";
+  if (selectedFeatures.length > 0 && !hasProcessedField && !categoryAllowsBasicUseWithoutPersonalInformation) {
     diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: "fields", message: "请至少勾选一项产品实际处理的个人信息。" });
   }
 

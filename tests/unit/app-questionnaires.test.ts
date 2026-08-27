@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { getAppCategory } from "@/src/categories";
 import {
-  MOBILITY_CATEGORY_KEYS,
-  getMobilityQuestionnaire,
+  APP_CATEGORY_KEYS,
+  getAppQuestionnaire,
   getQuestionnaireFeature,
-} from "@/src/questionnaires/mobility";
+} from "@/src/questionnaires";
 import { createDevelopmentProjectFormData } from "@/src/workspace/development-defaults";
 import { toGenerationForm, toWorkspaceCompatibilityState } from "@/src/workspace/form-adapter";
 
-describe("mobility questionnaires", () => {
-  it("provides an independent, versioned questionnaire for every open mobility category", () => {
-    expect(MOBILITY_CATEGORY_KEYS).toHaveLength(8);
-    for (const categoryKey of MOBILITY_CATEGORY_KEYS) {
+describe("app questionnaires", () => {
+  it("provides an independent, versioned questionnaire for every statutory category", () => {
+    expect(APP_CATEGORY_KEYS).toHaveLength(39);
+    for (const categoryKey of APP_CATEGORY_KEYS) {
       const category = getAppCategory(categoryKey);
-      const questionnaire = getMobilityQuestionnaire(categoryKey);
+      const questionnaire = getAppQuestionnaire(categoryKey);
       expect(category?.availability).toBe("OPEN");
       expect(questionnaire.categoryLabel).toBe(category?.label);
       expect(questionnaire.formVersion).toBe(category?.formVersion);
@@ -29,7 +29,7 @@ describe("mobility questionnaires", () => {
   });
 
   it("keeps statutory necessary-information baselines explicit", () => {
-    const requiredLabels = (categoryKey: string) => getMobilityQuestionnaire(categoryKey).features
+    const requiredLabels = (categoryKey: string) => getAppQuestionnaire(categoryKey).features
       .flatMap((feature) => feature.fields)
       .filter((field) => field.required)
       .map((field) => field.label);
@@ -45,13 +45,28 @@ describe("mobility questionnaires", () => {
     expect(requiredLabels("local-life")).toEqual(["注册用户移动电话号码"]);
     expect(requiredLabels("vehicle-service")).toEqual(expect.arrayContaining(["驾驶证件信息", "位置信息", "支付时间", "支付金额", "支付渠道"]));
     expect(requiredLabels("performance-ticket")).toEqual(expect.arrayContaining(["注册用户移动电话号码", "观演场次", "座位号（如有）", "支付时间", "支付金额", "支付渠道"]));
+    expect(requiredLabels("instant-messaging")).toEqual(expect.arrayContaining(["注册用户移动电话号码", "即时通信账号", "即时通信联系人账号列表"]));
+    expect(requiredLabels("dating")).toEqual(expect.arrayContaining(["注册用户移动电话号码", "性别", "年龄", "婚姻状况"]));
+    expect(requiredLabels("online-payment")).toEqual(expect.arrayContaining(["注册用户移动电话号码", "注册用户姓名", "证件类型和号码", "证件有效期限", "银行卡号码"]));
+    expect(requiredLabels("mail-express")).toEqual(expect.arrayContaining(["寄件人姓名", "寄件人证件类型和号码等身份信息", "收件人姓名（名称）", "寄递物品名称", "寄递物品性质", "寄递物品数量"]));
+    expect(requiredLabels("mobile-banking")).toEqual(expect.arrayContaining(["注册用户移动电话号码", "用户姓名", "证件影印件", "银行预留移动电话号码", "收款人姓名", "收款人开户银行信息"]));
+    expect(requiredLabels("medical-registration")).toEqual(expect.arrayContaining(["注册用户移动电话号码", "患者姓名", "患者证件类型和号码", "预约挂号的医院", "预约挂号的科室", "病情描述"]));
+
+    const noStatutoryInformationCategories = [
+      "live-streaming", "online-av", "short-video", "news", "womens-health", "fitness", "ebook",
+      "browser", "input-method", "security-management", "camera-beauty", "app-store", "practical-tools",
+    ];
+    for (const categoryKey of noStatutoryInformationCategories) {
+      expect(requiredLabels(categoryKey)).toEqual([]);
+      expect(getAppCategory(categoryKey)?.necessaryInfoSummary).toBe("无需个人信息即可使用基本功能");
+    }
   });
 
-  it("builds category-specific development facts instead of map facts", () => {
-    for (const categoryKey of MOBILITY_CATEGORY_KEYS) {
+  it("builds category-specific development facts instead of map facts for all 39 categories", () => {
+    for (const categoryKey of APP_CATEGORY_KEYS) {
       const form = createDevelopmentProjectFormData(categoryKey);
       const generation = toGenerationForm(form, categoryKey);
-      const questionnaire = getMobilityQuestionnaire(categoryKey);
+      const questionnaire = getAppQuestionnaire(categoryKey);
       if (categoryKey !== "map-navigation") {
         expect(form.processingActivities.map((activity) => activity.featureKey)).toEqual(
           questionnaire.features.filter((feature) => feature.defaultSelection).map((feature) => feature.key),
@@ -68,6 +83,13 @@ describe("mobility questionnaires", () => {
     expect(generation.selected).not.toContain("navigation");
     expect(generation.fieldAnswers["hotel-booking.hotel-name"]).toBe("PROCESS");
     expect(getQuestionnaireFeature("hotel-service", "hotel-booking")?.title).toBe("酒店预订与入住安排");
+
+    const paymentForm = createDevelopmentProjectFormData("online-payment");
+    const paymentGeneration = toGenerationForm(paymentForm, "online-payment");
+    expect(paymentForm.profile.productName).toBe("示例网络支付产品");
+    expect(paymentGeneration.selected).toContain("payment-account");
+    expect(paymentGeneration.selected).not.toContain("navigation");
+    expect(paymentGeneration.fieldAnswers["payment-account.bank-card"]).toBe("PROCESS");
   });
 
   it("preserves preset extensions across save, reload, and generation", () => {

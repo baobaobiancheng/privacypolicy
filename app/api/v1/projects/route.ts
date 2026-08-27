@@ -8,7 +8,7 @@ import { apiError, getRequestId, invalidInput } from "@/src/http/api-error";
 import { createEntityId } from "@/src/domain/ids";
 import { DomainError } from "@/src/domain/errors";
 import { appCategoryRegistry, getAppCategory } from "@/src/categories";
-import { getMobilityQuestionnaire } from "@/src/questionnaires/mobility";
+import { getAppQuestionnaire } from "@/src/questionnaires";
 import { calculateProjectProgress, FORM_SCHEMA_VERSION, ProjectFormDataSchema } from "@/src/workspace/contract";
 import {
   createDevelopmentProjectFormData,
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       ?? (developmentFormDefaultsEnabled()
         ? createDevelopmentProjectFormData(category.key)
         : ProjectFormDataSchema.parse({ schemaVersion: FORM_SCHEMA_VERSION }));
-    const questionnaire = getMobilityQuestionnaire(category.key);
+    const questionnaire = getAppQuestionnaire(category.key);
     const productName = formData.profile.productName?.trim() || null;
     const uniqueKey = {
       tenantId: actor.tenantId,

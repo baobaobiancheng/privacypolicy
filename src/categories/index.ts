@@ -1,5 +1,5 @@
 import { z } from "zod";
-import rawRegistry from "./app-categories-v1.1.0.json";
+import rawRegistry from "./app-categories-v1.2.0.json";
 
 const CategorySchema = z.object({
   key: z.string().min(1),

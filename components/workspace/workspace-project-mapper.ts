@@ -1,11 +1,11 @@
-import { getMobilityQuestionnaire, getQuestionnaireScenarios } from "@/src/questionnaires/mobility";
+import { getAppQuestionnaire, getQuestionnaireScenarios } from "@/src/questionnaires";
 import { resolveFieldAnswer } from "@/src/knowledge/readiness";
 import { FORM_SCHEMA_VERSION, ProjectFormDataSchema, type ProjectFormData } from "@/src/workspace/contract";
 import { basicProfileFields, rightsProfileFields, type ProjectData, type StepIndex } from "./workspace-model";
 
 /** Converts UI compatibility state into the single, versioned persistence contract. */
 export function toProjectFormData(current: ProjectData): ProjectFormData {
-  const questionnaire = getMobilityQuestionnaire(current.categoryKey);
+  const questionnaire = getAppQuestionnaire(current.categoryKey);
   const scenarios = getQuestionnaireScenarios(current.categoryKey);
   const basicFeatureIds = new Set(questionnaire.features.filter((feature) => feature.kind === "BASIC").map((feature) => feature.key));
   const processingActivities = [
@@ -61,7 +61,7 @@ export function toProjectFormData(current: ProjectData): ProjectFormData {
 
 /** Returns the earliest incomplete workspace step; step 6 means the form can enter generation. */
 export function firstIncompleteFor(project: ProjectData): StepIndex {
-  const questionnaire = getMobilityQuestionnaire(project.categoryKey);
+  const questionnaire = getAppQuestionnaire(project.categoryKey);
   const scenarios = getQuestionnaireScenarios(project.categoryKey);
   const basicFeatureIds = new Set(questionnaire.features.filter((feature) => feature.kind === "BASIC").map((feature) => feature.key));
   const basicComplete = basicProfileFields.every(([key]) => Boolean(project.profile[key]?.trim()));

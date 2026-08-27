@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { FormPayloadSchema } from "@/src/ai/form-payload";
 import { GenerationPreflightSchema } from "@/src/ai/policy-preflight";
-import { getQuestionnaireFeature } from "@/src/questionnaires/mobility";
+import { getQuestionnaireFeature } from "@/src/questionnaires";
 import { FORM_SCHEMA_VERSION, ProjectFormDataSchema, type ProjectFormData } from "./contract";
 
 type UnknownRecord = Record<string, unknown>;

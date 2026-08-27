@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { getMobilityQuestionnaire, getQuestionnaireScenarios } from "@/src/questionnaires/mobility";
+import { getAppQuestionnaire, getQuestionnaireScenarios } from "@/src/questionnaires";
 import { getRequiredSupplementQuestions, getSlotScenario } from "@/src/knowledge/map-cn";
 import { evaluateFormalPolicyReadiness, resolveFieldAnswer } from "@/src/knowledge/readiness";
 import type { FormPayload } from "@/src/ai/deepseek";
@@ -19,7 +19,7 @@ export function useWorkspaceDerivedState(data: ProjectData, activeStep: StepInde
 }
 
 function deriveWorkspaceState(data: ProjectData, activeStep: StepIndex, history: SnapshotItem[] | null) {
-  const questionnaire = getMobilityQuestionnaire(data.categoryKey);
+  const questionnaire = getAppQuestionnaire(data.categoryKey);
   const scenarios = getQuestionnaireScenarios(data.categoryKey);
   const basicFeatureIds = new Set(questionnaire.features.filter((feature) => feature.kind === "BASIC").map((feature) => feature.key));
   const selectedScenarios = scenarios.filter((scenario) => data.selected.includes(scenario.id));
@@ -84,7 +84,11 @@ function deriveWorkspaceState(data: ProjectData, activeStep: StepIndex, history:
   }, data.categoryKey);
   const hasBasicFeature = data.selected.some((feature) => basicFeatureIds.has(feature))
     || data.processingActivities.some((activity) => activity.kind === "BASIC" && data.customFeatures.includes(activity.title));
-  const canReview = basicProfileComplete && hasBasicFeature && selectedDetailsComplete && processedFieldCount > 0;
+  const categoryAllowsBasicUseWithoutPersonalInformation = questionnaire.necessaryInfoSummary === "无需个人信息即可使用基本功能";
+  const canReview = basicProfileComplete
+    && hasBasicFeature
+    && selectedDetailsComplete
+    && (processedFieldCount > 0 || categoryAllowsBasicUseWithoutPersonalInformation);
   const permissionDetailsComplete = data.permissions.length === 0
     || data.permissions.every((permission) => Boolean(permission.label.trim()) && (permission.scenes.length > 0 || Boolean(permission.sceneOther.trim())));
   const storageDetailsComplete = Boolean(

@@ -16,7 +16,7 @@ import type { ProjectFormData } from "@/src/workspace/contract";
 import { toGenerationForm } from "@/src/workspace/form-adapter";
 import { buildPolicyGenerationContext, type PolicyGenerationContext } from "./policy-generation-context";
 import { filterAcknowledgedBlockingIssues } from "./preflight-acknowledgements";
-import { getMobilityQuestionnaire, type MobilityQuestionnaire } from "@/src/questionnaires/mobility";
+import { getAppQuestionnaire, type AppQuestionnaire } from "@/src/questionnaires";
 
 export type PolicyGeneratorStage = "FACT_CHECK" | "LAW_SEARCH" | "DRAFTING" | "FINALIZING";
 
@@ -43,7 +43,7 @@ export async function generatePolicyFromProjectFacts(
   categoryKey: string,
   callbacks: PolicyGeneratorCallbacks = {},
 ): Promise<PolicyGeneratorResult> {
-  const questionnaire = getMobilityQuestionnaire(categoryKey);
+  const questionnaire = getAppQuestionnaire(categoryKey);
   const form = toGenerationForm(formData, categoryKey);
   const generationContext = buildPolicyGenerationContext(formData, questionnaire);
   const readiness = evaluateFormalPolicyReadiness(form, categoryKey);
@@ -93,7 +93,7 @@ async function renderPolicy(
   form: ReturnType<typeof toGenerationForm>,
   generationContext: PolicyGenerationContext,
   legalSearchResults: LawKeywordSearchResult[],
-  questionnaire: MobilityQuestionnaire,
+  questionnaire: AppQuestionnaire,
   callbacks: PolicyGeneratorCallbacks,
 ): Promise<Omit<PolicyGeneratorResult, "inputHash">> {
   const input = form;

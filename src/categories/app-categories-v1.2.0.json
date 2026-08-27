@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1",
+  "categoryVersion": "app-categories-v1.2.0",
+  "source": "《常见类型移动互联网应用程序必要个人信息范围规定》",
+  "sourceUrl": "https://www.miit.gov.cn/jgsj/xgj/gzdt/art/2021/art_4e535277ab4343ee9010dbbaf90aab64.html",
+  "groups": [
+    { "key": "mobility", "label": "出行与生活", "categories": [
+      { "key": "map-navigation", "label": "地图导航", "basicFunction": "定位、地图浏览、路线规划与导航", "necessaryInfoSummary": "位置信息、出发地、到达地", "availability": "OPEN", "formVersion": "map-questionnaire-v2.0.0" },
+      { "key": "ride-hailing", "label": "网络约车", "basicFunction": "网络预约出租汽车服务、巡游出租汽车电召服务", "necessaryInfoSummary": "注册用户移动电话号码；乘车人出发地、到达地、位置信息、行踪轨迹；网络预约出租汽车服务的支付信息", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" },
+      { "key": "transport-ticket", "label": "交通票务", "basicFunction": "交通票务服务及行程管理", "necessaryInfoSummary": "注册用户移动电话号码；旅客身份和类型；行程与席位信息；支付信息", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" },
+      { "key": "travel-service", "label": "旅游服务", "basicFunction": "旅游服务产品信息的发布与订购", "necessaryInfoSummary": "注册用户移动电话号码；旅游目的地和旅游时间；出行人身份及联系方式", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" },
+      { "key": "hotel-service", "label": "酒店服务", "basicFunction": "酒店预订", "necessaryInfoSummary": "注册用户移动电话号码；住宿人姓名和联系方式；入住、退房时间及酒店名称", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" },
+      { "key": "local-life", "label": "本地生活", "basicFunction": "家政维修、家居装修、二手闲置物品交易等日常生活服务", "necessaryInfoSummary": "注册用户移动电话号码", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" },
+      { "key": "vehicle-service", "label": "用车服务", "basicFunction": "共享单车、共享汽车、租赁汽车等服务", "necessaryInfoSummary": "注册用户移动电话号码；特定汽车服务的证件和驾驶证件信息；支付信息；特定服务的位置信息", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" },
+      { "key": "performance-ticket", "label": "演出票务", "basicFunction": "演出购票", "necessaryInfoSummary": "注册用户移动电话号码；观演场次、座位号（如有）；支付信息", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" }
+    ]},
+    { "key": "social-content", "label": "社交与内容", "categories": [
+      { "key": "instant-messaging", "label": "即时通信", "basicFunction": "提供文字、图片、语音、视频等网络即时通信服务", "necessaryInfoSummary": "注册用户移动电话号码；账号信息（账号、即时通信联系人账号列表）", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "online-community", "label": "网络社区", "basicFunction": "博客、论坛、社区等话题讨论、信息分享和关注互动", "necessaryInfoSummary": "注册用户移动电话号码", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "dating", "label": "婚恋相亲", "basicFunction": "婚恋相亲", "necessaryInfoSummary": "注册用户移动电话号码；婚恋相亲人的性别、年龄、婚姻状况", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "remote-meeting", "label": "远程会议", "basicFunction": "通过网络提供音频或视频会议", "necessaryInfoSummary": "注册用户移动电话号码", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "live-streaming", "label": "网络直播", "basicFunction": "向公众持续提供实时视频、音频、图文等形式信息浏览服务", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "online-av", "label": "在线影音", "basicFunction": "影视、音乐搜索和播放", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "short-video", "label": "短视频", "basicFunction": "不超过一定时长的视频搜索和播放", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "news", "label": "新闻资讯", "basicFunction": "新闻资讯浏览、搜索", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" }
+    ]},
+    { "key": "commerce-service", "label": "交易与服务", "categories": [
+      { "key": "online-payment", "label": "网络支付", "basicFunction": "网络支付、提现、转账等", "necessaryInfoSummary": "注册用户移动电话号码；姓名、证件类型和号码、证件有效期限、银行卡号码", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "online-shopping", "label": "网上购物", "basicFunction": "购买商品", "necessaryInfoSummary": "注册用户移动电话号码；收货人姓名（名称）、地址、联系电话；支付时间、金额、渠道等支付信息", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "food-delivery", "label": "餐饮外卖", "basicFunction": "餐饮购买及外送", "necessaryInfoSummary": "注册用户移动电话号码；收货人姓名（名称）、地址、联系电话；支付时间、金额、渠道等支付信息", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "mail-express", "label": "邮件快件寄递", "basicFunction": "信件、包裹、印刷品等物品寄递", "necessaryInfoSummary": "寄件人姓名、证件类型和号码等身份信息、地址、联系电话；收件人姓名（名称）、地址、联系电话；寄递物品名称、性质、数量", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "housing", "label": "房屋租售", "basicFunction": "个人房源信息发布、房屋出租或买卖", "necessaryInfoSummary": "注册用户移动电话号码；房源基本信息（地址、面积、户型、期望售价或租金）", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "used-car", "label": "二手车交易", "basicFunction": "二手车买卖信息交换和交易撮合", "necessaryInfoSummary": "注册用户移动电话号码；购买方和出售方姓名、证件类型和号码；车辆行驶证号、车辆识别号码", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" }
+    ]},
+    { "key": "career-finance", "label": "职业与金融", "categories": [
+      { "key": "recruitment", "label": "求职招聘", "basicFunction": "求职者与用人单位之间的求职招聘信息交换", "necessaryInfoSummary": "注册用户移动电话号码；求职者提供的简历", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "online-lending", "label": "网络借贷", "basicFunction": "通过互联网平台实现个人消费贷款", "necessaryInfoSummary": "注册用户移动电话号码；借款人姓名、证件类型和号码、证件有效期限、银行卡号码", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "investment", "label": "投资理财", "basicFunction": "股票、期货、基金、债券等相关投资理财服务", "necessaryInfoSummary": "注册用户移动电话号码；投资理财人姓名、证件类型和号码、证件有效期限、证件影印件；投资理财账号、银行卡号码或支付账号", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "mobile-banking", "label": "手机银行", "basicFunction": "通过手机等移动智能终端提供银行账户管理、信息查询、转账汇款等服务", "necessaryInfoSummary": "注册用户移动电话号码；用户姓名、证件类型和号码、证件有效期限、证件影印件、银行卡号码、银行预留移动电话号码；转账收款人姓名、银行卡号码、开户银行信息", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" }
+    ]},
+    { "key": "health-education", "label": "健康教育娱乐", "categories": [
+      { "key": "medical-registration", "label": "问诊挂号", "basicFunction": "在线咨询问诊、预约挂号", "necessaryInfoSummary": "注册用户移动电话号码；挂号时提供患者姓名、证件类型和号码、预约医院和科室；问诊时提供病情描述", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "online-game", "label": "网络游戏", "basicFunction": "通过网络向用户提供游戏产品和服务", "necessaryInfoSummary": "注册用户移动电话号码", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "education", "label": "学习教育", "basicFunction": "在线辅导、网络课堂等", "necessaryInfoSummary": "注册用户移动电话号码", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "womens-health", "label": "女性健康", "basicFunction": "女性经期管理、备孕育儿、美容美体等健康管理服务", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "fitness", "label": "运动健身", "basicFunction": "运动健身训练", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "ebook", "label": "电子图书", "basicFunction": "电子图书搜索、阅读", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" }
+    ]},
+    { "key": "utilities", "label": "工具与效率", "categories": [
+      { "key": "mail-cloud", "label": "邮箱云盘", "basicFunction": "邮箱、云盘等", "necessaryInfoSummary": "注册用户移动电话号码", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "browser", "label": "浏览器", "basicFunction": "浏览互联网信息资源", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "input-method", "label": "输入法", "basicFunction": "文字、符号等输入", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "security-management", "label": "安全管理", "basicFunction": "查杀病毒、清理恶意插件、修复漏洞等", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "camera-beauty", "label": "拍摄美化", "basicFunction": "拍摄、美颜、滤镜等", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "app-store", "label": "应用商店", "basicFunction": "应用搜索、下载", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" },
+      { "key": "practical-tools", "label": "实用工具", "basicFunction": "日历、天气、词典翻译、计算器、遥控器、手电筒、指南针、时钟闹钟、文件传输、文件管理、壁纸铃声、截图录屏、录音、文档处理、智能家居助手、星座性格测试等", "necessaryInfoSummary": "无需个人信息即可使用基本功能", "availability": "OPEN", "formVersion": "universal-questionnaire-v1.0.0" }
+    ]}
+  ]
+}

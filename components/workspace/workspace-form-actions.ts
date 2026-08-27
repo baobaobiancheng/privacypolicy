@@ -1,5 +1,5 @@
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
-import type { MobilityQuestionnaire, PermissionPreset, QuestionnairePresetFeature } from "@/src/questionnaires/mobility";
+import type { AppQuestionnaire, PermissionPreset, QuestionnairePresetFeature } from "@/src/questionnaires";
 import {
   CLIENT_PERSONA_ID,
   SECURITY_PRESETS,
@@ -13,7 +13,7 @@ type SelectedFieldItem = { id: string; label: string };
 
 type WorkspaceFormActionOptions = {
   data: ProjectData;
-  questionnaire: MobilityQuestionnaire;
+  questionnaire: AppQuestionnaire;
   commit: Commit;
   customName: string;
   setCustomName: (value: string) => void;
