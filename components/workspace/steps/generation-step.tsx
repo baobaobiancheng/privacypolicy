@@ -81,7 +81,6 @@ export function GenerationStep(props: Props) {
   const preflightReviewRound = props.preflightIssues[0]?.preflightRound ?? 1;
   const issueProgress = props.preflightIssues.length ? Math.round(confirmedIssueCount / props.preflightIssues.length * 100) : 0;
   return <section className="workspace-panel draft-panel panel-enter">
-    <div className="review-summary-grid final-summary"><div><span>产品功能</span><strong>{props.selectedCount}</strong></div><div><span>个人信息</span><strong>{props.processedFieldCount}</strong></div><div><span>已完成补充</span><strong>{props.completedSupplementCount}/{props.supplementCount}</strong></div></div>
     {props.blockingDiagnostic ? <div className="warning-callout"><Warning weight="fill" /><div><strong>生成前还需补充</strong><span>{props.blockingDiagnostic}</span></div></div> : null}
     <div className="generation-divider" />
     <div className="panel-heading">
