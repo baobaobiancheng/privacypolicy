@@ -82,7 +82,6 @@ export function GenerationStep(props: Props) {
   const issueProgress = props.preflightIssues.length ? Math.round(confirmedIssueCount / props.preflightIssues.length * 100) : 0;
   return <section className="workspace-panel draft-panel panel-enter">
     {props.blockingDiagnostic ? <div className="warning-callout"><Warning weight="fill" /><div><strong>生成前还需补充</strong><span>{props.blockingDiagnostic}</span></div></div> : null}
-    <div className="generation-divider" />
     <div className="panel-heading">
       <p>隐私政策生成</p>
       <h2>{data.generated?.status === "SUCCEEDED" ? "隐私政策已生成，可预览或下载。" : generating ? stageCopy.title : data.generated?.status === "FAILED" ? "本次生成未完成，填写内容已保存。" : "确认以上事实后生成完整政策。"}</h2>

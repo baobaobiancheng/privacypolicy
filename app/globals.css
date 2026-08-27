@@ -3570,8 +3570,6 @@ input:focus-visible {
 .storage-section textarea { min-height: 90px; resize: vertical; }
 .rights-form { margin-bottom: 26px; }
 .rights-form textarea { min-height: 96px; }
-.generation-divider { height: 1px; margin: 34px 0; background: var(--bj-divider); }
-
 @media (max-width: 720px) {
   .permission-selector-grid, .binary-choice { grid-template-columns: 1fr; }
 }
