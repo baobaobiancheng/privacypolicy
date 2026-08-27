@@ -8,7 +8,7 @@ import { apiError, getRequestId, invalidInput } from "@/src/http/api-error";
 import { createEntityId } from "@/src/domain/ids";
 import { DomainError } from "@/src/domain/errors";
 import { appCategoryRegistry, getAppCategory } from "@/src/categories";
-import { verifiedMapV1Content } from "@/src/content/map-v1/server-content";
+import { getMobilityQuestionnaire } from "@/src/questionnaires/mobility";
 import { calculateProjectProgress, FORM_SCHEMA_VERSION, ProjectFormDataSchema } from "@/src/workspace/contract";
 import {
   createDevelopmentProjectFormData,
@@ -47,8 +47,9 @@ export async function POST(request: Request) {
     const requestId = getRequestId(request);
     const formData = parsed.data.formData
       ?? (developmentFormDefaultsEnabled()
-        ? createDevelopmentProjectFormData()
+        ? createDevelopmentProjectFormData(category.key)
         : ProjectFormDataSchema.parse({ schemaVersion: FORM_SCHEMA_VERSION }));
+    const questionnaire = getMobilityQuestionnaire(category.key);
     const productName = formData.profile.productName?.trim() || null;
     const uniqueKey = {
       tenantId: actor.tenantId,
@@ -75,8 +76,8 @@ export async function POST(request: Request) {
           categoryVersion: appCategoryRegistry.categoryVersion,
           currentStepKey: "profile",
           progressPercent: calculateProjectProgress(formData),
-          contentVersion: verifiedMapV1Content.contentVersion,
-          contentHash: verifiedMapV1Content.contentHash,
+          contentVersion: questionnaire.contentVersion,
+          contentHash: questionnaire.contentHash,
           formData: formData as unknown as Prisma.InputJsonValue,
         }, select: projectCreationSelect });
         await tx.auditEvent.create({ data: {

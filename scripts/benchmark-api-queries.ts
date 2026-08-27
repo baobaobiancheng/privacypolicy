@@ -57,7 +57,7 @@ async function main() {
     projectRevision: 5,
     idempotencyKey: `perf-generation-${index}`,
     inputHash: HASH,
-    inputJson: { schemaVersion: "privacy-form-v2.0.0", projectRevision: 5, formData: FORM_DATA },
+    inputJson: { schemaVersion: "privacy-form-v2.0.0", categoryKey: "map-navigation", projectRevision: 5, formData: FORM_DATA },
     state: index % 10 === 0 ? "FAILED" as const : "SUCCEEDED" as const,
     stage: "COMPLETED" as const,
     attemptCount: 1,

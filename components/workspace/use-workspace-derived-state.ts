@@ -1,13 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { mapV1Content } from "@/src/content/map-v1";
-import { scenarios } from "@/src/content/map-v1/ui-content";
+import { getMobilityQuestionnaire, getQuestionnaireScenarios } from "@/src/questionnaires/mobility";
 import { getRequiredSupplementQuestions, getSlotScenario } from "@/src/knowledge/map-cn";
 import { evaluateFormalPolicyReadiness, resolveFieldAnswer } from "@/src/knowledge/readiness";
 import type { FormPayload } from "@/src/ai/deepseek";
 import {
-  BASIC_FEATURE_IDS,
   basicProfileFields,
   profileFields,
   rightsProfileFields,
@@ -21,10 +19,13 @@ export function useWorkspaceDerivedState(data: ProjectData, activeStep: StepInde
 }
 
 function deriveWorkspaceState(data: ProjectData, activeStep: StepIndex, history: SnapshotItem[] | null) {
+  const questionnaire = getMobilityQuestionnaire(data.categoryKey);
+  const scenarios = getQuestionnaireScenarios(data.categoryKey);
+  const basicFeatureIds = new Set(questionnaire.features.filter((feature) => feature.kind === "BASIC").map((feature) => feature.key));
   const selectedScenarios = scenarios.filter((scenario) => data.selected.includes(scenario.id));
   const selectedCustomFeatures = data.customFeatures;
   const selectedFieldItems = selectedScenarios.flatMap((scenario) => {
-    const feature = mapV1Content.payload.features.find((item) => item.key === scenario.id);
+    const feature = questionnaire.features.find((item) => item.key === scenario.id);
     return (feature?.fields ?? scenario.fields.map((label) => ({ key: label, label })))
       .map((field) => ({ id: `${scenario.id}.${field.key}`, featureId: scenario.id, feature: scenario.title, label: field.label }));
   });
@@ -46,7 +47,7 @@ function deriveWorkspaceState(data: ProjectData, activeStep: StepIndex, history:
     selected: data.selected,
     customFeatures: data.customFeatures,
     supplementAnswers: data.supplementAnswers,
-  });
+  }, data.categoryKey);
   const effectiveSupplementAnswers = Object.fromEntries(supplementQuestions.map((question) => [
     question.id,
     data.supplementAnswers[question.id] ?? { answer: "NO" as const, detail: "", slots: {} },
@@ -80,8 +81,8 @@ function deriveWorkspaceState(data: ProjectData, activeStep: StepIndex, history:
     fieldAnswers: data.fieldAnswers,
     additionalNotes: data.additionalNotes,
     supplementAnswers: effectiveSupplementAnswers,
-  });
-  const hasBasicFeature = data.selected.some((feature) => BASIC_FEATURE_IDS.has(feature))
+  }, data.categoryKey);
+  const hasBasicFeature = data.selected.some((feature) => basicFeatureIds.has(feature))
     || data.processingActivities.some((activity) => activity.kind === "BASIC" && data.customFeatures.includes(activity.title));
   const canReview = basicProfileComplete && hasBasicFeature && selectedDetailsComplete && processedFieldCount > 0;
   const permissionDetailsComplete = data.permissions.length === 0
@@ -145,6 +146,9 @@ function deriveWorkspaceState(data: ProjectData, activeStep: StepIndex, history:
   const assistantProjectFacts = buildAssistantProjectFacts(data, selectedScenarios, selectedCustomFeatures, selectedFieldItems, fieldAnswer);
 
   return {
+    questionnaire,
+    scenarios,
+    basicFeatureIds,
     selectedScenarios,
     selectedCustomFeatures,
     selectedFieldItems,
@@ -173,7 +177,7 @@ function deriveWorkspaceState(data: ProjectData, activeStep: StepIndex, history:
   };
 }
 
-type SelectedScenario = (typeof scenarios)[number];
+type SelectedScenario = ReturnType<typeof getQuestionnaireScenarios>[number];
 type SelectedField = { id: string; featureId: string; feature: string; label: string };
 
 function buildAssistantStepFields(input: {

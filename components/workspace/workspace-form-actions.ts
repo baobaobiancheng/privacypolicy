@@ -1,9 +1,7 @@
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
+import type { MobilityQuestionnaire, PermissionPreset, QuestionnairePresetFeature } from "@/src/questionnaires/mobility";
 import {
   CLIENT_PERSONA_ID,
-  PERMISSION_PRESETS,
-  PRESET_ADDITIONAL_FEATURES,
-  PURPOSE_PRESETS,
   SECURITY_PRESETS,
   type ActivityDetail,
   type ProjectData,
@@ -15,6 +13,7 @@ type SelectedFieldItem = { id: string; label: string };
 
 type WorkspaceFormActionOptions = {
   data: ProjectData;
+  questionnaire: MobilityQuestionnaire;
   commit: Commit;
   customName: string;
   setCustomName: (value: string) => void;
@@ -29,6 +28,7 @@ type WorkspaceFormActionOptions = {
 export function useWorkspaceFormActions(options: WorkspaceFormActionOptions) {
   const {
     data,
+    questionnaire,
     commit,
     customName,
     setCustomName,
@@ -85,7 +85,7 @@ export function useWorkspaceFormActions(options: WorkspaceFormActionOptions) {
 
   function updatePurposeOther(id: string, value: string) {
     const current = data.activityDetails[id] ?? { purpose: "" };
-    const presets = PURPOSE_PRESETS[id] ?? [];
+    const presets = questionnaire.features.find((feature) => feature.key === id)?.purposes ?? [];
     const selectedPresets = current.purpose.split("；").map((item) => item.trim()).filter((item) => presets.includes(item));
     const other = value.split(/[；\n]/).map((item) => item.trim()).filter(Boolean);
     updateActivityDetail(id, "purpose", [...selectedPresets, ...other].join("；"));
@@ -99,7 +99,7 @@ export function useWorkspaceFormActions(options: WorkspaceFormActionOptions) {
     commit({ processingActivities: [...data.processingActivities.filter((item) => item.featureKey !== featureKey), next] }, "其他个人信息已保存");
   }
 
-  function togglePresetFeature(feature: (typeof PRESET_ADDITIONAL_FEATURES)[number]) {
+  function togglePresetFeature(feature: QuestionnairePresetFeature) {
     const selected = data.customFeatures.includes(feature.title);
     const featureKey = `custom:${feature.title}`;
     if (selected) {
@@ -147,7 +147,7 @@ export function useWorkspaceFormActions(options: WorkspaceFormActionOptions) {
 
   function updateCustomPurposeOther(feature: string, value: string) {
     const current = data.customDetails[feature] ?? { purpose: "" };
-    const preset = PRESET_ADDITIONAL_FEATURES.find((item) => item.title === feature);
+    const preset = questionnaire.additionalFeatures.find((item) => item.title === feature);
     const options: readonly string[] = preset?.purposes ?? [];
     const selectedPresets = current.purpose.split("；").map((item) => item.trim()).filter((item) => options.includes(item));
     const other = value.split(/[；\n]/).map((item) => item.trim()).filter(Boolean);
@@ -167,7 +167,7 @@ export function useWorkspaceFormActions(options: WorkspaceFormActionOptions) {
     }, message);
   }
 
-  function togglePermission(preset: (typeof PERMISSION_PRESETS)[number]) {
+  function togglePermission(preset: PermissionPreset) {
     const exists = data.permissions.some((item) => item.key === preset.key);
     const permissions = exists ? data.permissions.filter((item) => item.key !== preset.key) : [...data.permissions, { key: preset.key, label: preset.label, scenes: [], sceneOther: "" }];
     const detail = permissions.length ? permissions.map((item) => `${item.label}：${[...item.scenes, item.sceneOther].filter(Boolean).join("、")}`).join("；") : "产品不调用设备权限";

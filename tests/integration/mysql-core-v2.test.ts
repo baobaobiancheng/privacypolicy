@@ -170,7 +170,7 @@ integration("MySQL core v2 API and worker", () => {
     let externalRequestAborted = false;
     const processing = processNextGenerationJob(prisma, "worker-that-loses-lease", {
       heartbeatMs: 20,
-      generatePolicy: async (_reportId, _formData, callbacks) => {
+      generatePolicy: async (_reportId, _formData, _categoryKey, callbacks) => {
         generationStarted();
         const signal = callbacks?.signal;
         if (!signal) throw new Error("worker did not pass an abort signal");

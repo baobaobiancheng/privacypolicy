@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
-import { scenarios } from "@/src/content/map-v1/ui-content";
+import { getMobilityQuestionnaire, getQuestionnaireScenarios } from "@/src/questionnaires/mobility";
 import { createBrowserId } from "@/src/browser/random-id";
 import {
-  BASIC_FEATURE_IDS,
   CLIENT_PERSONA_ID,
   type AssistantAttachment,
   type AssistantMessage,
@@ -254,12 +253,15 @@ export function useWorkspaceAssistant(options: WorkspaceAssistantOptions) {
   function applySuggestion(message: AssistantMessage) {
     if (!message.suggestedText || message.applied) return;
     const target = message.suggestionTarget;
+    const scenarios = getQuestionnaireScenarios(options.dataRef.current.categoryKey);
+    const questionnaire = getMobilityQuestionnaire(options.dataRef.current.categoryKey);
+    const basicFeatureIds = new Set(questionnaire.features.filter((item) => item.kind === "BASIC").map((item) => item.key));
     const scenario = target?.featureName ? scenarios.find((item) => item.title === target.featureName) : undefined;
     const customFeature = target?.featureName && options.dataRef.current.customFeatures.includes(target.featureName) ? target.featureName : undefined;
     if (target?.kind === "FEATURE_INFORMATION" && (scenario || customFeature)) {
       const featureKey = scenario?.id ?? `custom:${customFeature!}`;
       const current = options.dataRef.current.processingActivities.find((item) => item.featureKey === featureKey)
-        ?? { featureKey, title: target.featureName!, kind: scenario ? (BASIC_FEATURE_IDS.has(scenario.id) ? "BASIC" as const : "EXTENSION" as const) : "CUSTOM" as const, informationItems: [], informationOther: [], purposes: [], purposeOther: "" };
+        ?? { featureKey, title: target.featureName!, kind: scenario ? (basicFeatureIds.has(scenario.id) ? "BASIC" as const : "EXTENSION" as const) : "CUSTOM" as const, informationItems: [], informationOther: [], purposes: [], purposeOther: "" };
       options.commit({ processingActivities: [...options.dataRef.current.processingActivities.filter((item) => item.featureKey !== featureKey), { ...current, informationOther: [...new Set([...current.informationOther, message.suggestedText.trim()])] }] }, `已填入“${target.featureName}”的其他个人信息，请核对`);
     } else if (target?.kind === "FEATURE_PURPOSE" && scenario) {
       const current = options.dataRef.current.activityDetails[scenario.id] ?? { purpose: "" };

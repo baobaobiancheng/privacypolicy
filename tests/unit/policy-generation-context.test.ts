@@ -2,12 +2,15 @@ import { describe, expect, it } from "vitest";
 import { buildPolicyGenerationContext } from "@/src/application/generation/policy-generation-context";
 import { createDevelopmentProjectFormData } from "@/src/workspace/development-defaults";
 import { toGenerationForm } from "@/src/workspace/form-adapter";
+import { getMobilityQuestionnaire } from "@/src/questionnaires/mobility";
+
+const mapQuestionnaire = getMobilityQuestionnaire("map-navigation");
 
 describe("PolicyGenerationContext", () => {
   it("keeps canonical facts without transmitting legacy duplicates", () => {
     const form = createDevelopmentProjectFormData();
     const legacy = toGenerationForm(form);
-    const context = buildPolicyGenerationContext(form);
+    const context = buildPolicyGenerationContext(form, mapQuestionnaire);
 
     expect(legacy).not.toHaveProperty("projectFacts");
     expect(context.activities).toEqual(form.processingActivities);
@@ -15,6 +18,25 @@ describe("PolicyGenerationContext", () => {
     expect(context.partners).toEqual(form.partners);
     expect(context.storageAndSecurity).toEqual(form.storageAndSecurity);
     expect(context.rightsAndGovernance).toEqual(form.rightsAndGovernance);
+    expect(context.category).toEqual({
+      key: "map-navigation",
+      label: "地图导航",
+      basicFunction: "定位、地图浏览、路线规划与导航",
+      necessaryInfoBaseline: "位置信息、出发地、到达地",
+    });
+  });
+
+  it("carries the selected category baseline into generation context", () => {
+    const questionnaire = getMobilityQuestionnaire("ride-hailing");
+    const form = createDevelopmentProjectFormData("ride-hailing");
+    const context = buildPolicyGenerationContext(form, questionnaire);
+
+    expect(context.category.key).toBe("ride-hailing");
+    expect(context.category.label).toBe("网络约车");
+    expect(context.category.basicFunction).toContain("出租汽车");
+    expect(context.category.necessaryInfoBaseline).toContain("乘车人出发地");
+    expect(context.activities.map((activity) => activity.featureKey)).toContain("ride-booking");
+    expect(context.activities.map((activity) => activity.featureKey)).not.toContain("navigation");
   });
 
   it("only includes confirmed attachment contents and supplement slots", () => {
@@ -37,7 +59,7 @@ describe("PolicyGenerationContext", () => {
       slots: {},
     };
 
-    const context = buildPolicyGenerationContext(form);
+    const context = buildPolicyGenerationContext(form, mapQuestionnaire);
     expect(context.confirmedAttachments).toEqual([{ name: "confirmed.txt", kind: "TEXT", content: "confirmed", truncated: false }]);
     expect(context.confirmedSupplements["third-party-services"]?.detail).toBe("");
     expect(Object.keys(context.confirmedSupplements["third-party-services"]?.slots ?? {})).toEqual(["name"]);
@@ -47,7 +69,7 @@ describe("PolicyGenerationContext", () => {
   it("reduces the model fact payload by at least thirty percent", () => {
     const form = createDevelopmentProjectFormData();
     const oldPayload = JSON.stringify({ ...toGenerationForm(form), projectFacts: form });
-    const compactPayload = JSON.stringify(buildPolicyGenerationContext(form));
+    const compactPayload = JSON.stringify(buildPolicyGenerationContext(form, mapQuestionnaire));
     expect(compactPayload.length).toBeLessThanOrEqual(oldPayload.length * 0.7);
   });
 });

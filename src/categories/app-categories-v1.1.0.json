@@ -1,18 +1,18 @@
 {
   "schemaVersion": "1",
-  "categoryVersion": "app-categories-v1.0.0",
+  "categoryVersion": "app-categories-v1.1.0",
   "source": "《常见类型移动互联网应用程序必要个人信息范围规定》",
   "sourceUrl": "https://www.miit.gov.cn/jgsj/xgj/gzdt/art/2021/art_4e535277ab4343ee9010dbbaf90aab64.html",
   "groups": [
     { "key": "mobility", "label": "出行与生活", "categories": [
       { "key": "map-navigation", "label": "地图导航", "basicFunction": "定位、地图浏览、路线规划与导航", "necessaryInfoSummary": "位置信息、出发地、到达地", "availability": "OPEN", "formVersion": "map-questionnaire-v2.0.0" },
-      { "key": "ride-hailing", "label": "网络约车", "basicFunction": "预约出租汽车服务", "necessaryInfoSummary": "手机号、位置信息、行踪轨迹、支付信息", "availability": "COMING_SOON", "formVersion": null },
-      { "key": "transport-ticket", "label": "交通票务", "basicFunction": "交通票务购买", "necessaryInfoSummary": "购票人身份、联系方式及行程信息", "availability": "COMING_SOON", "formVersion": null },
-      { "key": "travel-service", "label": "旅游服务", "basicFunction": "旅游产品预订", "necessaryInfoSummary": "出行人身份、联系方式及行程信息", "availability": "COMING_SOON", "formVersion": null },
-      { "key": "hotel-service", "label": "酒店服务", "basicFunction": "酒店预订", "necessaryInfoSummary": "住宿人身份、联系方式及订单信息", "availability": "COMING_SOON", "formVersion": null },
-      { "key": "local-life", "label": "本地生活", "basicFunction": "家政维修、家居装修、二手闲置物品交易等日常生活服务", "necessaryInfoSummary": "注册用户移动电话号码", "availability": "COMING_SOON", "formVersion": null },
-      { "key": "vehicle-service", "label": "用车服务", "basicFunction": "共享单车、共享汽车、租赁汽车等服务", "necessaryInfoSummary": "手机号；特定汽车服务的证件和驾驶证信息；支付信息；特定服务的位置信息", "availability": "COMING_SOON", "formVersion": null },
-      { "key": "performance-ticket", "label": "演出票务", "basicFunction": "演出购票", "necessaryInfoSummary": "手机号、观演场次、座位号（如有）及支付信息", "availability": "COMING_SOON", "formVersion": null }
+      { "key": "ride-hailing", "label": "网络约车", "basicFunction": "网络预约出租汽车服务、巡游出租汽车电召服务", "necessaryInfoSummary": "注册用户移动电话号码；乘车人出发地、到达地、位置信息、行踪轨迹；网络预约出租汽车服务的支付信息", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" },
+      { "key": "transport-ticket", "label": "交通票务", "basicFunction": "交通票务服务及行程管理", "necessaryInfoSummary": "注册用户移动电话号码；旅客身份和类型；行程与席位信息；支付信息", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" },
+      { "key": "travel-service", "label": "旅游服务", "basicFunction": "旅游服务产品信息的发布与订购", "necessaryInfoSummary": "注册用户移动电话号码；旅游目的地和旅游时间；出行人身份及联系方式", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" },
+      { "key": "hotel-service", "label": "酒店服务", "basicFunction": "酒店预订", "necessaryInfoSummary": "注册用户移动电话号码；住宿人姓名和联系方式；入住、退房时间及酒店名称", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" },
+      { "key": "local-life", "label": "本地生活", "basicFunction": "家政维修、家居装修、二手闲置物品交易等日常生活服务", "necessaryInfoSummary": "注册用户移动电话号码", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" },
+      { "key": "vehicle-service", "label": "用车服务", "basicFunction": "共享单车、共享汽车、租赁汽车等服务", "necessaryInfoSummary": "注册用户移动电话号码；特定汽车服务的证件和驾驶证件信息；支付信息；特定服务的位置信息", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" },
+      { "key": "performance-ticket", "label": "演出票务", "basicFunction": "演出购票", "necessaryInfoSummary": "注册用户移动电话号码；观演场次、座位号（如有）；支付信息", "availability": "OPEN", "formVersion": "mobility-questionnaire-v1.0.0" }
     ]},
     { "key": "social-content", "label": "社交与内容", "categories": [
       { "key": "instant-messaging", "label": "即时通信", "basicFunction": "文字、图片、语音或视频通信", "necessaryInfoSummary": "注册账号信息及通信联系人信息", "availability": "COMING_SOON", "formVersion": null },

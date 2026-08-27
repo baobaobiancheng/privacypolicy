@@ -91,7 +91,7 @@ export async function processNextGenerationJob(
     const input = GenerationInputSchema.parse(job.inputJson);
     const reportId = createEntityId("rpt");
     const generatePolicy = dependencies.generatePolicy ?? generatePolicyFromProjectFacts;
-    const result: PolicyGeneratorResult = await generatePolicy(reportId, input.formData, {
+    const result: PolicyGeneratorResult = await generatePolicy(reportId, input.formData, input.categoryKey, {
       onStage: async (stage, message) => {
         await queueProgressWrite(stageToDatabase(stage), { message });
         await flushProgressWrites();

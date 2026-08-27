@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { FormPayloadSchema } from "@/src/ai/form-payload";
 import { GenerationPreflightSchema } from "@/src/ai/policy-preflight";
-import { getMapFeature } from "@/src/content/map-v1";
+import { getQuestionnaireFeature } from "@/src/questionnaires/mobility";
 import { FORM_SCHEMA_VERSION, ProjectFormDataSchema, type ProjectFormData } from "./contract";
 
 type UnknownRecord = Record<string, unknown>;
@@ -35,23 +35,25 @@ export function canonicalizeProjectFormData(value: unknown): ProjectFormData {
   return ProjectFormDataSchema.parse(migrated);
 }
 
-export function toGenerationForm(formData: ProjectFormData): z.output<typeof FormPayloadSchema> {
+export function toGenerationForm(formData: ProjectFormData, categoryKey = "map-navigation"): z.output<typeof FormPayloadSchema> {
+  const isQuestionnaireActivity = (activity: ProjectFormData["processingActivities"][number]) =>
+    Boolean(getQuestionnaireFeature(categoryKey, activity.featureKey));
   const selected = formData.processingActivities
-    .filter((activity) => activity.kind !== "CUSTOM")
+    .filter(isQuestionnaireActivity)
     .map((activity) => activity.featureKey);
   const customFeatures = formData.processingActivities
-    .filter((activity) => activity.kind === "CUSTOM")
+    .filter((activity) => !isQuestionnaireActivity(activity))
     .map((activity) => activity.title);
   const activityDetails = Object.fromEntries(
     formData.processingActivities
-      .filter((activity) => activity.kind !== "CUSTOM")
+      .filter(isQuestionnaireActivity)
       .map((activity) => [activity.featureKey, {
         purpose: [...activity.purposes, activity.purposeOther].filter(Boolean).join("；"),
       }]),
   );
   const customDetails = Object.fromEntries(
     formData.processingActivities
-      .filter((activity) => activity.kind === "CUSTOM")
+      .filter((activity) => !isQuestionnaireActivity(activity))
       .map((activity) => [activity.title, {
         purpose: [...activity.purposes, activity.purposeOther].filter(Boolean).join("；"),
       }]),
@@ -60,7 +62,7 @@ export function toGenerationForm(formData: ProjectFormData): z.output<typeof For
   const confirmedFields: string[] = [];
   const fieldAnswers: Record<string, "PROCESS" | "NOT_PROCESS"> = {};
   for (const activity of formData.processingActivities) {
-    const feature = getMapFeature(activity.featureKey);
+    const feature = getQuestionnaireFeature(categoryKey, activity.featureKey);
     for (const field of feature?.fields ?? []) {
       const assertionKey = `${activity.featureKey}.${field.key}`;
       const processed = activity.informationItems.includes(field.label);
@@ -82,19 +84,21 @@ export function toGenerationForm(formData: ProjectFormData): z.output<typeof For
   });
 }
 
-export function toWorkspaceCompatibilityState(formData: ProjectFormData) {
-  const selected = formData.processingActivities.filter((item) => item.kind !== "CUSTOM").map((item) => item.featureKey);
-  const customActivities = formData.processingActivities.filter((item) => item.kind === "CUSTOM");
+export function toWorkspaceCompatibilityState(formData: ProjectFormData, categoryKey = "map-navigation") {
+  const isQuestionnaireActivity = (activity: ProjectFormData["processingActivities"][number]) =>
+    Boolean(getQuestionnaireFeature(categoryKey, activity.featureKey));
+  const selected = formData.processingActivities.filter(isQuestionnaireActivity).map((item) => item.featureKey);
+  const customActivities = formData.processingActivities.filter((item) => !isQuestionnaireActivity(item));
   const customFeatures = customActivities.map((item) => item.title);
   const activityDetails = Object.fromEntries(formData.processingActivities
-    .filter((item) => item.kind !== "CUSTOM")
+    .filter(isQuestionnaireActivity)
     .map((item) => [item.featureKey, { purpose: [...item.purposes, item.purposeOther].filter(Boolean).join("；") }]));
   const customDetails = Object.fromEntries(customActivities
     .map((item) => [item.title, { purpose: [...item.purposes, item.purposeOther].filter(Boolean).join("；") }]));
   const fieldAnswers: Record<string, "PROCESS" | "NOT_PROCESS"> = {};
   const confirmedFields: string[] = [];
   for (const activity of formData.processingActivities) {
-    for (const field of getMapFeature(activity.featureKey)?.fields ?? []) {
+    for (const field of getQuestionnaireFeature(categoryKey, activity.featureKey)?.fields ?? []) {
       const key = `${activity.featureKey}.${field.key}`;
       const processed = activity.informationItems.includes(field.label);
       fieldAnswers[key] = processed ? "PROCESS" : "NOT_PROCESS";
@@ -114,6 +118,7 @@ export function toWorkspaceCompatibilityState(formData: ProjectFormData) {
 
 export const GenerationInputSchema = z.object({
   schemaVersion: z.literal(FORM_SCHEMA_VERSION),
+  categoryKey: z.string().trim().min(1).max(80).default("map-navigation"),
   projectRevision: z.number().int().nonnegative(),
   formData: ProjectFormDataSchema,
   acknowledgedPreflightIssues: z.array(z.string().trim().min(1).max(1_000)).max(20).default([]),

@@ -81,6 +81,8 @@ export type GenerationJobPayload = {
 };
 export type ProjectData = {
   projectId: string | null;
+  categoryKey: string;
+  categoryLabel: string;
   revision: number;
   profile: Record<string, string>;
   selected: string[];
@@ -108,34 +110,7 @@ export const INITIAL_GENERATION_STAGES: GenerationStageItem[] = [
   { key: "DRAFTING", label: "编写政策正文", status: "WAITING", message: "等待法规资料准备完成" },
   { key: "FINALIZING", label: "核对并制作 Word", status: "WAITING", message: "等待正文编写完成" },
 ];
-export const PURPOSE_PRESETS: Record<string, string[]> = {
-  navigation: ["确定当前位置", "路线规划", "实时导航与路线偏离提醒"],
-  traffic: ["展示道路拥堵情况", "优化路线计算", "提供交通事件提醒"],
-  discovery: ["展示地点和附近服务", "提供地点搜索", "展示最近浏览内容"],
-  support: ["回复咨询或投诉", "核验用户身份", "定位和处理产品故障"],
-  security: ["保障账号与服务安全", "识别异常请求", "排查崩溃和运行故障"],
-};
-export const BASIC_FEATURE_IDS = new Set(["navigation", "traffic", "discovery"]);
-export const PRESET_ADDITIONAL_FEATURES = [
-  { title: "账号与同步", kind: "EXTENSION" as const, informationItems: ["手机号码", "账号信息", "收藏地点", "历史路线"], purposes: ["注册和登录账号", "同步用户主动保存的内容", "在多设备间恢复数据"] },
-  { title: "收藏、发布与分享", kind: "EXTENSION" as const, informationItems: ["收藏地点", "用户发布内容", "分享记录"], purposes: ["保存用户收藏", "发布地点或评价内容", "完成用户主动分享"] },
-  { title: "消息通知", kind: "EXTENSION" as const, informationItems: ["设备标识信息", "通知设置", "消息送达记录"], purposes: ["发送导航提醒", "通知服务状态", "展示用户订阅的消息"] },
-  { title: "语音或智能助手", kind: "EXTENSION" as const, informationItems: ["语音内容", "文字指令", "交互记录"], purposes: ["识别用户指令", "提供语音搜索或导航", "回答与产品功能有关的问题"] },
-  { title: "个性化展示与推荐", kind: "EXTENSION" as const, informationItems: ["浏览记录", "点击记录", "所在城市", "偏好设置"], purposes: ["展示个性化地点或内容", "优化搜索结果排序", "提供关闭个性化展示的能力"] },
-] as const;
-export const PERMISSION_PRESETS = [
-  { key: "location", label: "位置权限", description: "定位和地图服务常用权限", scenes: ["展示当前位置", "地点搜索与路线规划", "实时导航", "提供实时路况"] },
-  { key: "camera", label: "相机权限", description: "仅在用户主动触发拍摄时申请", scenes: ["拍摄并上传图片", "扫码识别", "AR 导航"] },
-  { key: "microphone", label: "麦克风权限", description: "仅在语音功能开启时申请", scenes: ["语音搜索", "语音导航指令", "客服语音沟通"] },
-  { key: "photos", label: "相册/存储权限", description: "用于用户主动选择或保存内容", scenes: ["选择并上传图片", "保存地图或路线图片", "提交客服材料"] },
-  { key: "contacts", label: "通讯录权限", description: "涉及联系人功能时才需要", scenes: ["主动选择联系人", "设置紧急联系人", "提高语音拨号识别率"] },
-  { key: "notifications", label: "通知权限", description: "用于用户选择接收的提醒", scenes: ["导航提醒", "服务状态通知", "订阅消息"] },
-  { key: "sensors", label: "传感器", description: "用于方向、姿态或定位辅助", scenes: ["判断设备方向和姿态", "改善定位精度", "记录运动状态"] },
-  { key: "clipboard", label: "剪贴板", description: "只处理用户主动复制或粘贴的内容", scenes: ["识别用户复制的地点或链接", "读取用户主动粘贴的口令"] },
-] as const;
 export const SECURITY_PRESETS = ["HTTPS 传输", "访问权限分级", "最小权限控制", "操作日志审计", "数据备份", "员工保密与安全培训"] as const;
-export const PARTNER_PURPOSE_PRESETS = ["登录", "地图定位", "支付", "消息推送", "统计分析", "客服", "安全风控"] as const;
-export const PARTNER_INFORMATION_PRESETS = ["设备标识信息", "网络信息", "位置信息", "应用运行信息", "账号信息", "用户主动提交的内容"] as const;
 export const PARTNER_PERMISSION_PRESETS = ["位置权限", "相机权限", "麦克风权限", "相册/存储权限", "通知权限"] as const;
 export const PLATFORM_PRESETS = ["Android", "iOS", "Web", "微信小程序"] as const;
 export const RIGHTS_FIELD_PRESETS: Record<string, readonly string[]> = {

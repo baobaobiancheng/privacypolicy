@@ -28,6 +28,7 @@ export async function enqueueGeneration(
   const formData = ProjectFormDataSchema.parse(project.formData);
   const baseInput = {
     schemaVersion: formData.schemaVersion,
+    categoryKey: project.categoryKey,
     projectRevision: project.revision,
     formData,
   };

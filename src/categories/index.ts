@@ -1,5 +1,5 @@
 import { z } from "zod";
-import rawRegistry from "./app-categories-v1.0.0.json";
+import rawRegistry from "./app-categories-v1.1.0.json";
 
 const CategorySchema = z.object({
   key: z.string().min(1),
@@ -34,4 +34,4 @@ export function getAppCategory(key: string) {
   return appCategories.find((item) => item.key === key);
 }
 
-export const OPEN_CATEGORY_KEY = "map-navigation";
+export const openCategoryKeys = appCategories.filter((item) => item.availability === "OPEN").map((item) => item.key);

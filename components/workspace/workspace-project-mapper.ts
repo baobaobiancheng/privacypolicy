@@ -1,17 +1,19 @@
-import { mapV1Content } from "@/src/content/map-v1";
-import { scenarios } from "@/src/content/map-v1/ui-content";
+import { getMobilityQuestionnaire, getQuestionnaireScenarios } from "@/src/questionnaires/mobility";
 import { resolveFieldAnswer } from "@/src/knowledge/readiness";
 import { FORM_SCHEMA_VERSION, ProjectFormDataSchema, type ProjectFormData } from "@/src/workspace/contract";
-import { BASIC_FEATURE_IDS, basicProfileFields, rightsProfileFields, type ProjectData, type StepIndex } from "./workspace-model";
+import { basicProfileFields, rightsProfileFields, type ProjectData, type StepIndex } from "./workspace-model";
 
 /** Converts UI compatibility state into the single, versioned persistence contract. */
 export function toProjectFormData(current: ProjectData): ProjectFormData {
+  const questionnaire = getMobilityQuestionnaire(current.categoryKey);
+  const scenarios = getQuestionnaireScenarios(current.categoryKey);
+  const basicFeatureIds = new Set(questionnaire.features.filter((feature) => feature.kind === "BASIC").map((feature) => feature.key));
   const processingActivities = [
     ...scenarios.filter((scenario) => current.selected.includes(scenario.id)).map((scenario) => ({
       featureKey: scenario.id,
       title: scenario.title,
-      kind: (BASIC_FEATURE_IDS.has(scenario.id) ? "BASIC" : "EXTENSION") as "BASIC" | "EXTENSION",
-      informationItems: (mapV1Content.payload.features.find((item) => item.key === scenario.id)?.fields ?? [])
+      kind: (basicFeatureIds.has(scenario.id) ? "BASIC" : "EXTENSION") as "BASIC" | "EXTENSION",
+      informationItems: (questionnaire.features.find((item) => item.key === scenario.id)?.fields ?? [])
         .filter((field) => resolveFieldAnswer(current, `${scenario.id}.${field.key}`) === "PROCESS")
         .map((field) => field.label),
       informationOther: current.processingActivities.find((item) => item.featureKey === scenario.id)?.informationOther ?? [],
@@ -59,16 +61,19 @@ export function toProjectFormData(current: ProjectData): ProjectFormData {
 
 /** Returns the earliest incomplete workspace step; step 6 means the form can enter generation. */
 export function firstIncompleteFor(project: ProjectData): StepIndex {
+  const questionnaire = getMobilityQuestionnaire(project.categoryKey);
+  const scenarios = getQuestionnaireScenarios(project.categoryKey);
+  const basicFeatureIds = new Set(questionnaire.features.filter((feature) => feature.kind === "BASIC").map((feature) => feature.key));
   const basicComplete = basicProfileFields.every(([key]) => Boolean(project.profile[key]?.trim()));
   if (!basicComplete) return 0;
   const selectedScenarios = scenarios.filter((scenario) => project.selected.includes(scenario.id));
   const detailsComplete = selectedScenarios.every((scenario) => Boolean(project.activityDetails[scenario.id]?.purpose?.trim()))
     && project.customFeatures.every((feature) => Boolean(project.customDetails[feature]?.purpose?.trim()));
-  const hasBasicFeature = project.selected.some((feature) => BASIC_FEATURE_IDS.has(feature))
+  const hasBasicFeature = project.selected.some((feature) => basicFeatureIds.has(feature))
     || project.processingActivities.some((activity) => activity.kind === "BASIC");
   if (!hasBasicFeature || !detailsComplete) return 1;
   const hasProcessedField = selectedScenarios.some((scenario) => {
-    const feature = mapV1Content.payload.features.find((item) => item.key === scenario.id);
+    const feature = questionnaire.features.find((item) => item.key === scenario.id);
     return (feature?.fields ?? []).some((field, index) => resolveFieldAnswer(project, `${scenario.id}.${field.key}`) === "PROCESS" || resolveFieldAnswer(project, `${scenario.id}.${index}`) === "PROCESS");
   });
   const hasCustomInformation = project.processingActivities.some((activity) => activity.informationItems.length > 0);

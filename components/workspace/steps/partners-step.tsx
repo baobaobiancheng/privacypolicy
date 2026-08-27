@@ -2,11 +2,13 @@
 
 import type { ReactNode } from "react";
 import { ArrowLeft, ArrowRight, Check, Plus } from "@phosphor-icons/react";
-import { PARTNER_INFORMATION_PRESETS, PARTNER_PERMISSION_PRESETS, PARTNER_PURPOSE_PRESETS, type ProjectData } from "../workspace-model";
+import { PARTNER_PERMISSION_PRESETS, type ProjectData } from "../workspace-model";
 
 type Partner = ProjectData["partners"][number];
 type Props = {
   data: ProjectData;
+  purposePresets: string[];
+  informationPresets: string[];
   renderSupplementQuestion: (questionId: string) => ReactNode;
   onConfirm: (answer: "YES" | "NO") => void;
   onAdd: () => void;
@@ -30,8 +32,8 @@ export function PartnersStep(props: Props) {
       <div className="form-grid">
         <label><span>SDK/服务名称</span><input value={partner.name} onChange={(event) => props.onUpdate(index, { name: event.target.value })} /></label>
         <label><span>提供方</span><input value={partner.provider} onChange={(event) => props.onUpdate(index, { provider: event.target.value })} /></label>
-        <label className="full-field choice-field"><span>使用目的（可多选）</span><div className="preset-chips">{PARTNER_PURPOSE_PRESETS.map((purpose) => <button type="button" key={purpose} data-selected={partner.purposes.includes(purpose)} onClick={() => props.onTogglePurpose(index, purpose)}>{partner.purposes.includes(purpose) ? <Check weight="bold" /> : null}{purpose}</button>)}</div><textarea rows={2} value={partner.purposes.filter((item) => !PARTNER_PURPOSE_PRESETS.includes(item as (typeof PARTNER_PURPOSE_PRESETS)[number])).join("、")} onChange={(event) => props.onUpdateOtherValues(index, "purposes", PARTNER_PURPOSE_PRESETS, event.target.value)} placeholder="如有其他情况，请补充说明。" /></label>
-        <label className="full-field choice-field"><span>涉及个人信息（可多选）</span><div className="preset-chips">{PARTNER_INFORMATION_PRESETS.map((item) => <button type="button" key={item} data-selected={partner.informationItems.includes(item)} onClick={() => props.onToggleListValue(index, "informationItems", item)}>{partner.informationItems.includes(item) ? <Check weight="bold" /> : null}{item}</button>)}</div><textarea rows={2} value={partner.informationItems.filter((item) => !PARTNER_INFORMATION_PRESETS.includes(item as (typeof PARTNER_INFORMATION_PRESETS)[number])).join("、")} onChange={(event) => props.onUpdateOtherValues(index, "informationItems", PARTNER_INFORMATION_PRESETS, event.target.value)} placeholder="如有其他情况，请补充说明。" /></label>
+        <label className="full-field choice-field"><span>使用目的（可多选）</span><div className="preset-chips">{props.purposePresets.map((purpose) => <button type="button" key={purpose} data-selected={partner.purposes.includes(purpose)} onClick={() => props.onTogglePurpose(index, purpose)}>{partner.purposes.includes(purpose) ? <Check weight="bold" /> : null}{purpose}</button>)}</div><textarea rows={2} value={partner.purposes.filter((item) => !props.purposePresets.includes(item)).join("、")} onChange={(event) => props.onUpdateOtherValues(index, "purposes", props.purposePresets, event.target.value)} placeholder="如有其他情况，请补充说明。" /></label>
+        <label className="full-field choice-field"><span>涉及个人信息（可多选）</span><div className="preset-chips">{props.informationPresets.map((item) => <button type="button" key={item} data-selected={partner.informationItems.includes(item)} onClick={() => props.onToggleListValue(index, "informationItems", item)}>{partner.informationItems.includes(item) ? <Check weight="bold" /> : null}{item}</button>)}</div><textarea rows={2} value={partner.informationItems.filter((item) => !props.informationPresets.includes(item)).join("、")} onChange={(event) => props.onUpdateOtherValues(index, "informationItems", props.informationPresets, event.target.value)} placeholder="如有其他情况，请补充说明。" /></label>
         <label className="full-field choice-field"><span>调用的设备权限（可多选，没有可不选）</span><div className="preset-chips">{PARTNER_PERMISSION_PRESETS.map((item) => <button type="button" key={item} data-selected={partner.permissions.includes(item)} onClick={() => props.onToggleListValue(index, "permissions", item)}>{partner.permissions.includes(item) ? <Check weight="bold" /> : null}{item}</button>)}</div><textarea rows={2} value={partner.permissions.filter((item) => !PARTNER_PERMISSION_PRESETS.includes(item as (typeof PARTNER_PERMISSION_PRESETS)[number])).join("、")} onChange={(event) => props.onUpdateOtherValues(index, "permissions", PARTNER_PERMISSION_PRESETS, event.target.value)} placeholder="其他设备权限（可选）" /></label>
         <label><span>调用或发送时机</span><input value={partner.trigger} onChange={(event) => props.onUpdate(index, { trigger: event.target.value })} /></label>
         <label><span>隐私政策链接</span><input type="url" value={partner.privacyUrl} onChange={(event) => props.onUpdate(index, { privacyUrl: event.target.value })} /></label>

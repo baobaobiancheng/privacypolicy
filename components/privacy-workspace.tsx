@@ -54,6 +54,8 @@ type PrivacyWorkspaceProps = {
 
 const emptyProject: ProjectData = {
   projectId: null,
+  categoryKey: "map-navigation",
+  categoryLabel: "地图导航",
   revision: 0,
   profile: {},
   selected: [],
@@ -120,13 +122,13 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     setPreflightIssues,
   });
 
-  async function loadProjectFromServer(id: string): Promise<{ formData: Partial<ProjectData>; revision: number; currentStepKey: string; latestGeneration: GenerationJobPayload | null } | null> {
+  async function loadProjectFromServer(id: string): Promise<{ formData: Partial<ProjectData>; revision: number; categoryKey: string; categoryLabel: string; currentStepKey: string; latestGeneration: GenerationJobPayload | null } | null> {
     try {
       const res = await fetch(`/api/v1/projects/${id}`, { headers: { "x-persona-id": CLIENT_PERSONA_ID } });
       if (!res.ok) return null;
-      const payload = await res.json() as { data: { formData: unknown; revision: number; currentStepKey: string; latestGeneration: GenerationJobPayload | null } };
+      const payload = await res.json() as { data: { formData: unknown; revision: number; categoryKey: string; categoryLabel: string; currentStepKey: string; latestGeneration: GenerationJobPayload | null } };
       const canonical = canonicalizeProjectFormData(payload.data.formData);
-      return { formData: toWorkspaceCompatibilityState(canonical), revision: payload.data.revision, currentStepKey: payload.data.currentStepKey, latestGeneration: payload.data.latestGeneration };
+      return { formData: toWorkspaceCompatibilityState(canonical, payload.data.categoryKey), revision: payload.data.revision, categoryKey: payload.data.categoryKey, categoryLabel: payload.data.categoryLabel, currentStepKey: payload.data.currentStepKey, latestGeneration: payload.data.latestGeneration };
     } catch {
       return null;
     }
@@ -135,6 +137,9 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
   const storageKey = projectStorageKey(projectId ?? data.projectId ?? undefined);
 
   const {
+    questionnaire,
+    scenarios,
+    basicFeatureIds,
     selectedScenarios,
     selectedCustomFeatures,
     selectedFieldItems,
@@ -192,11 +197,15 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
           return;
         }
         const serverFormIsEmpty = (server.formData.processingActivities?.length ?? 0) === 0 && Object.keys(server.formData.profile ?? {}).length === 0;
-        const hydratedForm = developmentPrefillEnabled && serverFormIsEmpty ? initialProject : server.formData;
+        const hydratedForm = developmentPrefillEnabled && serverFormIsEmpty
+          ? createDevelopmentProjectDefaults(server.categoryKey)
+          : server.formData;
         const serverData: ProjectData = {
           ...emptyProject,
           ...hydratedForm,
           projectId,
+          categoryKey: server.categoryKey,
+          categoryLabel: server.categoryLabel,
           revision: server.revision,
           generated: undefined,
         };
@@ -224,7 +233,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       if (saved) {
         try {
           const canonical = canonicalizeProjectFormData(JSON.parse(saved));
-          const parsed = toWorkspaceCompatibilityState(canonical) as Partial<ProjectData>;
+          const parsed = toWorkspaceCompatibilityState(canonical, dataRef.current.categoryKey) as Partial<ProjectData>;
           const restored: ProjectData = {
             ...initialProject,
             ...parsed,
@@ -335,7 +344,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       method: "POST",
       headers: { "Content-Type": "application/json", "x-persona-id": CLIENT_PERSONA_ID },
       body: JSON.stringify({
-        categoryKey: "map-navigation",
+        categoryKey: dataRef.current.categoryKey,
         idempotencyKey: creationKeyRef.current,
         usageConfirmation: usageConfirmationRequest,
         formData: toProjectFormData(dataRef.current),
@@ -467,6 +476,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     extractSupplementSlots,
   } = useWorkspaceFormActions({
     data,
+    questionnaire,
     commit,
     customName,
     setCustomName,
@@ -552,11 +562,11 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
         </div>
       </header>
 
-      <div className="workspace-v3-breadcrumb">项目 <span>/</span> {data.profile.productName || "新地图项目"} <em className="category-pill">地图导航类</em></div>
+      <div className="workspace-v3-breadcrumb">项目 <span>/</span> {data.profile.productName || `新${data.categoryLabel}项目`} <em className="category-pill">{data.categoryLabel}类</em></div>
 
       <section className="workspace-v3-progress">
         <div className="workspace-v3-progress-heading">
-          <h1>{data.profile.productName ? `${data.profile.productName}隐私政策` : "地图类隐私政策"}</h1>
+          <h1>{data.profile.productName ? `${data.profile.productName}隐私政策` : `${data.categoryLabel}类隐私政策`}</h1>
           <div><strong>第 {activeStep + 1} / {steps.length} 步 · {steps[activeStep]}</strong><span>完成度 {completionPercent}%</span></div>
         </div>
         <div className="workspace-v3-progress-line" aria-label={`项目完成度 ${completionPercent}%`}><span style={{ width: `${completionPercent}%` }} /></div>
@@ -571,11 +581,11 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
 
           {activeStep === 0 && <BasicInformationStep data={data} complete={basicProfileComplete} onUpdate={updateProfile} onTogglePreset={toggleProfilePreset} onUpdateOther={updateProfileOther} onNext={() => void goToStep(1)} />}
 
-          {activeStep === 1 && <ProcessingActivitiesStep data={data} selectedScenarios={selectedScenarios} selectedCustomFeatures={selectedCustomFeatures} draftFields={draftFields} customOpen={customOpen} customName={customName} canContinue={canReview} onToggleFeature={toggleFeature} onTogglePresetFeature={togglePresetFeature} onSetCustomOpen={setCustomOpen} onSetCustomName={setCustomName} onAddCustomFeature={addCustomFeature} onRemoveCustomFeature={removeCustomFeature} onToggleField={toggleField} onUpdateInformationOther={updateInformationOther} onTogglePurposePreset={togglePurposePreset} onUpdatePurposeOther={updatePurposeOther} onToggleCustomInformationPreset={toggleCustomInformationPreset} onToggleCustomPurposePreset={toggleCustomPurposePreset} onUpdateCustomPurposeOther={updateCustomPurposeOther} onUpdateNotes={(value) => commit({ additionalNotes: value }, "补充信息已保存")} onBack={() => void goToStep(0)} onNext={() => void goToStep(2)} />}
+          {activeStep === 1 && <ProcessingActivitiesStep data={data} questionnaire={questionnaire} scenarios={scenarios} basicFeatureIds={basicFeatureIds} selectedScenarios={selectedScenarios} selectedCustomFeatures={selectedCustomFeatures} draftFields={draftFields} customOpen={customOpen} customName={customName} canContinue={canReview} onToggleFeature={toggleFeature} onTogglePresetFeature={togglePresetFeature} onSetCustomOpen={setCustomOpen} onSetCustomName={setCustomName} onAddCustomFeature={addCustomFeature} onRemoveCustomFeature={removeCustomFeature} onToggleField={toggleField} onUpdateInformationOther={updateInformationOther} onTogglePurposePreset={togglePurposePreset} onUpdatePurposeOther={updatePurposeOther} onToggleCustomInformationPreset={toggleCustomInformationPreset} onToggleCustomPurposePreset={toggleCustomPurposePreset} onUpdateCustomPurposeOther={updateCustomPurposeOther} onUpdateNotes={(value) => commit({ additionalNotes: value }, "补充信息已保存")} onBack={() => void goToStep(0)} onNext={() => void goToStep(2)} />}
 
-          {activeStep === 2 && <DevicePermissionsStep data={data} complete={permissionDetailsComplete} renderSupplementQuestion={(id) => renderSupplementQuestion(id)} onTogglePermission={togglePermission} onAddCustomPermission={addCustomPermission} onUpdateCustomPermission={updateCustomPermission} onRemovePermission={removePermission} onToggleScene={togglePermissionScene} onUpdateScene={updatePermissionScene} onBack={() => void goToStep(1)} onNext={() => void goToStep(3)} />}
+          {activeStep === 2 && <DevicePermissionsStep data={data} permissionPresets={questionnaire.permissionPresets} complete={permissionDetailsComplete} renderSupplementQuestion={(id) => renderSupplementQuestion(id)} onTogglePermission={togglePermission} onAddCustomPermission={addCustomPermission} onUpdateCustomPermission={updateCustomPermission} onRemovePermission={removePermission} onToggleScene={togglePermissionScene} onUpdateScene={updatePermissionScene} onBack={() => void goToStep(1)} onNext={() => void goToStep(3)} />}
 
-          {activeStep === 3 && <PartnersStep data={data} renderSupplementQuestion={(id) => renderSupplementQuestion(id)} onConfirm={confirmPartners} onAdd={addPartner} onRemove={removePartner} onUpdate={updatePartner} onTogglePurpose={togglePartnerPurpose} onToggleListValue={togglePartnerListValue} onUpdateOtherValues={updatePartnerOtherValues} onBack={() => void goToStep(2)} onNext={() => void goToStep(4)} />}
+          {activeStep === 3 && <PartnersStep data={data} purposePresets={questionnaire.partnerPurposePresets} informationPresets={questionnaire.partnerInformationPresets} renderSupplementQuestion={(id) => renderSupplementQuestion(id)} onConfirm={confirmPartners} onAdd={addPartner} onRemove={removePartner} onUpdate={updatePartner} onTogglePurpose={togglePartnerPurpose} onToggleListValue={togglePartnerListValue} onUpdateOtherValues={updatePartnerOtherValues} onBack={() => void goToStep(2)} onNext={() => void goToStep(4)} />}
 
           {activeStep === 4 && <StorageSecurityStep data={data} complete={storageDetailsComplete} renderSupplementQuestion={(id) => renderSupplementQuestion(id)} onToggleValue={toggleStorageValue} onUpdateText={updateStorageText} onToggleSecurityMeasure={toggleSecurityMeasure} onUpdateSecurityOther={updateSecurityOther} onBack={() => void goToStep(3)} onNext={() => void confirmStorageAndContinue()} />}
 

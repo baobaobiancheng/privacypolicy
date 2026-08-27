@@ -1,4 +1,5 @@
 import { mapV1Content } from "@/src/content/map-v1";
+import { getMobilityQuestionnaire } from "@/src/questionnaires/mobility";
 import type { SupplementAnswer } from "@/src/knowledge/map-cn/schema";
 import {
   FORM_SCHEMA_VERSION,
@@ -14,7 +15,7 @@ const no = (): SupplementAnswer => ({ answer: "NO", detail: "", slots: {} });
  * 开发和演示期端到端测试数据。它只通过显式开关装载，不属于知识包；
  * 正式上线前必须将 NEXT_PUBLIC_DEV_FORM_DEFAULTS 设为 false。
  */
-export function createDevelopmentProjectDefaults() {
+function createMapDevelopmentProjectDefaults() {
   const selected = mapV1Content.payload.features.map((feature) => feature.key);
   const processedFieldIds = mapV1Content.payload.features.flatMap((feature) =>
     feature.fields.map((field) => `${feature.key}.${field.key}`),
@@ -179,6 +180,99 @@ export function createDevelopmentProjectDefaults() {
   };
 }
 
+export function createDevelopmentProjectDefaults(categoryKey = "map-navigation") {
+  if (categoryKey === "map-navigation") return createMapDevelopmentProjectDefaults();
+
+  const questionnaire = getMobilityQuestionnaire(categoryKey);
+  const productName = `示例${questionnaire.categoryLabel}产品`;
+  const processingActivities = questionnaire.features
+    .filter((item) => item.defaultSelection)
+    .map((item) => ({
+      featureKey: item.key,
+      title: item.title,
+      kind: item.kind,
+      informationItems: item.fields.map((itemField) => itemField.label),
+      informationOther: [],
+      purposes: item.purposes,
+      purposeOther: "",
+    }));
+  const selected = processingActivities.map((item) => item.featureKey);
+  const confirmedFields = questionnaire.features
+    .filter((item) => selected.includes(item.key))
+    .flatMap((item) => item.fields.map((itemField) => `${item.key}.${itemField.key}`));
+  const fieldAnswers = Object.fromEntries(confirmedFields.map((key) => [key, "PROCESS" as const]));
+  const activityDetails = Object.fromEntries(processingActivities.map((item) => [item.featureKey, { purpose: item.purposes.join("；") }]));
+  const supplementAnswers: Record<string, SupplementAnswer> = {
+    "device-permissions": no(),
+    "third-party-services": no(),
+    "storage-locations": yes("产品信息保存在中华人民共和国境内服务器，并按统一保存规则处理。", {
+      "data-types": confirmed("账号、订单、服务记录及客户主动提交的信息"),
+      "storage-location": confirmed("中华人民共和国境内服务器"),
+      retention: confirmed("提供服务所必需的最短期限；用户删除或注销账号后按规则处理；法律法规另有要求的除外"),
+      "deletion-method": confirmed("期限届满后删除或匿名化，备份数据随轮换周期清理"),
+    }),
+    "account-cloud-sync": no(),
+    "notification-push": no(),
+    "cookies-local-storage": no(),
+    "sensitive-information": questionnaire.features.some((item) => item.fields.some((itemField) => ["document", "driver-license", "location", "trajectory"].includes(itemField.key)))
+      ? yes(`产品仅在用户使用${questionnaire.basicFunction}时处理表单中已勾选的相关信息，并用于对应服务。`)
+      : no(),
+    "user-control-paths": yes("用户可在“我的—设置—隐私中心”提交查阅、更正、删除、撤回同意或注销账号请求。"),
+    "sharing-transfer-public": no(),
+    "shutdown-data-handling": yes("停止运营时通过 App 公告提前通知，停止新增收集，并按公告期限删除或匿名化相关信息，法律法规另有要求的除外。"),
+  };
+  return {
+    profile: {
+      operatorName: "示例出行服务有限公司",
+      operatorContact: "浙江省杭州市西湖区示例路 88 号",
+      productName,
+      platform: "Android、iOS",
+      productVersion: "1.0.0",
+      releaseDate: "2026-08-20",
+      contactEmail: "privacy@example.com",
+      contactPhone: "400-000-0000",
+      rightsEntry: "App 内「我的—设置—隐私中心」",
+      rightsResponsePeriod: "收到申请后 15 个工作日内回复",
+      policyEntry: "App 内「我的—设置—隐私政策」",
+      minorProcessing: "产品不以未成年人为主要服务对象",
+      securityMeasures: "HTTPS 传输、访问权限分级、最小权限控制、操作日志审计、数据备份",
+      incidentChannel: "App 弹窗和站内消息",
+      policyEffectiveDate: "2026-08-20",
+      policyUpdateNotice: "App 弹窗和隐私政策页面提示",
+    },
+    selected,
+    customFeatures: [],
+    customDetails: {},
+    activityDetails,
+    processingActivities,
+    confirmedFields,
+    fieldAnswers,
+    additionalNotes: `本示例仅演示${questionnaire.categoryLabel}类问卷，实际使用时应按产品真实功能修改所有选项。`,
+    supplementAnswers,
+    permissions: [],
+    partners: [],
+    storageAndSecurity: {
+      locations: ["CN" as const, "CLOUD" as const],
+      crossBorderDetail: "",
+      retentionPolicies: ["MINIMUM_NECESSARY" as const, "UNTIL_DELETION_OR_CLOSURE" as const, "LEGAL_REQUIREMENT" as const],
+      fixedPeriod: "",
+      expiryActions: ["DELETE" as const, "ANONYMIZE" as const],
+      expiryOther: "",
+      securityMeasures: ["HTTPS 传输", "访问权限分级", "最小权限控制", "操作日志审计", "数据备份"],
+    },
+    rightsAndGovernance: {
+      rightsEntry: "App 内「我的—设置—隐私中心」",
+      responsePeriod: "收到申请后 15 个工作日内回复",
+      contactEmail: "privacy@example.com",
+      contactPhone: "400-000-0000",
+      policyEntry: "App 内「我的—设置—隐私政策」",
+      updateNotices: ["App 弹窗", "隐私政策页面提示"],
+      minorMode: "ADULT_ONLY" as const,
+    },
+    attachments: [],
+  };
+}
+
 /**
  * 模拟数据由显式开关控制。开发环境默认开启；生产构建只有明确配置为
  * `true` 时才开启，方便演示部署继续使用，并在正式上线前一处关闭。
@@ -191,8 +285,8 @@ export function developmentFormDefaultsEnabled(
 }
 
 /** 创建接口直接持久化的 v2 表单，避免依赖客户端水合后再补写模拟数据。 */
-export function createDevelopmentProjectFormData(): ProjectFormData {
-  const defaults = createDevelopmentProjectDefaults();
+export function createDevelopmentProjectFormData(categoryKey = "map-navigation"): ProjectFormData {
+  const defaults = createDevelopmentProjectDefaults(categoryKey);
   return ProjectFormDataSchema.parse({
     schemaVersion: FORM_SCHEMA_VERSION,
     profile: defaults.profile,

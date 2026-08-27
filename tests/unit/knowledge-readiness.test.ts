@@ -39,6 +39,19 @@ describe("map local knowledge readiness", () => {
     expect(withThirdParty.map((item) => item.id)).toContain("third-party-initialization");
   });
 
+  it("uses category-neutral wording and common extension triggers outside map projects", () => {
+    const questions = getRequiredSupplementQuestions({
+      selected: ["hotel-booking"],
+      customFeatures: ["客服与问题反馈", "安全保障与故障诊断"],
+    }, "hotel-service");
+    const thirdParty = questions.find((item) => item.id === "third-party-services");
+    const notification = questions.find((item) => item.id === "notification-push");
+
+    expect(thirdParty?.prompt).not.toContain("地图");
+    expect(notification?.prompt).not.toContain("导航提醒");
+    expect(questions.map((item) => item.id)).toEqual(expect.arrayContaining(["customer-service-records", "diagnostic-logs"]));
+  });
+
   it("treats unchecked information as omitted but still blocks an unknown supplemental answer", () => {
     expect(evaluateFormalPolicyReadiness(base).ready).toBe(true);
     const partiallySelected = evaluateFormalPolicyReadiness({ ...base, confirmedFields: ["navigation.0"] });

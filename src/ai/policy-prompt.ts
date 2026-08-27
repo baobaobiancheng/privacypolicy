@@ -3,8 +3,10 @@ import type { FormPayload } from "./form-payload";
 import { POLICY_SECTION_TITLES } from "./policy-markdown";
 
 export function buildPolicyMessages(input: PolicyGenerationInput): Array<{ role: "system" | "user"; content: string }> {
+  const category = input.generationContext?.category;
+  const categoryLabel = category?.label ? `${category.label}类` : "移动互联网应用";
   const system = [
-    "你是中国地图导航类产品的隐私政策编排助手，不得作出合规结论。",
+    `你是中国${categoryLabel}产品的隐私政策编排助手，不得作出合规结论。`,
     "请严格输出 Markdown，不要 JSON、解释文字或代码围栏。",
     `Markdown 必须包含一个 # 标题，随后按 1 到 ${POLICY_SECTION_TITLES.length} 的顺序使用固定 ## 章节标题；每个章节只能出现一次。`,
     `固定章节标题依次为：${POLICY_SECTION_TITLES.join("；")}。标题格式必须是“## 1. ${POLICY_SECTION_TITLES[0]}”这类带序号形式。`,
@@ -14,7 +16,7 @@ export function buildPolicyMessages(input: PolicyGenerationInput): Array<{ role:
     "只可使用 FORM_JSON 中的客户事实；FORM_JSON 是 Core v2 问卷生成的唯一权威事实上下文。本请求在发送前已经完成客户确认。不要编造名称、期限、第三方、权限、法律依据或不存在的功能。",
     "CONFIRMED_FACT_KEYS 才是可以作为确定事实写入正文的字段。不要输出任何 [[待确认:...]]、内部编号、断言说明、复核附录或技术元数据。",
     "本地规则包和行业结构仅用于确定章节结构、遗漏提示和表达质量，不能证明客户产品事实；不得提及、复制或暗示任何参考产品。",
-    "必须在第1章明确区分基本功能与扩展功能：定位、地图浏览与地点搜索、路线规划与导航、实时路况与交通信息是地图类基本功能候选，但只有客户实际选择的功能才可出现；法定必要个人信息基线仍仅包括位置信息、出发地和到达地。账号同步、收藏发布与分享、消息通知、语音或智能助手、客服、安全保障、个性化展示与推荐等仅在客户选择时作为扩展功能分别披露。不得暗示扩展功能信息是使用地图基本功能的必需条件。",
+    `必须在第1章明确区分基本功能与扩展功能。${category ? `本项目类别为“${category.label}”，法定基本功能基线为“${category.basicFunction}”，法定必要个人信息基线为“${category.necessaryInfoBaseline}”。` : ""}只有客户实际选择的功能和信息才可出现；扩展功能仅在客户选择时分别披露，不得暗示扩展功能信息是使用基本功能的必需条件。`,
     "第1章开头必须使用Markdown三列表格汇总处理活动，表头必须且只能是：功能、个人信息、处理目的。不得在该表增加保存期限、拒绝影响、内部编号或来源标签；表后可以按功能作必要说明。",
     "第2章对每项已确认的SDK或第三方服务使用Markdown表格，表头至少包含名称、提供方、使用目的、涉及信息、启动与发送时机、隐私政策链接。链接必须保持客户填写值，不得替换或猜测。",
     "不要使用“继续使用即视为同意全部处理”一类笼统同意表述；应区分政策告知、基本功能必要处理、设备权限、敏感信息及依法需要单独同意的扩展处理。",

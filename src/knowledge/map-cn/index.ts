@@ -32,6 +32,30 @@ export function isQuestionRequired(question: KnowledgeQuestion, input: { selecte
   return input.supplementAnswers?.[question.dependsOn.questionId]?.answer === question.dependsOn.answer;
 }
 
-export function getRequiredSupplementQuestions(input: { selected: string[]; customFeatures: string[]; supplementAnswers?: Record<string, SupplementAnswer> }) {
-  return mapCnKnowledgePackage.questions.filter((question) => isQuestionRequired(question, input));
+export function getRequiredSupplementQuestions(
+  input: { selected: string[]; customFeatures: string[]; supplementAnswers?: Record<string, SupplementAnswer> },
+  categoryKey = "map-navigation",
+) {
+  const normalizedInput = categoryKey === "map-navigation" ? input : normalizeCommonFeatureTriggers(input);
+  return mapCnKnowledgePackage.questions
+    .filter((question) => isQuestionRequired(question, normalizedInput))
+    .map((question) => categoryKey === "map-navigation" ? question : generalizeQuestionCopy(question));
+}
+
+function normalizeCommonFeatureTriggers(input: { selected: string[]; customFeatures: string[]; supplementAnswers?: Record<string, SupplementAnswer> }) {
+  const selected = new Set(input.selected);
+  if (input.customFeatures.includes("客服与问题反馈")) selected.add("support");
+  if (input.customFeatures.includes("安全保障与故障诊断")) selected.add("security");
+  if (input.customFeatures.includes("个性化展示与推荐")) selected.add("discovery");
+  return { ...input, selected: [...selected] };
+}
+
+function generalizeQuestionCopy(question: KnowledgeQuestion): KnowledgeQuestion {
+  if (question.id === "third-party-services") {
+    return { ...question, prompt: "产品是否使用 SDK、云服务、统计、推送或其他第三方服务？" };
+  }
+  if (question.id === "notification-push") {
+    return { ...question, prompt: "产品是否发送订单、行程或服务提醒、运营消息或营销推送？" };
+  }
+  return question;
 }

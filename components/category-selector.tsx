@@ -62,7 +62,7 @@ export function CategorySelector() {
               key={category.key}
               onClick={() => selectCategory(category)}
             >
-              <span className="category-card-icon" aria-hidden="true">{category.key === "map-navigation" ? <MapPin weight="fill" /> : <LockSimple weight="bold" />}</span>
+              <span className="category-card-icon" aria-hidden="true">{category.availability === "OPEN" ? <MapPin weight="fill" /> : <LockSimple weight="bold" />}</span>
               <span className="category-card-copy">
                 <span><strong>{category.label}</strong><em>{category.availability === "OPEN" ? <><CheckCircle weight="fill" /> 已开放</> : "即将开放"}</em></span>
                 <small>{category.basicFunction}</small>
@@ -80,7 +80,7 @@ export function CategorySelector() {
           <span className="category-modal-icon" aria-hidden="true"><LockSimple weight="bold" /></span>
           <p>类别能力建设中</p>
           <h2 id="category-modal-title">{notice.label}即将开放</h2>
-          <span>当前首期仅开放地图导航类。该类别的行业问卷、必要信息规则和报告模板完成验证后即可创建项目。</span>
+          <span>该类别的行业问卷、必要信息规则和报告模板仍在建设，完成验证后即可创建项目。</span>
           <button type="button" className="button button-primary" onClick={() => setNotice(null)}>我知道了</button>
         </section>
       </div> : null}

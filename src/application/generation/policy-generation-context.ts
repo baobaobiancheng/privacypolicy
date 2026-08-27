@@ -1,7 +1,14 @@
 import { getSlotScenario } from "@/src/knowledge/map-cn";
 import type { ProjectFormData } from "@/src/workspace/contract";
+import type { MobilityQuestionnaire } from "@/src/questionnaires/mobility";
 
 export type PolicyGenerationContext = {
+  category: {
+    key: string;
+    label: string;
+    basicFunction: string;
+    necessaryInfoBaseline: string;
+  };
   profile: ProjectFormData["profile"];
   activities: ProjectFormData["processingActivities"];
   permissions: ProjectFormData["permissions"];
@@ -18,8 +25,14 @@ export type PolicyGenerationContext = {
  * fields used by deterministic rules stay outside this object, so a fact is
  * never transmitted twice under both legacy and Core v2 paths.
  */
-export function buildPolicyGenerationContext(form: ProjectFormData): PolicyGenerationContext {
+export function buildPolicyGenerationContext(form: ProjectFormData, questionnaire: MobilityQuestionnaire): PolicyGenerationContext {
   return {
+    category: {
+      key: questionnaire.categoryKey,
+      label: questionnaire.categoryLabel,
+      basicFunction: questionnaire.basicFunction,
+      necessaryInfoBaseline: questionnaire.necessaryInfoSummary,
+    },
     profile: removeEmptyStrings(form.profile),
     activities: form.processingActivities,
     permissions: form.permissions,

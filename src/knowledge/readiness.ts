@@ -1,5 +1,6 @@
 import type { FormPayload } from "@/src/ai/deepseek";
 import { mapV1Content } from "@/src/content/map-v1";
+import { getMobilityQuestionnaire } from "@/src/questionnaires/mobility";
 import { getRequiredSupplementQuestions, getSlotScenario } from "./map-cn";
 import { SupplementAnswerSchema, type SupplementAnswer } from "./map-cn/schema";
 
@@ -60,7 +61,7 @@ function fieldIdFromLegacy(fieldId: string): string | null {
 
 const profileKeys = ["operatorName", "operatorContact", "productName", "productVersion", "contactEmail", "rightsEntry", "rightsResponsePeriod", "minorProcessing", "securityMeasures", "incidentChannel", "policyEffectiveDate", "policyUpdateNotice"] as const;
 
-export function evaluateFormalPolicyReadiness(input: FormPayload & { supplementAnswers?: Record<string, SupplementAnswer> }): FormalPolicyReadiness {
+export function evaluateFormalPolicyReadiness(input: FormPayload & { supplementAnswers?: Record<string, SupplementAnswer> }, categoryKey = "map-navigation"): FormalPolicyReadiness {
   const diagnostics: ReadinessDiagnostic[] = [];
   for (const key of profileKeys) {
     if (!(input.profile[key] ?? "").trim()) diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: `profile.${key}`, message: "通用披露信息尚未填写完整。" });
@@ -75,13 +76,13 @@ export function evaluateFormalPolicyReadiness(input: FormPayload & { supplementA
   }
 
   // 至少确认一项实际处理的个人信息：未勾选任何信息项的草稿没有披露内容。
-  const selectedFeatures = mapV1Content.payload.features.filter((feature) => input.selected.includes(feature.key));
+  const selectedFeatures = getMobilityQuestionnaire(categoryKey).features.filter((feature) => input.selected.includes(feature.key));
   const hasProcessedField = selectedFeatures.some((feature) => feature.fields.some((field, index) => resolveFieldAnswer(input, `${feature.key}.${field.key}`) === "PROCESS" || resolveFieldAnswer(input, `${feature.key}.${index}`) === "PROCESS"));
   if (selectedFeatures.length > 0 && !hasProcessedField) {
     diagnostics.push({ code: "NEEDS_CUSTOMER_INPUT", severity: "BLOCKING", target: "fields", message: "请至少勾选一项产品实际处理的个人信息。" });
   }
 
-  const requiredQuestions = getRequiredSupplementQuestions(input);
+  const requiredQuestions = getRequiredSupplementQuestions(input, categoryKey);
   const answers: Record<string, SupplementAnswer> = {};
   for (const question of requiredQuestions) {
     const result = SupplementAnswerSchema.safeParse(input.supplementAnswers?.[question.id]);

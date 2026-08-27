@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { PolicyGenerationContext } from "@/src/application/generation/policy-generation-context";
-import { getMapFeature } from "@/src/content/map-v1";
+import { getMobilityQuestionnaire, getQuestionnaireFeature } from "@/src/questionnaires/mobility";
 import { DomainError } from "@/src/domain/errors";
 import { sanitizeConfirmedForm } from "./confirmed-form";
 import { configuredDeepSeekModel } from "./deepseek-config";
@@ -37,12 +37,13 @@ export async function analyzeFormBeforeGeneration(
   form: FormPayload,
   signal?: AbortSignal,
   generationContext?: PolicyGenerationContext,
+  categoryKey = "map-navigation",
 ): Promise<GenerationPreflight> {
   const apiKey = process.env.DEEPSEEK_API_KEY?.trim();
   if (!apiKey) throw new DomainError("MODEL_NOT_CONFIGURED", "尚未配置 DeepSeek API Key，无法执行生成前检查。", { retryable: false });
   const confirmedForm = sanitizeConfirmedForm(form);
   const semanticFeatureMap = confirmedForm.selected.map((featureKey) => {
-    const feature = getMapFeature(featureKey);
+    const feature = getQuestionnaireFeature(categoryKey, featureKey);
     return {
       featureKey,
       title: feature?.title ?? featureKey,
@@ -76,6 +77,7 @@ export async function analyzeFormBeforeGeneration(
     {
       role: "user",
       content: [
+        "PRODUCT_CATEGORY:", JSON.stringify(getMobilityQuestionnaire(categoryKey).categoryLabel),
         "FORM_JSON:", JSON.stringify(generationContext ?? confirmedForm),
         "SEMANTIC_FEATURE_MAP:", JSON.stringify(semanticFeatureMap),
         "CURRENT_DATE:", new Date().toISOString().slice(0, 10),

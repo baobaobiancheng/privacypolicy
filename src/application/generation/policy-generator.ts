@@ -1,5 +1,4 @@
 import { createHash } from "node:crypto";
-import { verifiedMapV1Content } from "@/src/content/map-v1/server-content";
 import { buildDraftPlan } from "@/src/domain/draft/export-plan";
 import { evaluateExportInvariants, type ActivityFacts } from "@/src/domain/rules";
 import { renderDraftDocx } from "@/src/documents/render-draft";
@@ -17,6 +16,7 @@ import type { ProjectFormData } from "@/src/workspace/contract";
 import { toGenerationForm } from "@/src/workspace/form-adapter";
 import { buildPolicyGenerationContext, type PolicyGenerationContext } from "./policy-generation-context";
 import { filterAcknowledgedBlockingIssues } from "./preflight-acknowledgements";
+import { getMobilityQuestionnaire, type MobilityQuestionnaire } from "@/src/questionnaires/mobility";
 
 export type PolicyGeneratorStage = "FACT_CHECK" | "LAW_SEARCH" | "DRAFTING" | "FINALIZING";
 
@@ -40,11 +40,13 @@ export type PolicyGeneratorResult = {
 export async function generatePolicyFromProjectFacts(
   reportId: string,
   formData: ProjectFormData,
+  categoryKey: string,
   callbacks: PolicyGeneratorCallbacks = {},
 ): Promise<PolicyGeneratorResult> {
-  const form = toGenerationForm(formData);
-  const generationContext = buildPolicyGenerationContext(formData);
-  const readiness = evaluateFormalPolicyReadiness(form);
+  const questionnaire = getMobilityQuestionnaire(categoryKey);
+  const form = toGenerationForm(formData, categoryKey);
+  const generationContext = buildPolicyGenerationContext(formData, questionnaire);
+  const readiness = evaluateFormalPolicyReadiness(form, categoryKey);
   if (!readiness.ready) {
     throw new DomainError("FORM_NOT_READY", "请先完成必填信息，再生成隐私政策。", {
       retryable: false,
@@ -60,7 +62,7 @@ export async function generatePolicyFromProjectFacts(
       : `正在进行第 ${preflightRound}/3 轮产品事实核对`,
   );
   const preflight = callbacks.cachedPreflight
-    ?? await analyzeFormBeforeGeneration(form, callbacks.signal, generationContext);
+    ?? await analyzeFormBeforeGeneration(form, callbacks.signal, generationContext, categoryKey);
   const blockingIssues = filterAcknowledgedBlockingIssues(
     preflight.issues,
     callbacks.acknowledgedPreflightIssues ?? [],
@@ -79,7 +81,7 @@ export async function generatePolicyFromProjectFacts(
   await callbacks.onStage?.("LAW_SEARCH", "正在根据产品场景查询相关法规");
   const legalSearchResults = await searchLawsByKeywords(preflight.lawKeywords, { signal: callbacks.signal });
   await callbacks.onStage?.("DRAFTING", "智能体正在组织政策正文");
-  const result = await renderPolicy(reportId, form, generationContext, legalSearchResults, callbacks);
+  const result = await renderPolicy(reportId, form, generationContext, legalSearchResults, questionnaire, callbacks);
   return {
     ...result,
     inputHash: `sha256:${createHash("sha256").update(JSON.stringify(formData)).digest("hex")}`,
@@ -91,11 +93,12 @@ async function renderPolicy(
   form: ReturnType<typeof toGenerationForm>,
   generationContext: PolicyGenerationContext,
   legalSearchResults: LawKeywordSearchResult[],
+  questionnaire: MobilityQuestionnaire,
   callbacks: PolicyGeneratorCallbacks,
 ): Promise<Omit<PolicyGeneratorResult, "inputHash">> {
   const input = form;
   const structuredFactKeys = collectFactPaths(generationContext, "");
-  const selectedFeatures = verifiedMapV1Content.payload.features.filter((feature) => input.selected.includes(feature.key));
+  const selectedFeatures = questionnaire.features.filter((feature) => input.selected.includes(feature.key));
   const confirmedSupplementFactKeys = Object.entries(input.supplementAnswers).flatMap(([questionId, answer]) => [
     ...(answer.answer !== "UNKNOWN" ? [`supplementAnswers.${questionId}`, `supplementAnswers.${questionId}.answer`] : []),
     ...(!getSlotScenario(questionId) && answer.answer === "YES" && answer.detail ? [`supplementAnswers.${questionId}.detail`] : []),
@@ -109,7 +112,7 @@ async function renderPolicy(
     featureKey: feature.key,
     selected: true,
     requiredFields: feature.fields.filter((field) => field.required).map((field) => field.key),
-    riskCode: feature.riskCode,
+    riskCode: null,
     assertions: feature.fields.map((field) => ({
       assertionId: `${reportId}-${feature.key}-${field.key}`,
       activityKey: `activity-${feature.key}`,
@@ -139,12 +142,14 @@ async function renderPolicy(
   const generatedDraft = await generatePolicyDraft({
     form: input,
     generationContext,
-    contentVersion: verifiedMapV1Content.contentVersion,
-    contentHash: verifiedMapV1Content.contentHash,
+    contentVersion: questionnaire.contentVersion,
+    contentHash: questionnaire.contentHash,
     knowledgeContext: {
       packageVersion: mapCnKnowledgePackage.contentVersion,
       packageHash: mapCnKnowledgePackage.packageHash,
-      ruleSummary: mapCnKnowledgePackage.sources.map((source) => `${source.id}:${source.role}`),
+      ruleSummary: mapCnKnowledgePackage.sources.map((source) => source.id === "REG-CORE-03"
+        ? `${source.id}:${questionnaire.categoryLabel}类基本功能及必要信息边界`
+        : `${source.id}:${source.role}`),
     },
     selectedFeatures: selectedFeatures.map((feature) => ({
       key: feature.key,
@@ -161,7 +166,6 @@ async function renderPolicy(
       ...input.selected.map((key) => `activityDetails.${key}.purpose`),
       ...Object.keys(input.profile).flatMap((key) => [key, `profile.${key}`]),
       ...confirmedSupplementFactKeys,
-      ...verifiedMapV1Content.payload.commonDisclosureFields.map((field) => field.key),
       "additionalNotes",
       ...structuredFactKeys,
       "THIRD_PARTY_FACTS_STATUS",
@@ -196,8 +200,8 @@ async function renderPolicy(
     operatorName: input.profile.operatorName,
     productName: input.profile.productName,
     productVersion: input.profile.productVersion,
-    contentVersion: verifiedMapV1Content.contentVersion,
-    contentHash: verifiedMapV1Content.contentHash,
+    contentVersion: questionnaire.contentVersion,
+    contentHash: questionnaire.contentHash,
     policyEffectiveDate: input.profile.policyEffectiveDate,
     generatedAt: new Date().toISOString().slice(0, 10),
     model: generatedDraft.model,
