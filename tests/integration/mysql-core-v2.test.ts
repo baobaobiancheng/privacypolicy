@@ -75,7 +75,11 @@ integration("MySQL core v2 API and worker", () => {
     const createResponse = await POST(new Request("http://localhost/api/v1/projects", {
       method: "POST",
       headers: { "content-type": "application/json", "x-persona-id": "client-editor" },
-      body: JSON.stringify({ categoryKey: "map-navigation", idempotencyKey: "integration-project-create-1" }),
+      body: JSON.stringify({
+        categoryKey: "map-navigation",
+        idempotencyKey: "integration-project-create-1",
+        usageConfirmation: { accepted: true, version: "privacy-policy-usage-v1" },
+      }),
     }));
     expect(createResponse.status).toBe(201);
     const created = await createResponse.json() as { data: { id: string; revision: number } };
@@ -84,7 +88,11 @@ integration("MySQL core v2 API and worker", () => {
     const repeatedCreateResponse = await POST(new Request("http://localhost/api/v1/projects", {
       method: "POST",
       headers: { "content-type": "application/json", "x-persona-id": "client-editor" },
-      body: JSON.stringify({ categoryKey: "map-navigation", idempotencyKey: "integration-project-create-1" }),
+      body: JSON.stringify({
+        categoryKey: "map-navigation",
+        idempotencyKey: "integration-project-create-1",
+        usageConfirmation: { accepted: true, version: "privacy-policy-usage-v1" },
+      }),
     }));
     expect(repeatedCreateResponse.status).toBe(200);
     const repeatedProject = await repeatedCreateResponse.json() as { data: { id: string; reused: boolean } };
@@ -107,6 +115,13 @@ integration("MySQL core v2 API and worker", () => {
     expect((await save(0)).status).toBe(200);
     expect((await save(0)).status).toBe(409);
     expect(await prisma.auditEvent.count({ where: { projectId: created.data.id } })).toBe(2);
+    const creationAudit = await prisma.auditEvent.findFirst({
+      where: { projectId: created.data.id, action: "PROJECT_CREATED" },
+      select: { metadata: true },
+    });
+    expect(creationAudit?.metadata).toMatchObject({
+      usageConfirmationVersion: "privacy-policy-usage-v1",
+    });
   });
 
   it("runs an idempotent job and marks a stale report superseded", async () => {

@@ -3,6 +3,11 @@ import { expect, test } from "@playwright/test";
 test("地图项目完成七个环节并获得可下载政策", async ({ page }) => {
   await page.goto("/projects/new/category");
   await page.getByText("地图导航", { exact: true }).first().click();
+  await expect(page).toHaveURL(/\/projects\/new\/confirmation\?category=map-navigation$/);
+  const startButton = page.getByRole("button", { name: "确认并开始填写" });
+  await expect(startButton).toBeDisabled();
+  await page.getByRole("checkbox").check();
+  await startButton.click();
   await expect(page).toHaveURL(/\/projects\/prj_[^/]+\/profile$/);
 
   await page.getByRole("button", { name: "保存并选择功能" }).click();

@@ -16,12 +16,17 @@ import {
 } from "@/src/workspace/development-defaults";
 import { projectListSelect } from "@/src/data/project-list-query";
 import { withApiTiming } from "@/src/http/request-timing";
+import { USAGE_CONFIRMATION_VERSION } from "@/src/workspace/usage-confirmation";
 
 export const runtime = "nodejs";
 
 const CreateProjectSchema = z.object({
   categoryKey: z.string().trim().min(1),
   idempotencyKey: z.string().trim().min(8).max(128),
+  usageConfirmation: z.object({
+    accepted: z.literal(true),
+    version: z.literal(USAGE_CONFIRMATION_VERSION),
+  }).strict(),
   formData: ProjectFormDataSchema.optional(),
 }).strict();
 
@@ -76,7 +81,12 @@ export async function POST(request: Request) {
         }, select: projectCreationSelect });
         await tx.auditEvent.create({ data: {
           id: createEntityId("aud"), requestId, projectId: created.id, userId: actor.userId,
-          action: "PROJECT_CREATED", metadata: { categoryKey: category.key, schemaVersion: formData.schemaVersion },
+          action: "PROJECT_CREATED", metadata: {
+            categoryKey: category.key,
+            schemaVersion: formData.schemaVersion,
+            usageConfirmationVersion: parsed.data.usageConfirmation.version,
+            usageConfirmedAt: new Date().toISOString(),
+          },
         } });
         return created;
       });

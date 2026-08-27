@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 import { resolveAnalyticsSessionId, type AnalyticsSessionStorage } from "@/src/analytics/client-session";
 import { explicitAnalyticsAction, normalizeAnalyticsPagePath, type ClientAnalyticsEvent } from "@/src/analytics/contract";
+import { createBrowserId } from "@/src/browser/random-id";
 
 const PERSONA_ID = "client-editor";
 const FLUSH_DELAY_MS = 2_000;
@@ -16,7 +17,7 @@ function sessionId(): string {
   } catch {
     storage = null;
   }
-  inMemorySessionId = resolveAnalyticsSessionId(storage, inMemorySessionId, () => crypto.randomUUID());
+  inMemorySessionId = resolveAnalyticsSessionId(storage, inMemorySessionId, createBrowserId);
   return inMemorySessionId;
 }
 

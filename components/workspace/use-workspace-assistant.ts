@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { scenarios } from "@/src/content/map-v1/ui-content";
+import { createBrowserId } from "@/src/browser/random-id";
 import {
   BASIC_FEATURE_IDS,
   CLIENT_PERSONA_ID,
@@ -326,7 +327,7 @@ function attachmentKind(file: File): AssistantAttachment["kind"] {
 }
 
 function messageId(prefix: string) {
-  return `${prefix}-${typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`}`;
+  return `${prefix}-${createBrowserId()}`;
 }
 
 function serializableAttachment(attachment: AssistantAttachment): Omit<AssistantAttachment, "previewUrl"> {

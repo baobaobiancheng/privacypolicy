@@ -1,36 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowRight, CheckCircle, LockSimple, MagnifyingGlass, MapPin, X } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BaijianBrand } from "@/components/baijian-brand";
 import { appCategoryRegistry, type AppCategory } from "@/src/categories";
-import { clearProjectCreationKey, projectCreationStorage, resolveProjectCreationKey } from "@/src/workspace/project-creation-key";
-
-const PERSONA_ID = "client-editor";
-const CREATE_TIMEOUT_MS = 15_000;
-const NAVIGATION_FALLBACK_MS = 2_500;
-
-function createProjectIdempotencyKey() {
-  const random = typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID()
-    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-  return `project-create-${random}`;
-}
 
 export function CategorySelector() {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [creating, setCreating] = useState(false);
   const [notice, setNotice] = useState<AppCategory | null>(null);
-  const [error, setError] = useState("");
-  const creationKeyRef = useRef<string | null>(null);
-  const navigationFallbackRef = useRef<number | null>(null);
-
-  useEffect(() => () => {
-    if (navigationFallbackRef.current !== null) window.clearTimeout(navigationFallbackRef.current);
-  }, []);
 
   const groups = useMemo(() => {
     const keyword = query.trim().toLowerCase();
@@ -45,42 +25,12 @@ export function CategorySelector() {
       .filter((group) => group.categories.length > 0);
   }, [query]);
 
-  async function selectCategory(category: AppCategory) {
-    setError("");
+  function selectCategory(category: AppCategory) {
     if (category.availability !== "OPEN") {
       setNotice(category);
       return;
     }
-    setCreating(true);
-    const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), CREATE_TIMEOUT_MS);
-    const creationStorage = projectCreationStorage();
-    creationKeyRef.current = resolveProjectCreationKey(creationStorage, creationKeyRef.current, createProjectIdempotencyKey);
-    try {
-      const response = await fetch("/api/v1/projects", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-persona-id": PERSONA_ID },
-        body: JSON.stringify({ categoryKey: category.key, idempotencyKey: creationKeyRef.current }),
-        signal: controller.signal,
-      });
-      const payload = await response.json() as { data?: { id: string }; error?: { message?: string } };
-      if (!response.ok || !payload.data?.id) throw new Error(payload.error?.message || "项目创建失败，请稍后重试。");
-      clearProjectCreationKey(creationStorage);
-      const target = `/projects/${payload.data.id}/profile`;
-      router.push(target);
-      navigationFallbackRef.current = window.setTimeout(() => {
-        // Hard navigation is an intentional recovery path when the client router stalls.
-        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-        window.location.assign(target);
-      }, NAVIGATION_FALLBACK_MS);
-    } catch (cause) {
-      setError(cause instanceof DOMException && cause.name === "AbortError"
-        ? "创建请求等待时间过长，请重试；系统不会重复创建项目。"
-        : cause instanceof Error ? cause.message : "项目创建失败，请稍后重试。");
-      setCreating(false);
-    } finally {
-      window.clearTimeout(timeout);
-    }
+    router.push(`/projects/new/confirmation?category=${encodeURIComponent(category.key)}`);
   }
 
   return (
@@ -109,9 +59,8 @@ export function CategorySelector() {
               className="category-card"
               data-analytics-id={`category.${category.key}.select`}
               data-open={category.availability === "OPEN"}
-              disabled={creating}
               key={category.key}
-              onClick={() => void selectCategory(category)}
+              onClick={() => selectCategory(category)}
             >
               <span className="category-card-icon" aria-hidden="true">{category.key === "map-navigation" ? <MapPin weight="fill" /> : <LockSimple weight="bold" />}</span>
               <span className="category-card-copy">
@@ -125,8 +74,6 @@ export function CategorySelector() {
         </section>)}
         {groups.length === 0 ? <div className="category-empty">没有找到相关类别，请尝试搜索产品的主要功能。</div> : null}
       </section>
-      {error ? <div className="category-error" role="alert">{error}</div> : null}
-
       {notice ? <div className="category-modal-backdrop" role="presentation" onClick={() => setNotice(null)}>
         <section className="category-modal" role="dialog" aria-modal="true" aria-labelledby="category-modal-title" onClick={(event) => event.stopPropagation()}>
           <button type="button" className="category-modal-close" onClick={() => setNotice(null)} aria-label="关闭"><X weight="bold" /></button>

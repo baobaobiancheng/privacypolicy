@@ -8,6 +8,7 @@ import {
 import { useRouter } from "next/navigation";
 import { BaijianBrand } from "@/components/baijian-brand";
 import type { PreflightIssue } from "@/src/ai/deepseek";
+import { createBrowserId } from "@/src/browser/random-id";
 import { WORKSPACE_STEPS, workspaceSlugFor } from "@/src/workspace/contract";
 import { canonicalizeProjectFormData, toWorkspaceCompatibilityState } from "@/src/workspace/form-adapter";
 import {
@@ -33,6 +34,7 @@ import {
   StorageSecurityStep,
 } from "@/components/workspace/lazy-workspace-steps";
 import { clearProjectCreationKey, projectCreationStorage, resolveProjectCreationKey } from "@/src/workspace/project-creation-key";
+import { usageConfirmationRequest } from "@/src/workspace/usage-confirmation";
 import {
   CLIENT_PERSONA_ID,
   INITIAL_GENERATION_STAGES,
@@ -326,7 +328,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       creationKeyRef.current = resolveProjectCreationKey(
         projectCreationStorage(),
         null,
-        () => `project-create-${crypto.randomUUID()}`,
+        () => `project-create-${createBrowserId()}`,
       );
     }
     const res = await fetch("/api/v1/projects", {
@@ -335,6 +337,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
       body: JSON.stringify({
         categoryKey: "map-navigation",
         idempotencyKey: creationKeyRef.current,
+        usageConfirmation: usageConfirmationRequest,
         formData: toProjectFormData(dataRef.current),
       }),
     });
@@ -507,7 +510,7 @@ export function PrivacyWorkspace({ projectId, initialStep = 0 }: PrivacyWorkspac
     // generation therefore always gets its own id even if facts did not change.
     const saved = await persistence.persistNow("generate");
     if (!saved.ok) return;
-    const generationId = `web_${crypto.randomUUID()}`;
+    const generationId = `web_${createBrowserId()}`;
     await runDraftGeneration(id, generationId, preflightAcknowledgements);
   }
 
