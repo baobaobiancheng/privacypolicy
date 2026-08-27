@@ -9,6 +9,14 @@ export function getDevPersona(id: string): DevPersona | null {
   return DEV_PERSONAS.find((persona) => persona.id === id) ?? null;
 }
 
-export function isDevPersonaEnabled(environment = process.env.NODE_ENV): boolean {
-  return environment === "development" || environment === "test";
+/**
+ * Dev personas are always available to local development/tests. A production
+ * build must opt in explicitly for the temporary internal-demo deployment.
+ * Remove ALLOW_DEV_PERSONA when the platform SSO session is connected.
+ */
+export function isDevPersonaEnabled(
+  environment = process.env.NODE_ENV,
+  explicitOptIn = process.env.ALLOW_DEV_PERSONA,
+): boolean {
+  return environment === "development" || environment === "test" || explicitOptIn === "1";
 }

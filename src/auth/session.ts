@@ -19,9 +19,12 @@ export function actorFromSession(session: unknown): SessionActor {
   return parsed.data;
 }
 
-export function assertDevPersonaSwitchAllowed(environment = process.env.NODE_ENV): void {
-  if (!isDevPersonaEnabled(environment)) {
-    throw new DomainError("PROJECT_FORBIDDEN", "开发身份切换器仅在 development 环境可用。", { retryable: false });
+export function assertDevPersonaSwitchAllowed(
+  environment = process.env.NODE_ENV,
+  explicitOptIn = process.env.ALLOW_DEV_PERSONA,
+): void {
+  if (!isDevPersonaEnabled(environment, explicitOptIn)) {
+    throw new DomainError("PROJECT_FORBIDDEN", "当前部署尚未接入登录认证。", { retryable: false });
   }
 }
 
@@ -34,7 +37,8 @@ const DEFAULT_PERSONA_ID = "client-editor";
 
 /**
  * 开发环境路由身份：从 x-persona-id 请求头映射到 dev persona，缺省为「客户法务」。
- * 与现有 demo 路由一致，生产环境不可用（personaToSessionActor 内部会拦截）。
+ * 与现有 demo 路由一致。生产构建仅在 ALLOW_DEV_PERSONA=1 时临时可用，
+ * 接入平台 SSO 后必须删除该开关和这条身份解析路径。
  */
 export function requireDevActor(request: Request): SessionActor {
   const personaId = request.headers.get("x-persona-id") ?? DEFAULT_PERSONA_ID;
