@@ -6,6 +6,8 @@ import {
   getQuestionnaireFeature,
 } from "@/src/questionnaires";
 import { createDevelopmentProjectFormData } from "@/src/workspace/development-defaults";
+import { developmentScenarios } from "@/src/workspace/development-scenarios";
+import { evaluateFormalPolicyReadiness } from "@/src/knowledge/readiness";
 import { toGenerationForm, toWorkspaceCompatibilityState } from "@/src/workspace/form-adapter";
 
 describe("app questionnaires", () => {
@@ -78,7 +80,7 @@ describe("app questionnaires", () => {
 
     const form = createDevelopmentProjectFormData("hotel-service");
     const generation = toGenerationForm(form, "hotel-service");
-    expect(form.profile.productName).toBe("示例酒店服务产品");
+    expect(form.profile.productName).toBe("安住酒店");
     expect(generation.selected).toContain("hotel-booking");
     expect(generation.selected).not.toContain("navigation");
     expect(generation.fieldAnswers["hotel-booking.hotel-name"]).toBe("PROCESS");
@@ -86,10 +88,49 @@ describe("app questionnaires", () => {
 
     const paymentForm = createDevelopmentProjectFormData("online-payment");
     const paymentGeneration = toGenerationForm(paymentForm, "online-payment");
-    expect(paymentForm.profile.productName).toBe("示例网络支付产品");
+    expect(paymentForm.profile.productName).toBe("安付");
     expect(paymentGeneration.selected).toContain("payment-account");
     expect(paymentGeneration.selected).not.toContain("navigation");
     expect(paymentGeneration.fieldAnswers["payment-account.bank-card"]).toBe("PROCESS");
+  });
+
+  it("fills every non-map category with a distinct and reviewable development scenario", () => {
+    const productNames = new Set<string>();
+    const operatorNames = new Set<string>();
+
+    for (const [categoryKey, scenario] of Object.entries(developmentScenarios)) {
+      const questionnaire = getAppQuestionnaire(categoryKey);
+      const form = createDevelopmentProjectFormData(categoryKey);
+      const availablePermissionKeys = new Set(questionnaire.permissionPresets.map((permission) => permission.key));
+
+      expect(form.profile.productName).toBe(scenario.productName);
+      expect(form.profile.operatorName).toBe(scenario.operatorName);
+      expect(form.profile.platform).toBe(scenario.platform);
+      expect(form.additionalNotes).toContain(questionnaire.categoryLabel);
+      expect(form.processingActivities[0]?.informationOther).toContain(scenario.extraInformation);
+      expect(form.permissions.length).toBeGreaterThan(0);
+      expect(form.permissions.every((permission) => availablePermissionKeys.has(permission.key))).toBe(true);
+      expect(new Set(form.permissions.map((permission) => permission.key))).toEqual(new Set(scenario.permissionKeys));
+      expect(form.partners).toHaveLength(1);
+      expect(form.partners[0]?.purposes).toContain(scenario.partnerPurpose);
+      expect(form.partners[0]?.privacyUrl).toContain(categoryKey);
+      expect(form.storageAndSecurity.fixedPeriod).toBe(scenario.retentionSummary);
+      expect(form.supplementAnswers["device-permissions"]?.answer).toBe("YES");
+      expect(form.supplementAnswers["third-party-services"]?.answer).toBe("YES");
+      const storedInformation = form.supplementAnswers["storage-locations"]?.slots?.["data-types"]?.value ?? "";
+      const processedInformation = new Set(form.processingActivities.flatMap((activity) => [
+        ...activity.informationItems,
+        ...activity.informationOther,
+      ]));
+      expect([...processedInformation].every((information) => storedInformation.includes(information))).toBe(true);
+      expect(evaluateFormalPolicyReadiness(toGenerationForm(form, categoryKey), categoryKey).ready).toBe(true);
+
+      productNames.add(form.profile.productName ?? "");
+      operatorNames.add(form.profile.operatorName ?? "");
+    }
+
+    expect(productNames.size).toBe(38);
+    expect(operatorNames.size).toBe(38);
   });
 
   it("preserves preset extensions across save, reload, and generation", () => {

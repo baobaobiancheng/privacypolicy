@@ -49,7 +49,7 @@ describe("PolicyGenerationContext", () => {
     expect(context.category.necessaryInfoBaseline).toContain("银行卡");
     expect(context.activities.map((activity) => activity.featureKey)).toContain("payment-transaction");
     expect(context.activities.map((activity) => activity.featureKey)).not.toContain("navigation");
-    expect(context.profile.productName).toBe("示例网络支付产品");
+    expect(context.profile.productName).toBe("安付");
   });
 
   it("only includes confirmed attachment contents and supplement slots", () => {

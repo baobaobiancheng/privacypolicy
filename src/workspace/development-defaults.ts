@@ -6,6 +6,7 @@ import {
   ProjectFormDataSchema,
   type ProjectFormData,
 } from "@/src/workspace/contract";
+import { getDevelopmentScenario } from "@/src/workspace/development-scenarios";
 
 const confirmed = (value: string) => ({ value, status: "CONFIRMED" as const });
 const yes = (detail: string, slots: SupplementAnswer["slots"] = {}): SupplementAnswer => ({ answer: "YES", detail, slots });
@@ -184,15 +185,16 @@ export function createDevelopmentProjectDefaults(categoryKey = "map-navigation")
   if (categoryKey === "map-navigation") return createMapDevelopmentProjectDefaults();
 
   const questionnaire = getAppQuestionnaire(categoryKey);
-  const productName = `示例${questionnaire.categoryLabel}产品`;
+  const scenario = getDevelopmentScenario(categoryKey);
+  if (!scenario) throw new Error(`DEVELOPMENT_SCENARIO_NOT_CONFIGURED:${categoryKey}`);
   const processingActivities = questionnaire.features
     .filter((item) => item.defaultSelection)
-    .map((item) => ({
+    .map((item, index) => ({
       featureKey: item.key,
       title: item.title,
       kind: item.kind,
       informationItems: item.fields.map((itemField) => itemField.label),
-      informationOther: [],
+      informationOther: index === 0 ? [scenario.extraInformation] : [],
       purposes: item.purposes,
       purposeOther: "",
     }));
@@ -202,18 +204,65 @@ export function createDevelopmentProjectDefaults(categoryKey = "map-navigation")
     .flatMap((item) => item.fields.map((itemField) => `${item.key}.${itemField.key}`));
   const fieldAnswers = Object.fromEntries(confirmedFields.map((key) => [key, "PROCESS" as const]));
   const activityDetails = Object.fromEntries(processingActivities.map((item) => [item.featureKey, { purpose: item.purposes.join("；") }]));
+  const permissions = questionnaire.permissionPresets
+    .filter((permission) => scenario.permissionKeys.includes(permission.key))
+    .map((permission) => ({
+      key: permission.key,
+      label: permission.label,
+      scenes: permission.scenes.slice(0, 3),
+      sceneOther: `仅在用户主动使用${questionnaire.basicFunction}的对应场景时申请，可在系统设置中关闭`,
+    }));
+  const permissionLabels = permissions.map((permission) => permission.label);
+  const selectedInformation = [...new Set(processingActivities
+    .flatMap((activity) => [...activity.informationItems, ...activity.informationOther]))];
+  const partnerName = `示例${scenario.partnerPurpose}服务 SDK`;
+  const partnerProvider = `示例${questionnaire.categoryLabel}技术服务有限公司`;
+  const partnerInformation = questionnaire.partnerInformationPresets.slice(0, 4);
+  const partners = [{
+    kind: "SDK" as const,
+    name: partnerName,
+    provider: partnerProvider,
+    purposes: [scenario.partnerPurpose],
+    informationItems: partnerInformation,
+    permissions: permissionLabels.slice(0, 2),
+    trigger: `用户同意隐私政策后加载；仅在用户主动使用${questionnaire.basicFunction}时按需调用`,
+    privacyUrl: `https://example.com/privacy/${categoryKey}`,
+  }];
+  const hasAccountFeature = processingActivities.some((activity) => activity.featureKey.includes("account") || activity.title.includes("账号"));
+  const usesNotifications = scenario.permissionKeys.includes("notifications");
+  const usesLocalStorage = ["browser", "input-method", "security-management", "camera-beauty", "practical-tools"].includes(categoryKey);
   const supplementAnswers: Record<string, SupplementAnswer> = {
-    "device-permissions": no(),
-    "third-party-services": no(),
-    "storage-locations": yes("产品信息保存在中华人民共和国境内服务器，并按统一保存规则处理。", {
-      "data-types": confirmed("账号、订单、服务记录及客户主动提交的信息"),
-      "storage-location": confirmed("中华人民共和国境内服务器"),
-      retention: confirmed("提供服务所必需的最短期限；用户删除或注销账号后按规则处理；法律法规另有要求的除外"),
+    "device-permissions": yes(`产品使用${permissionLabels.join("、")}；仅在用户主动触发相应功能时申请，拒绝授权只影响对应功能。`),
+    "third-party-services": yes(`产品接入${partnerName}，由${partnerProvider}提供，用于${scenario.partnerPurpose}。`, {
+      "service-name": confirmed(partnerName),
+      "provider-name": confirmed(partnerProvider),
+      purpose: confirmed(scenario.partnerPurpose),
+      "data-types": confirmed(partnerInformation.join("、")),
+      "initialization-timing": confirmed(`用户同意隐私政策后加载；仅在主动使用${questionnaire.basicFunction}时按需调用`),
+      "privacy-policy-url": confirmed(`https://example.com/privacy/${categoryKey}`),
+    }),
+    "storage-locations": yes(`产品信息保存在中华人民共和国境内服务器${usesLocalStorage ? "和用户设备本地" : ""}，并按分类保存规则处理。`, {
+      "data-types": confirmed(selectedInformation.join("、")),
+      "storage-location": confirmed(`中华人民共和国境内服务器${usesLocalStorage ? "；部分用户设置和内容保存在设备本地" : ""}`),
+      retention: confirmed(scenario.retentionSummary),
       "deletion-method": confirmed("期限届满后删除或匿名化，备份数据随轮换周期清理"),
     }),
-    "account-cloud-sync": no(),
-    "notification-push": no(),
-    "cookies-local-storage": no(),
+    "account-cloud-sync": hasAccountFeature
+      ? yes(`产品支持手机号验证码登录；账号资料和用户主动保存的${questionnaire.categoryLabel}服务记录可在登录设备间同步，用户可在账号设置中关闭同步或删除。`, {
+        "login-method": confirmed("手机号和短信验证码登录"),
+        "sync-data": confirmed(`账号资料和用户主动保存的${questionnaire.categoryLabel}服务记录`),
+        "activation-condition": confirmed("用户登录后主动使用保存或同步功能时开启"),
+        "disable-path": confirmed("我的—设置—账号与同步；关闭后不再同步新增记录"),
+        "deletion-rule": confirmed("用户可在账号设置中删除同步数据或注销账号；依法需要留存的记录除外"),
+      })
+      : no(),
+    "third-party-initialization": yes(`${partnerName}在用户同意隐私政策后加载；只有用户主动使用${questionnaire.basicFunction}的对应功能时才按需发送请求。`),
+    "notification-push": usesNotifications
+      ? yes(`用户开启通知权限后，产品发送与${questionnaire.basicFunction}有关的服务状态和必要提醒；可在消息设置或系统设置中关闭。`)
+      : no(),
+    "cookies-local-storage": usesLocalStorage
+      ? yes("产品使用设备本地缓存保存用户设置、服务状态和用户主动保存的内容；用户可在产品设置或系统设置中清理。")
+      : no(),
     "sensitive-information": questionnaire.features.some((item) => item.fields.some((itemField) => [
       "document", "identity", "driver-license", "location", "trajectory", "health", "condition",
       "voice-video", "bank-card", "credit", "face", "biometric",
@@ -226,10 +275,10 @@ export function createDevelopmentProjectDefaults(categoryKey = "map-navigation")
   };
   return {
     profile: {
-      operatorName: `示例${questionnaire.categoryLabel}科技有限公司`,
+      operatorName: scenario.operatorName,
       operatorContact: "浙江省杭州市西湖区示例路 88 号",
-      productName,
-      platform: "Android、iOS",
+      productName: scenario.productName,
+      platform: scenario.platform,
       productVersion: "1.0.0",
       releaseDate: "2026-08-20",
       contactEmail: "privacy@example.com",
@@ -237,7 +286,9 @@ export function createDevelopmentProjectDefaults(categoryKey = "map-navigation")
       rightsEntry: "App 内「我的—设置—隐私中心」",
       rightsResponsePeriod: "收到申请后 15 个工作日内回复",
       policyEntry: "App 内「我的—设置—隐私政策」",
-      minorProcessing: "产品不以未成年人为主要服务对象",
+      minorProcessing: scenario.minorMode === "MINORS_WITH_GUARDIAN"
+        ? "产品可能向未成年人提供服务，使用相关功能前应取得监护人同意并由监护人指导"
+        : "产品不以未成年人为主要服务对象",
       securityMeasures: "HTTPS 传输、访问权限分级、最小权限控制、操作日志审计、数据备份",
       incidentChannel: "App 弹窗和站内消息",
       policyEffectiveDate: "2026-08-20",
@@ -250,15 +301,17 @@ export function createDevelopmentProjectDefaults(categoryKey = "map-navigation")
     processingActivities,
     confirmedFields,
     fieldAnswers,
-    additionalNotes: `本示例仅演示${questionnaire.categoryLabel}类问卷，实际使用时应按产品真实功能修改所有选项。`,
+    additionalNotes: `${scenario.productName}当前版本以${questionnaire.basicFunction}为主要基本功能。当前内容是${questionnaire.categoryLabel}类开发模拟数据，实际使用时应按产品真实功能逐项修改。`,
     supplementAnswers,
-    permissions: [],
-    partners: [],
+    permissions,
+    partners,
     storageAndSecurity: {
-      locations: ["CN" as const, "CLOUD" as const],
+      locations: usesLocalStorage
+        ? ["CN" as const, "DEVICE" as const, "CLOUD" as const]
+        : ["CN" as const, "CLOUD" as const],
       crossBorderDetail: "",
-      retentionPolicies: ["MINIMUM_NECESSARY" as const, "UNTIL_DELETION_OR_CLOSURE" as const, "LEGAL_REQUIREMENT" as const],
-      fixedPeriod: "",
+      retentionPolicies: ["MINIMUM_NECESSARY" as const, "FIXED_PERIOD" as const, "UNTIL_DELETION_OR_CLOSURE" as const, "LEGAL_REQUIREMENT" as const],
+      fixedPeriod: scenario.retentionSummary,
       expiryActions: ["DELETE" as const, "ANONYMIZE" as const],
       expiryOther: "",
       securityMeasures: ["HTTPS 传输", "访问权限分级", "最小权限控制", "操作日志审计", "数据备份"],
@@ -270,7 +323,7 @@ export function createDevelopmentProjectDefaults(categoryKey = "map-navigation")
       contactPhone: "400-000-0000",
       policyEntry: "App 内「我的—设置—隐私政策」",
       updateNotices: ["App 弹窗", "隐私政策页面提示"],
-      minorMode: "ADULT_ONLY" as const,
+      minorMode: scenario.minorMode ?? "ADULT_ONLY" as const,
     },
     attachments: [],
   };
