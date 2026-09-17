@@ -1,0 +1,2 @@
+key: <BAIJIAN_APP_KEY>
+secret: <BAIJIAN_APP_SECRET>

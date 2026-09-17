@@ -1,0 +1,1147 @@
+<html lang="zh" xml:lang="zh"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="color-scheme" content="light dark"><link rel="icon" href="/document/favicon.ico"><link rel="stylesheet" href="//at.alicdn.com/t/font_2741193_ifyz0d9koce.css"><title>腾讯隐私保护平台</title><script src="https://cdn-go.cn/aegis/aegis-sdk/latest/aegis.min.js"></script><script>const whiteList = {
+        'privacy.qq.com': 'aTSihIrSbVFyNktJdS',
+        'privacy.tencent.com': 'aTSihIrSZDFvdcoHua'
+      }
+      const id = whiteList[location.host]
+      
+      if (id) {
+        const aegis = new Aegis({
+          id, // 项目ID，即上报id
+          uin: '', // 用户唯一 ID（可选）
+          reportApiSpeed: true, // 接口测速
+          reportAssetSpeed: true, // 静态资源测速
+          spa: true,
+          ext1: 1,
+          beforeRequest: function (data) {
+            let msg = '';
+            if (data.logs) msg = data.logs.msg;
+
+            const ifFilterLog =
+            data.logType === 'log' &&
+              (msg.includes('Script error') ||
+                msg.includes('Uncaught TypeError') ||
+                msg.includes('ReferenceError') ||
+                msg.includes("SyntaxError: Unexpected token '<'") ||
+                msg.includes('fetch req url: https://') && !msg.includes(location.host));
+
+            if (ifFilterLog) {
+              return false; //  手动过滤掉这几种错误
+            }
+          },
+        });
+      }</script><link href="/document/static/js/chunk-2d216214.8ece6c8e.js" rel="prefetch"><link href="/document/static/js/chunk-dc4aec5a.30ab81bc.js" rel="prefetch"><link href="/document/static/css/chunk-elementUI.af09357b.css" rel="preload" as="style"><link href="/document/static/css/chunk-libs.616508f1.css" rel="preload" as="style"><link href="/document/static/css/index.cea079bc.css" rel="preload" as="style"><link href="/document/static/js/chunk-elementUI.f6f70094.js" rel="preload" as="script"><link href="/document/static/js/chunk-html2canvas.59c4e88c.js" rel="preload" as="script"><link href="/document/static/js/chunk-jspdf.53ce4900.js" rel="preload" as="script"><link href="/document/static/js/chunk-libs.02352699.js" rel="preload" as="script"><link href="/document/static/js/index.c18257ce.js" rel="preload" as="script"><link href="/document/static/css/chunk-elementUI.af09357b.css" rel="stylesheet"><link href="/document/static/css/chunk-libs.616508f1.css" rel="stylesheet"><link href="/document/static/css/index.cea079bc.css" rel="stylesheet"></head><body><noscript><strong>We're sorry but 腾讯隐私保护平台 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id="app"><div data-v-49c41d7e="" element-loading-text="下载中" element-loading-spinner="el-icon-loading" class="document-preview"><div data-v-49c41d7e="" class="el-container web-container"><div data-v-49c41d7e="" class="el-aside side-bar" style="width: 280px;"><div data-v-49c41d7e="" class="title" title="腾讯视频隐私保护指引
+"> 腾讯视频隐私保护指引
+ </div><div data-v-49c41d7e="" title="版本更新提示：" class="list-title active"> 版本更新提示： </div><div data-v-49c41d7e="" title="阅读提示" class="list-title"> 阅读提示 </div><div data-v-49c41d7e="" title="导言" class="list-title"> 导言 </div><div data-v-49c41d7e="" title="1. 个人信息的收集和使用" class="list-title"> 1. 个人信息的收集和使用 </div><div data-v-49c41d7e="" title="2. Cookie等同类技术的使用" class="list-title"> 2. Cookie等同类技术的使用 </div><div data-v-49c41d7e="" title="3. 信息的存储" class="list-title"> 3. 信息的存储 </div><div data-v-49c41d7e="" title="4. 信息安全" class="list-title"> 4. 信息安全 </div><div data-v-49c41d7e="" title="5. 信息共享" class="list-title"> 5. 信息共享 </div><div data-v-49c41d7e="" title="6. 您的权利" class="list-title"> 6. 您的权利 </div><div data-v-49c41d7e="" title="7. 变更" class="list-title"> 7. 变更 </div><div data-v-49c41d7e="" title="8. 未成年人保护" class="list-title"> 8. 未成年人保护 </div><div data-v-49c41d7e="" title="9. 其他" class="list-title"> 9. 其他 </div><div data-v-49c41d7e="" title="10. 联系我们" class="list-title"> 10. 联系我们 </div><div data-v-49c41d7e="" title="附录：定义" class="list-title"> 附录：定义 </div><div data-v-49c41d7e="" title="历史版本" class="list-title"> 历史版本 </div></div><div data-v-49c41d7e="" class="el-container"><div data-v-49c41d7e="" class="el-main main"><div data-v-49c41d7e="" style="display: flex; font-weight: 600; font-size: 0.8rem;"><span data-v-49c41d7e="" style="margin-left: auto; margin-right: 0px;"> 更新日期：2026-07-10 </span><span data-v-49c41d7e="" style="margin-left: 2rem; margin-right: 0.5rem;"> 生效日期：2026-07-17 </span><span data-v-49c41d7e="" class="download-btn"><span data-v-49c41d7e="" class="iconfont privacy-xiazai"></span> 下载 </span></div><div data-v-49c41d7e="" class="header"></div><div data-v-49c41d7e="" id="pc-document-box" class="content-area"><div data-v-49c41d7e="" id="pc-document"><!----><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 版本更新提示： </h1><div data-v-49c41d7e=""><p class="ql-align-justify">为了更好地保障您的权益，我们于近日更新了《腾讯视频隐私保护指引》。</p>
+<p class="ql-align-justify">本次更新的内容为：</p>
+<p>1、基于新增功能，增加相关权限调用情况说明。</p>
+<p class="ql-align-justify">请您在使用/继续使用腾讯视频产品与/或服务前仔细阅读、充分理解全文，并在同意全部内容后使用/继续使用。</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 阅读提示 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">(1)&nbsp;&nbsp;请您在使用/继续使用腾讯视频的产品和/或服务前仔细阅读、充分理解《腾讯视频隐私保护指引》完整版全文，并在同意全部内容后使用/继续使用。除非另有说明，不同意《腾讯视频隐私保护指引》或其更新（我们将及时通知您此类更新）可能会影响您正常使用或继续正常使用我们的产品和/或服务。</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;为便于您快速了解《腾讯视频隐私保护指引》内容，我们将通过<strong>《<a href="https://privacy.qq.com/document/preview/5ad5e58d1456498bbeaf670cf1f8b6cc" target="_blank" rel="noopener noreferrer">腾讯视频隐私政策摘要</a>》</strong>向您简单、直观地说明我们是如何处理和保护您的个人信息，更多有关我们对您的个人信息的处理规则，请查阅完整版《腾讯视频隐私保护指引》。</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 导言 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">(1)&nbsp;&nbsp;腾讯视频是由<strong>深圳市腾讯计算机系统有限公司</strong>（以下简称为“我们”）提供服务的在线影音类产品，我们的<strong>注册地为广东省深圳市南山区粤海街道麻岭社区科技中一路腾讯大厦35层</strong>，同时产品运营过程中我们也会与关联公司联合运营。如果您对本指引或相关问题有任何疑问或顾虑，请通过本指引第10节“联系我们”中所提供的联系方式与我们联系。</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;本隐私保护指引适用于我们通过腾讯视频网站（https://v.qq.com/）、腾讯视频PC端、TV端、APP（包括但不限于iOS版、安卓版、<span style="font-size: 14px;"><span style="font-family: 'Segoe UI', sans-serif;">HarmonyOS</span><span style="font-family: 宋体;">版</span></span>）、Ipad端、以及小程序等全部终端客户端（以下单称或统称“平台”）向您提供的各项产品和服务。如某一客户端或某一应用软件版本有特殊功能或特殊个人信息处理活动的，我们会予以说明。如我们的客户端、产品和/或服务单独设置了隐私政策/隐私协议的，单独的隐私政策/隐私协议优先于本隐私保护指引适用；单独的隐私政策/隐私协议未提及的内容，适用本隐私保护指引。具体而言：</p>
+<p class="ql-align-justify">1）我们通过腾讯视频车载端以及腾讯视频音箱端向您提供的各项产品和服务，适用<strong>《<a href="https://privacy.qq.com/document/preview/2e2a152412a34812b6dda3256de419e2">腾讯视频（智慧屏版）隐私保护指引</a>》。</strong></p>
+<p class="ql-align-justify">2）我们通过腾讯视频小程序向您提供的各项产品和服务，适用<strong>《<a href="https://privacy.qq.com/document/preview/1929fad4a426443bb0cb438b174b783a">腾讯视频（小程序）隐私保护指引</a>》。</strong></p>
+<p>3）我们通过腾讯视频visionOS版向您提供的各项产品和服务，适用<strong>《<a href="https://privacy.qq.com/document/preview/9cd5a6dc7916464d81b502d6da903129">腾讯视频visionOS版隐私保护指引</a>》</strong>。</p>
+<p class="ql-align-justify"><strong>请您注意，本隐私保护指引不适用于与我们的平台、产品和/或服务集成的任何第三方应用程序或软件，或者任何其他第三方产品、服务或业务（统称“第三方服务”）。</strong> 第三方服务由第三方负责运营，您使用第三方服务应遵守第三方为此制定的的隐私政策或其他个人信息处理规则，我们提示您仔细识别实际服务的提供方，并在使用任何第三方服务之前仔细查看相关规则。</p>
+<p class="ql-align-justify">(3) &nbsp;<strong>针对涉及与您的权益（可能）存在重大关系的条款以及涉及敏感个人信息（定义见附录）的处理，我们在本指引中将采用粗体、下划线或其他合理方式提示您重点阅读。</strong></p>
+<p class="ql-align-justify">(4)&nbsp;&nbsp;<strong>您同意本指引表示您已经了解并同意在相关场景下，为实现功能运行，我们将对您的相关个人信息进行处理。但这并不代表只要您开始使用我们的产品与/或服务，我们将处理本指引中涉及的全部个人信息。仅当您使用特定功能时，我们才会根据“最小必要”原则，为实现向您提供服务的目的，处理您的相关个人信息。</strong></p>
+<p class="ql-align-justify"><span style="color: #000000;">(5)&nbsp;&nbsp;除本指引外，在特定场景下，我们将以及时告知的方式（包括但不限于更新本指引、重新签署文件、页面提示、弹窗、站内信、邮件、网站公告或其他便于您获知的方式）另行向您详细说明对应信息的处理目的、方式、范围等规则，并在征得您的授权同意后处理。</span></p>
+<p class="ql-align-justify">&nbsp;</p>
+<p class="ql-align-justify">本隐私保护指引将帮助您了解以下内容：</p>
+<p>1.&nbsp;<span style="color: black;">个人信息的收集和使用</span></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224408" target="_blank" rel="noopener noreferrer">2.&nbsp;&nbsp;Cookie等同类技术的使用</a></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224409" target="_blank" rel="noopener noreferrer">3.&nbsp;&nbsp;信息的存储</a></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224410" target="_blank" rel="noopener noreferrer">4.&nbsp;&nbsp;信息安全</a></p>
+<p class="ql-align-justify"><span style="color: black;">5.</span>&nbsp;&nbsp;&nbsp;<span style="color: black;">信息共享</span></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224433" target="_blank" rel="noopener noreferrer">6.&nbsp;&nbsp;您的权利</a></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224469" target="_blank" rel="noopener noreferrer">7.&nbsp;&nbsp;变更</a></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224472" target="_blank" rel="noopener noreferrer">8.&nbsp;&nbsp;未成年人保护</a></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224473" target="_blank" rel="noopener noreferrer">9.&nbsp;&nbsp;其他</a></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224474" target="_blank" rel="noopener noreferrer">10. 联系我们</a></p>
+<p class="ql-align-justify">&nbsp;</p>
+<p class="ql-align-center"><a style="color: #1890ff;" href="https://privacy.qq.com/document/preview/18f3ac8cb4364ed8b2ba596a9bfe3111" target="_blank" rel="noopener noreferrer"><div style="display: inline-block; background: url(&quot;https://images-75651.picgzc.qpic.cn/9aPzOpIzpPxI4lmeRmGY6MQpSFUiskRi?sign=q-sign-algorithm%3Dsha1%26q-ak%3DZPi8634lYM6UOHNiZkhRFB6X%26q-sign-time%3D1632390695%3B1632397895%26q-key-time%3D1632390695%3B1632397895%26q-header-list%3Dhost%26q-url-param-list%3D%26q-signature%3Dd55ad54f7a038b521a1f743a5b7ab922ff9f5b4d&quot;) center center / contain no-repeat; width: 85px; height: 85px;"></div></a><div style="display: inline-block; background: url(&quot;https://images-75651.picgzc.qpic.cn/jVcROnqQXR5V4IH74cU9F6dYUdQSaXvN?sign=q-sign-algorithm%3Dsha1%26q-ak%3DZPi8634lYM6UOHNiZkhRFB6X%26q-sign-time%3D1632390695%3B1632397895%26q-key-time%3D1632390695%3B1632397895%26q-header-list%3Dhost%26q-url-param-list%3D%26q-signature%3D5b9c8fd7a6f75444b7e30716d6420f3047360ba6&quot;) center center / contain no-repeat; width: 64px; height: 2px;"></div><a style="color: #1890ff;" href="https://privacy.qq.com/document/preview/ba4294dc9d4a45a89f3d682eb07a489b" target="_blank" rel="noopener noreferrer"><div style="display: inline-block; background: url(&quot;https://images-75651.picgzc.qpic.cn/sM7LQ2L5xoI0zUtTvZilUUutw-7eocOI?sign=q-sign-algorithm%3Dsha1%26q-ak%3DZPi8634lYM6UOHNiZkhRFB6X%26q-sign-time%3D1632390695%3B1632397895%26q-key-time%3D1632390695%3B1632397895%26q-header-list%3Dhost%26q-url-param-list%3D%26q-signature%3D63b063d97e6ad830813ed17989da5db27a05f733&quot;) center center / contain no-repeat; width: 85px; height: 85px;"></div></a></p>
+<p class="ql-align-center">我们收集使用的信息<div style="display: inline-block; background: url(&quot;https://images-75651.picgzc.qpic.cn/bL3Kbw6BSPazS5Xbt4VlAJYcRAsFROa4?sign=q-sign-algorithm%3Dsha1%26q-ak%3DZPi8634lYM6UOHNiZkhRFB6X%26q-sign-time%3D1632390695%3B1632397895%26q-key-time%3D1632390695%3B1632397895%26q-header-list%3Dhost%26q-url-param-list%3D%26q-signature%3D24581513643944a27feb9e9e1ebbb5d5e50b0bb5&quot;) center center / contain no-repeat; width: 46px; height: 3px;"></div>我们共享的信息<div style="display: inline-block; background: url(&quot;https://images-75651.picgzc.qpic.cn/MkIQNTo00qbuWFv77tkc4sEsYhYHlqkD?sign=q-sign-algorithm%3Dsha1%26q-ak%3DZPi8634lYM6UOHNiZkhRFB6X%26q-sign-time%3D1632390714%3B1632397914%26q-key-time%3D1632390714%3B1632397914%26q-header-list%3Dhost%26q-url-param-list%3D%26q-signature%3D68b47b7b7d57af177d2622e43ea4c26a45b12a92&quot;) center center / contain no-repeat; width: 7px; height: 2px;"></div></p>
+<p class="ql-align-center">&nbsp;</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 1. 个人信息的收集和使用 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">为帮您快速了解我们关于您的个人信息收集、使用的主要情况，我们以清单的方式进行了说明，您可以点击查看<strong>《<a href="https://privacy.qq.com/document/preview/18f3ac8cb4364ed8b2ba596a9bfe3111">腾讯视频已收集个人信息清单</a>》</strong>。</p>
+<p class="ql-align-justify">【原则与途径】我们会遵循合法、正当、最小必要、公开透明的原则，收集和使用您在使用我们的产品和/或服务过程中主动提供或因使用我们的产品和/或服务而产生的个人信息。</p>
+<p class="ql-align-justify">【系统权限】相机、相册（存储）、麦克风等系统权限，不会默认开启。只有在您触发相关业务功能时，我们才会向您申请相关权限，并获取相应信息（如涉及）。请您放心，我们申请访问的权限只限于实现特定的功能所必需，并且您可以随时撤回系统权限的授权。如您拒绝或撤回授权系统权限，会使您无法使用相应功能，但并不影响您正常使用产品与/或服务的其他功能。点击查看<strong>《<a href="https://privacy.qq.com/document/preview/3ddf57b1296348b3b14c37b8310b7d1b">腾讯视频应用权限申请与使用情况说明</a>》</strong>。</p>
+<p class="ql-align-justify">【业务功能】我们收集的您的个人信息类型会因产品/服务的内容不同而有所区别，具体以产品/服务实际提供为准。为提供完善的体验，我们会不断改进我们的产品和服务，并可能因此需要收集新的个人信息或变更个人信息使用目的或方式。如果某一需要收集您的个人信息的功能或场景未能在本指引中予以说明的，或者我们超出了与收集您的个人信息时所声称的目的及具有直接或合理关联范围的，我们会再次向您告知，并根据法律法规的相关要求征得您的同意。</p>
+<p class="ql-align-justify"><strong>&nbsp;</strong></p>
+<p class="ql-align-justify"><strong>通常情况下，我们会在以下场景中收集您的个人信息或申请相关权限：</strong></p>
+<p class="ql-align-justify"><strong>1.1&nbsp;&nbsp;账号注册、登录与绑定</strong></p>
+<p>您可以通过QQ账号、微信账号、手机号码注册/登录腾讯视频。当您通过QQ账号或微信账号授权登录腾讯视频时，我们将收集您的QQ账号标识符或微信账号标识符、头像、昵称，用于您登录账号时验证您的身份；当您通过手机号码注册登录腾讯视频时，我们将收集您的手机号码，用于您登录账号时接收验证码或本机号码一键登录、验证您的身份。通过手机号码注册的腾讯视频账号，可以绑定社交账号（微信账号或QQ账号）实现快捷登录，您通过此种方式登录的，我们将收集您的手机号码、微信标识符或QQ账号标识符、头像、昵称，用于您登录账号时验证您的身份；同时，我们还将收集您的<strong><u>QQ</u></strong><strong><u>或微信好友关系</u></strong>，用于您完成腾讯视频内的消费购买，详情请见1.6“下单与支付”。</p>
+<p class="ql-align-justify">您可以在腾讯视频内补充个人资料，您可自主选择填写您的性别、昵称、头像、自我介绍、生日、星座、所在地，并决定是否展示。如您未填写，不影响您使用我们产品和/或服务的基本功能。</p>
+<p class="ql-align-justify">当您使用腾讯视频数字藏品服务时，我们将收集您登录腾讯视频时所使用的<strong><u>QQ账号或微信账号</u></strong>、<span style="text-decoration: underline;"><strong>昵称</strong></span>、<strong><span style="text-decoration: underline;">头像</span>、<span style="text-decoration: underline;">手机号码</span>、<span style="text-decoration: underline;">身份证号</span>、<u>人脸比对信息</u></strong>、<strong><u>姓名</u></strong>，并基于<span style="text-decoration: underline;"><strong>手机号码</strong></span>、<span style="text-decoration: underline;"><strong>身份证号</strong></span>、<span style="text-decoration: underline;"><strong>姓名</strong></span>、<span style="text-decoration: underline;"><strong>人脸对比信息</strong></span>为您生成至信链地址。</p>
+<p class="ql-align-justify">当您使用腾讯视频APP扫码登录腾讯视频其他类型的客户端时，我们会收集您在APP已登录腾讯视频账号的头像及昵称，以及拟登录客户端所在设备型号、地理位置（基于IP地址解析所在城市），用于您确认授权登录账号及设备的情况。</p>
+<p>如您使用相同的手机号码、QQ账号或微信账号注册/授权登录腾讯视频和腾讯视频系列产品（如火龙漫剧）时，我们会收集腾讯视频系列产品账号ID并与您的腾讯视频账号进行关联。</p>
+<p class="ql-align-justify"><strong>1.2&nbsp;&nbsp;账号资料维护</strong></p>
+<p class="ql-align-justify">为便于您在腾讯视频内对个人资料进行查看与维护，您可自主选择填写您的性别、昵称、头像、<strong><u>手机号码</u></strong>、电子邮箱地址、<strong><u>收货地址</u></strong>、自我介绍、生日、星座、所在地、腾讯视频账号ID、关联账号、共享设备，这将有助于我们给您提供更具个性化的体验。如您未填写，不影响您使用我们产品和/或服务的基本功能。</p>
+<p class="ql-align-justify">您在上传/更换头像时，我们会请求您的<strong><u>相机</u>、<u>相册权限</u></strong>，并在经您授权后收集您上传/更换的图片信息。</p>
+<p class="ql-align-justify">请您注意，如您使用iOS设备登录我们的平台并且您的设备系统为iOS14及以上时，您可以选择关闭精准定位信息，此时我们将仅获取您的粗略地理位置，关闭精准定位信息不会影响您正常使用该功能。您也可以随时通过您设备的系统相关功能设置页面开启/取消该权限。当您更新APP版本后，未经您的明确同意，我们不会更改您之前设置的权限状态。</p>
+<p class="ql-align-justify">如您为腾讯视频会员，您可查看您的会员身份、等级、V力值、积分、权益回顾数据（包括活动奖品、会员礼品卡、优惠券等）；为验证您的会员身份，我们将收集您的会员状态、会员时长有效期、会员等级、<strong><u>开通及续费VIP记录</u></strong>、<strong><u>观影记录</u></strong>，权益中奖信息。为了保障您使用腾讯视频会员时的账号安全，我们建议您绑定手机号码，当您使用会员服务时，可能会通过您的绑定手机号码获取验证码进行验证。当您在“VIP帮助服务中心”使用CDK兑换会员权益功能时，我们将收集<span style="text-decoration: underline;"><strong>兑换码</strong></span>和您的绑定<span style="text-decoration: underline;"><strong>手机号码</strong></span>，并通过您的绑定手机号码获取验证码后完成验证和兑换。我们可能会根据您会员账号登录设备的数量、同一时间段使用会员服务的情况等，判断是否存在违规行为，您可以访问“VIP会员帮助服务中心”查看相关记录。</p>
+<p class="ql-align-justify">当您注销腾讯视频账号时，为了验证您的身份，我们将收集您的微信或QQ账号、头像、昵称；如您的账号已绑定手机号码，您需要通过接收短信验证码的方式进行增强验证；如您的账号未绑定过手机号码，您需要通过勾选常用登录地点、常用登录设备型号的方式进行增强验证。</p>
+<p class="ql-align-justify"><strong>1.3&nbsp;&nbsp;实名认证</strong></p>
+<p class="ql-align-justify">在您开通腾讯视频直播、上传本地视频、进入游戏、开通腾讯视频VIP/腾讯体育VIP青春V卡、开启青少年守护模式（含密码找回）、创作号注册、认证、钱包提现及数字藏品交易、使用“一起看”功能、使用“鸡腿”功能、购买我们的免流量服务时，为符合相关法律法规、监管要求以及腾讯未成年人健康上网保护计划，确保用户身份真实性、验证您的身份、保障您及其他用户的安全以及便于您参与专属优惠活动，我们将收集您的真实身份信息，包括您的<span style="text-decoration: underline;"><strong>姓名</strong></span>、<strong><u>身份证号码</u>、<span style="text-decoration: underline;">手机号码</span>、</strong><strong><u>人脸比对信息</u></strong>、学校（选填）（根据实际情况，不同场景下收集的真实身份信息可能不同）。但请注意，腾讯健康系统将独立收集和使用您的信息，其中可能包括您的敏感个人信息，腾讯视频不会收集这些信息，您需在提交信息前同意<strong>《<a href="https://rule.tencent.com/rule/preview/bf425d4a-a102-4291-a108-5c0341ee8393">腾讯健康系统个人信息保护规则</a>》</strong>。</p>
+<p class="ql-align-justify">如您是腾讯视频会员，为维护账户安全及参与专属优惠活动，您可在“VIP帮助服务中心”自行选择实名认证，向我们提供您的姓名及<strong><u>身份证号码</u></strong>，完成实名认证。</p>
+<p class="ql-align-justify">在您进行数字藏品购买时，为符合相关法律法规、监管要求，确保用户身份真实性、验证您的身份、保障您及其他用户的安全，我们将收集您的真实身份信息，包括您的<span style="text-decoration: underline;"><strong>姓名</strong></span>、<strong><u>身份证号码</u>、<span style="text-decoration: underline;">手机号码</span></strong>和<strong><u>人脸比对信息</u></strong>。</p>
+<p class="ql-align-justify"><strong>需提示的是，第三方服务（例如：第三方运营的游戏、第三方电信运营商的免流量服务）也可能需要您进行实名认证并收集您的信息，此时，腾讯视频不会收集您的这些信息。提示您仔细识别实际服务的提供方，并在使用任何第三方服务之前仔细查看相关隐私政策或个人信息处理规则。</strong></p>
+<p class="ql-align-justify"><strong>1.4&nbsp;&nbsp;内容搜索</strong></p>
+<p class="ql-align-justify">当您使用搜索功能时，我们会自动收集您输入的关键字信息和<strong><u>搜索记录</u></strong>。为了提供高效的搜索服务，部分前述信息会暂时存储在您的本地设备端，并可向您展示搜索历史记录。</p>
+<p class="ql-align-justify">当您使用语音搜索功能时，我们会请求您授权<strong><u>麦克风权限</u></strong>，并收集您的<strong><u>语音信息</u></strong>。</p>
+<p class="ql-align-justify"><strong>1.5&nbsp;&nbsp;内容浏览/播放/下载/订阅</strong></p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;&nbsp;为了更好地为您提供内容推荐展示，对搜索结果进行优化，了解产品对不同硬件设备适配性、确保操作环境安全、识别账号异常状态等用途，当您使用我们视频、音频、直播、电子读物（书籍、漫画）等服务内容的播放、<strong><u>浏览</u></strong>功能时，我们将收集您的设备信息及日志信息。</p>
+<p class="ql-align-justify">上述<strong><u>设备信息</u></strong>包括：Android ID、GUID、设备型号、系统版本；<strong><u>日志信息</u></strong>包括腾讯视频账号、播放视频ID、播放时间、软件版本型号、您的操作、行为日志信息（<strong><u>浏览记录</u></strong>、<strong><u>播放记录</u></strong>、播放时长、访问日期和时间、<strong><u>收藏/关注/订阅/阅读记录</u></strong>）。浏览记录亦称“上网记录”。&nbsp;</p>
+<p class="ql-align-justify">(2) &nbsp; 当您使用视频下载功能时，我们会请求您授权<strong><u>存储权限</u></strong>，以便在您设备外置存储空间内写入音视频文件的相关信息。</p>
+<p>(3)&nbsp;&nbsp;&nbsp;当您使用短视频服务内容的播放、<strong><u>浏览</u></strong>功能时，为了预加载播放地址并缓存不同清晰度的播放资源，我们会在您的网络状态发生变化时，采集您的SSID。</p>
+<p class="ql-align-justify">(4)&nbsp;&nbsp;&nbsp;当您作为粉丝关注特定创作号时，我们会将您在腾讯视频内的头像、昵称同步给该创作号，用于生成其粉丝列表，但粉丝列表仅该创作号可见；我们会根据您登录的账号信息及<span style="text-decoration: underline;"><strong>观影记录</strong></span>，用于帮助该创作者更好的了解粉丝群体整体情况（包括性别、生日、地区、兴趣标签等分布），您的信息将以汇总的形式呈现，不会与具体用户相关联。</p>
+<p class="ql-align-justify">(5)&nbsp;&nbsp;&nbsp;在断开与您身份的关联后，我们可能会使用部分信息（以用户实际提交及使用情况为准，包括<span style="text-decoration: underline;"><strong>观影记</strong><strong>录</strong></span>、性别、年龄区间、弹幕等）以汇总的方式用于分析与研究，优化我们的产品和服务。</p>
+<p>(6)&nbsp;&nbsp;&nbsp;当您使用电子纪念票功能时，我们会收集您完成特定任务的相关记录（如完成观影任务的<span style="text-decoration: underline;"><strong>浏览记录</strong></span>、<span style="text-decoration: underline;"><strong>会员购买记录</strong></span>、<span style="text-decoration: underline;"><strong>交流互动记录</strong></span>等）用于发放纪念票。当您获得纪念票时，我们会收集并在票面展示您的腾讯视频账号昵称、获得纪念票的时间以及纪念票编号，当您分享获得的纪念票时，前述票面信息也会对外展示。</p>
+<p class="ql-align-justify"><strong>1.6&nbsp;&nbsp;下单与支付</strong></p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;&nbsp;当您在购买我们的产品及/或服务时，包括开通/续费VIP、开通联合会员、购买青春V卡、企业内购、付费购买点播与直播、充值钻石、购买数字藏品数字纪念品、在商城、草场地以及鹅外惊喜（直播）下单、游戏付费，为便于协助您顺利完成交易、查询订单信息，以及向您提供客户服务和保障您的交易安全，我们需要根据商品或服务类型收集如下部分或全部的个人信息：<span style="text-decoration: underline;"><strong>交易商品或服务信息</strong></span>、收货信息（<span style="text-decoration: underline;"><strong>收货人姓名</strong></span>、<strong><u>收货地址</u></strong>及<strong><u>联系电话</u></strong>）、<strong><u>交易金额</u>、<u>下单时间</u></strong>、<strong><u>交易日期</u></strong>、<strong><u>订单商户</u></strong>、<strong><u>订单编号</u></strong>、<strong><u>订单状态</u>、<u>支付方式</u>、<u>支付账号</u></strong>、支付状态、<span style="text-decoration: underline;"><strong>虚拟商品及服务消费使用记录</strong></span>（如超能力、道具、钻石、观赛券、积分）、<span style="text-decoration: underline;"><strong>QQ卡（卡号及密码）</strong></span>、相关会员账户开通时间、联合会员账户信息、企业邮箱地址。在您购买青春V卡、数字藏品数字纪念品时，我们还需在交易前对您进行身份验证，以确保交易对象的正确及交易安全，为身份验证目的而收集的信息请见1.3“实名认证”。如果您的账号涉及手机号码会员资产权益，我们还会记录您的账号绑定手机号码以及<span style="text-decoration: underline;"><strong>会员资产转移记录</strong></span>。</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;&nbsp;当您使用邀请好友有礼（邀请好友加入腾讯视频VIP）、亲密付（帮亲友开通VIP）、赠送好友VIP、赠送超级影视VIP、好友分享功能时，我们将收集您的<strong><u>微信或QQ账号、微信或QQ好友关系列表</u></strong>、<strong><u>微信或QQ头像及昵称</u></strong>。</p>
+<p class="ql-align-justify">(3)&nbsp;&nbsp;&nbsp;当您使用数字人民币进行支付时，我们将使用您的手机号码用于和您的<span style="text-decoration: underline;"><strong>数字人民币账号</strong></span>进行匹配以实现支付。</p>
+<p class="ql-align-justify">(4) &nbsp; 为了便于您查看历史记录，当您使用以下功能时，我们将收集您的相关记录：</p>
+<table style="width: 63.92235609103079%; height: 114px;" border="1">
+<tbody>
+<tr style="height: 19px;">
+<td style="width: 27.30055596796302%; text-align: center; height: 19px;"><strong>功能</strong></td>
+<td style="width: 72.49864081918557%; text-align: center; height: 19px;"><strong>收集信息</strong></td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 27.30055596796302%; height: 19px;">福利中心（福利兑换）</td>
+<td style="width: 72.49864081918557%; height: 19px;"><span style="text-decoration: underline;"><strong>金币记录</strong></span>、<span style="text-decoration: underline;"><strong>现金提现记录</strong></span>以及<span style="text-decoration: underline;"><strong>奖品记录</strong></span>。</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 27.30055596796302%; height: 19px;">小说频道</td>
+<td style="width: 72.49864081918557%; height: 19px;"><span style="text-decoration: underline;"><strong>消费记录</strong></span>、书券明细、已购书籍、我的书架（已收藏书籍）以及<span style="text-decoration: underline;"><strong>阅读记录</strong></span>（仅包含章节进度）</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 27.30055596796302%; height: 19px;">鸡腿</td>
+<td style="width: 72.49864081918557%; height: 19px;">鸡腿数量信息及<span style="text-decoration: underline;"><strong>使用记录（<strong style="text-decoration: underline;">投喂记录</strong>、<strong style="text-decoration: underline;">领取记录</strong>、兑换记录）</strong></span></td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 27.30055596796302%; height: 19px;">积分公益捐</td>
+<td style="width: 72.49864081918557%; height: 19px;">
+<div>公益项目、捐助积分、筹到善款以及<span style="text-decoration: underline;"><strong>详情记录</strong></span></div>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="ql-align-justify">(5)&nbsp;&nbsp;&nbsp;此外，为方便您查询货物的交付与配送状态，我们还会自物流相关服务主体处收集与您的货物交付进度相关的信息。</p>
+<p class="ql-align-justify"><strong>1.7&nbsp;&nbsp;信息上传或发布、交流互动</strong></p>
+<p class="ql-align-justify">当您上传视频或照片、使用直播、帖子、弹幕、在圈儿社区及直播页面评论等功能时，我们将收集您上传的图文/音视频内容、您的<strong><u>昵称</u></strong>、<strong><u>头像</u></strong>、发布的信息内容、<strong><u>腾讯视频账号ID</u></strong>以及您的互动信息，包括<strong><u>点赞/分享/评论/互动记录</u></strong>、<strong><u>收藏记录</u></strong>。在您使用前述信息发布功能时，我们可能会请求您授权<strong><u>相机权限、相册权限</u></strong>。当您主动复制文字或表情等内容时，我们会调用您的剪切板功能。当您使用语音转文字功能时，我们会请求您授权<strong><span style="text-decoration: underline;">麦克风权限</span></strong>，并收集您的<strong><span style="text-decoration: underline;">语音信息</span></strong>。如您在发布内容时使用发布地快速填写功能，我们会请求您授权并展示<strong><u>IP属地</u></strong>（境内IP地址展示至省/自治区/直辖市、境外IP地址展示至国家/地区，具体信息以网络运营商数据为准）。</p>
+<p class="ql-align-justify">根据相关法律法规对于互联网账号管理的监管要求，为维护网络安全和良好的网络内容生态，我们会在您的个人主页内、您发布的内容下展示您的<span style="text-decoration: underline;"><strong>IP属地</strong></span>（境内IP地址展示至省/自治区/直辖市、境外IP地址展示至国家/地区，具体信息以网络运营商数据为准）。</p>
+<p class="ql-align-justify"><strong>1.8&nbsp;&nbsp;活动参与及消息通知</strong></p>
+<p class="ql-align-justify"><strong>1.8.1&nbsp;活动参与</strong></p>
+<p class="ql-align-justify">当您参与我们的活动时，可能需要您主动提交有关个人信息。包括：</p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;&nbsp;您参与抽奖活动时，我们将收集您的<strong><u>微信或QQ账号</u></strong>、<strong><u>头像</u></strong>、<strong><u>昵称</u></strong>、<strong><u>购买记录</u></strong>；如涉及以邮寄方式进行奖品发放，我们还将收集您的<strong><u>收货信息</u></strong>，包括<strong><u>收货地址</u></strong>、<strong><u>联系人名称</u></strong>及<strong><u>联系人电话</u></strong>。</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;&nbsp;当您在腾讯视频界面通过点击“免费领VIP”、“我的电影票”登录“小鹅花钱”、猫眼小程序时，我们将收集您的<strong><u>微信或QQ头像、昵称</u></strong>。</p>
+<p class="ql-align-justify">(3)&nbsp;&nbsp;&nbsp;当您通过扫一扫参加活动时，我们将申请您的<strong><u>相机权限</u></strong>。</p>
+<p class="ql-align-justify">(4) &nbsp;&nbsp;当您分享活动口令与链接时，我们将收集您的<span style="text-decoration: underline;"><strong>头像</strong></span>、<span style="text-decoration: underline;"><strong>昵称</strong></span>，并调用您的剪切板功能以判断是否有相关口令码信息。需要特别提示的是，为了判断是否有相关口令码信息，我们会在您启动腾讯视频、后台切前台时调用您的剪切板功能，如有相关口令码信息，则我们会收集该信息在服务器做校验后，向您反馈您所需的内容或绑定相关权益。我们并不会存储您剪切板的其他信息。</p>
+<p class="ql-align-justify">(5)&nbsp;&nbsp;&nbsp;当您参与基于精确位置的打卡任务时，我们将申请您的<span style="text-decoration: underline;"><strong>精确位置权限</strong></span>。</p>
+<p class="ql-align-justify">(6)&nbsp;&nbsp;&nbsp;我们可能会将通过活动获得的您的相关信息，用于研发和改进产品和服务、综合统计、数据分析或加工等以及经您同意的其他用途。</p>
+<p align="left">(7)&nbsp;&nbsp;&nbsp;针对部分活动我们可能会短期采集您的个人信息，相关个人信息收集情况请关注特定活动的活动规则、授权文件等隐私声明文件。</p>
+<p>此外，为判断您是否满足活动要求的参与资格（如：新用户）或者为保障活动的正常秩序、防范作弊与欺诈等违法违规情况，我们同时可能需要收集和使用您的设备信息（例如：设备型号、设备厂商、操作系统及版本信息）。</p>
+<p class="ql-align-justify"><strong>1.8.2&nbsp;消息通知</strong></p>
+<p class="ql-align-justify">(1) &nbsp; <span style="text-decoration: underline;"><strong>写入</strong><strong>设备日历权限</strong></span>用于正片上线、空降活动、学习提醒、游戏预约和游戏活动预约提醒，仅在您预约提醒时申请获取。在您开启相关权限后，我们会访问您的日历，帮助您预约或调整已预约的时间，以在您预约的时间通过日历功能提醒您。如您在预约提醒时时间尚未确定，我们将在时间确定后通过日历权限写入具体时间。拒绝授权将无法使用预约服务，但不会影响腾讯视频其他功能的正常使用。</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;&nbsp;使用商品上架、视频上线提醒功能的，我们还将收集您的腾讯视频账号ID、预约记录；使用游戏上线提醒功能的，我们还将收集您的手机号码，用于向您发送短信提醒。</p>
+<p class="ql-align-justify">(3)&nbsp;&nbsp;&nbsp;您知悉并同意，对于您在使用过程中提供的您的一种或多种联系方式，我们在运营中可能会向其中的一种或多种发送多类通知，用于用户消息告知、身份验证、安全验证、用户使用体验调研等用途。</p>
+<p class="ql-align-justify">(4)&nbsp; &nbsp;针对特定设备厂商，我们会收集OAID<span style="font-size: 14px; font-family: 宋体;">（仅安卓版）</span><span class="MsoCommentReference"><span style="font-size: 10.5pt; font-family: DengXian;"><a id="_anchor_1" class="msocomanchor" href="#_msocom_1" name="_msoanchor_1"></a></span></span>用于消息推送。</p>
+<p class="ql-align-justify"><strong>1.9&nbsp;&nbsp;运营及产品安全需要</strong></p>
+<p class="ql-align-justify">我们致力于为您提供安全、可信的产品与使用环境，提供优质而可靠的服务与信息。为了维护我们产品及服务的正常稳定运行，保护您或其他用户或公众的安全及合法利益，我们会收集如下信息：</p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;为检测腾讯视频版本是否有升级更新，我们将收集您的设备信息（GUID）。</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;为根据您的网络状态，为您推荐最佳的视频清晰度，我们将收集您的IP地址。</p>
+<p class="ql-align-justify">(3)&nbsp;&nbsp;为实现腾讯视频运行故障报错及分析和解决您在使用腾讯视频过程中所遇到的问题，我们将收集您的设备信息（GUID）、<strong><u>浏览和操作记录</u></strong>，并请求您的<strong><u>存储权限</u></strong>。</p>
+<p class="ql-align-justify">(4)&nbsp;&nbsp;为了校验应用标识符本身的有效性，并甄别异常设备环境，以便识别登录风险，我们将收集您的IDFV（仅iOS版）。</p>
+<p>(5)&nbsp; 技术处理说明：采取安全加密、去标识化、匿名化等安全技术措施后，并在无法重新识别个人身份的前提下，我们可能将所收集的数据进行算法优化、统计分析或其他必要的数据分析处理，用于研发、提供、运营我们或关联公司的各类产品和服务，例如：商业决策分析、个性化服务、风险识别等。</p>
+<p class="ql-align-justify"><strong>1.10 &nbsp;个性化内容推荐</strong></p>
+<p class="ql-align-justify">我们会基于收集的信息，包括您的设备信息（例如Android ID、GUID、设备型号、系统版本）、日志信息（<strong><u>购买记录</u>、<u>关注</u></strong>、<span style="text-decoration: underline;"><strong>点击</strong></span>、<strong><u>收藏</u></strong>、<strong><u>浏览</u></strong>、<strong><u>下载记录</u></strong>、<span style="text-decoration: underline;"><strong>点赞/分享/评论/互动的对象</strong></span>、<span style="text-decoration: underline;"><strong>搜索的字词</strong></span>）、<strong><u>性别</u></strong>、<strong><u>年龄</u></strong>、粗略的位置信息，通过自动化决策的方式对您的偏好、习惯作特征分析，以便为您提供符合您兴趣的定制化服务，例如向您展现或推荐相关程度更高（而非普遍推送）的视频、游戏、阅读、直播、圈儿社区的服务内容。自动化决策是指通过计算机程序自动分析、评估个人的行为习惯、兴趣爱好，并进行决策的活动。</p>
+<p class="ql-align-justify">另需提示，在更快地为您提供感兴趣内容的同时，个性化内容推荐可能会导致您所看到的内容越来越趋于同质化。如您不希望接收到我们为您推荐的个性化内容，您可以随时使用我们的产品和/或服务的相关功能设置页面开启/关闭个性化推荐。腾讯视频APP的个性化推荐设置路径为：<span style="font-size: 14px;"><span style="font-family: 宋体;">“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">个性化内容管理”</span> </span>。<strong> 若您选择关闭，我们不会基于个性化内容推送的目的处理您的个人信息，您看到的内容将可能与您的偏好相关度降低。</strong>当您更新腾讯视频APP版本后，未经您的同意，我们不会更改您之前设置的权限状态。</p>
+<p class="ql-align-justify"><strong>1.11 &nbsp;广告（含个性化广告）</strong></p>
+<p align="left">(1) &nbsp; 我们可能使用您的设备标识符（OAID、IDFV、IDFA）、广告数据（曝光、点击、转化数据）、设备信息（设备型号、系统语言、运营商、屏幕高宽、屏幕方向）、APP应用及使用数据（应用包名、操作日志、订单信息）、IP地址、会员身份、所选的兴趣标签等信息，通过自动化分析和计算预测您的特征偏好， 向您提供您可能感兴趣的广告，评估、改善我们的广告投放和其他促销及推广活动、商业分析的效果。<strong>请您放心，个性化广告推荐算法并不会识别您的真实身份，仅是基于推测的特征提供对您更有价值的广告信息、节约您的交易成本。</strong></p>
+<p align="left">(2) &nbsp; 当您使用创新广告交互功能（如摇动、扭动、扭转设备）时，我们会调用设备的陀螺仪、加速度、重力传感器以识别判断您的设备状态。</p>
+<p align="left">(3) &nbsp; 当您主动复制广告落地页上的链接等内容时，我们会写入剪切板，从而便于分享链接等功能的实现。</p>
+<p>(4) &nbsp; 若您不想接受个性化广告服务，您可以在我们的产品和/或服务的相关功能设置页面开启/关闭个性化广告。APP的个性化广告设置路径为：“个人中心-设置-隐私管理-个性化广告管理”。<strong>若您选择关闭，您看到的广告数量不会减少，但</strong><strong>APP</strong><strong>将不再向您展示个性化广告，您看到的广告将可能与您的偏好相关度降低。</strong></p>
+<p align="left">(5) &nbsp; 为了您获取更有价值的广告信息，我们可能基于您在腾讯视频内的搜索记录、行为数据推测您的间接画像，用于供您在腾讯及合作的第三方网站、应用等其他平台中收到您可能更感兴趣的广告内容。我们不会关联使用您的真实身份信息，不会使用您的具体搜索内容。若您不想接受跨平台广告服务，可以在APP设置页面开启/关闭：“个人中心-设置-隐私设置管理-跨平台广告推荐管理。</p>
+<p class="ql-align-justify"><strong> </strong></p>
+<p>(6) &nbsp; 针对部分通过第三方H5页面展示的广告，为了提供基于地理位置的服务，我们可能会申请您的<strong><u>位置权限</u></strong>，收集<span style="text-decoration: underline;"><strong>GPS信息</strong></span>、CellID、附近的WiFi（WLAN）。该等权限调用和信息采集仅在您访问和使用通过第三方H5页面展示的广告时通过腾讯视频申请获取。</p>
+<p class="ql-align-justify"><strong>1.12&nbsp;&nbsp;客户服务及其他用户响应功能</strong></p>
+<p class="ql-align-justify">当您联系我们的客服时，为了您的账号与系统安全，我们将收集您的微信号、QQ号及账号资料，并与您之前的个人信息相匹配以验证您的用户身份。 同时，为了调查事实与帮助您解决问题，我们可能还需要收集您的如下个人信息：联系方式（您使用的或主动向我们提供的手机号码、微信号、QQ号或其他联系方式）、您与我们的<strong><u>沟通记录</u></strong>。</p>
+<p class="ql-align-justify">当您使用帮助与反馈功能时，为便于您反馈在使用腾讯视频中所遇到的问题，我们将收集您的设备信息（GUID）、腾讯视频账号ID、网络情况、应用版本、访问页面、<span style="text-decoration: underline;"><strong>支付单号</strong></span>，并申请您的存储权限。当您反馈播放类和下载类问题时，为识别可能与地理位置相关的故障，我们还会收集您的IP地址及其对应的粗略地理位置（境内IP地址至地市级、境外IP地址至国家/地区，具体信息以网络运营商数据为准）。您可以在帮助与反馈功能页面查看反馈历史记录。</p>
+<p class="ql-align-justify">当您进行侵权投诉时，为核验侵权投诉人身份和权利情况、依法处置侵权投诉，您可能需要提供您的身份信息、权利证明材料相关信息等，但请注意，上述信息是由腾讯文犀·侵权投诉平台（下称“腾讯文犀”）收集和使用，其中可能包括您的敏感个人信息，腾讯视频不会收集这些信息，您需在提交侵权投诉材料前同意腾讯文犀的个人信息保护规则，请您仔细阅读该等规则，具体可点击查看<strong>《<a href="https://privacy.qq.com/document/preview/67ac39dc7b104207a66350b02123dce7">腾讯文犀 · 侵权投诉平台隐私保护指引</a>》。</strong></p>
+<p class="ql-align-justify">当您要求下载个人信息时，我们将收集您填写的电子邮箱地址用于把对应资料生成文件发送至您指定的邮箱。</p>
+<p class="ql-align-justify">如您是腾讯视频会员，您可在“VIP帮助服务中心”查看会员客户服务相关记录。</p>
+<p class="ql-align-justify"><strong>1.13&nbsp; 直播服务</strong></p>
+<p class="ql-align-justify">为了您使用直播互动功能，在您授权同意后，我们会访问您的麦克风、摄像头、相册（iOS版）或存储权限（安卓版），为您提供视频拍摄、声音录制、视频读取、上传直播封面等功能。您在使用直播功能时，我们仅在设备端侧处理您的<span style="text-decoration: underline;"><strong>面部像素信息</strong></span>，用于提供美颜效果，并不会上传到我们的服务器，也不会将您的<span style="text-decoration: underline;"><strong>面部像素信息</strong></span>用于其他用途。</p>
+<p class="ql-align-justify"><strong>1.14 &nbsp;创作号</strong></p>
+<p class="ql-align-justify">当您注册腾讯视频创作号（即以个人创作者身份使用腾讯视频创作平台的服务）时，我们将收集您的昵称、头像、简介、注册地。此外，为履行国家法律法规关于网络实名制（互联网用户账号真实身份信息认证）的要求，我们还将收集您的姓名、<span style="text-decoration: underline;"><strong>身份证号码</strong></span>、手机号码、<strong><u>人脸比对信息</u></strong>；您可自主选择填写您的性别、生日。</p>
+<p class="ql-align-justify">当您成功注册腾讯视频创作号后，我们会为您配置并收集主播ID。</p>
+<p class="ql-align-justify">当您通过腾讯视频创作号使用以下功能时，我们会收集您的如下个人信息并申请相关权限：</p>
+<p class="ql-align-justify">(1) &nbsp;认证直播功能时，我们将识别您当前创作号头像和昵称，用于验证创作号的的开播功能。</p>
+<p class="ql-align-justify">(2) &nbsp;进行实名认证且<span style="font-size: 10.5pt;">使用炫彩光线活体作为实人认证方式时，我们会调用设备的光线传感器。</span></p>
+<p class="ql-align-justify">(3) &nbsp;进行官方认证时，为确保是您本人操作，我们将根据您申请认证的身份类型收集您的<span style="text-decoration: underline;"><strong>人脸比对信息</strong></span>，并收集含有您的姓名、职位、签章和有效期的<span style="text-decoration: underline;"><strong>职业认证信息</strong></span>，来添加对应的职业认证。</p>
+<p class="ql-align-justify">(4) &nbsp;上传视频并使用内容同步功能时，为履行国家法律法规关于网络实名制（互联网用户账号真实身份信息认证）的要求，我们将根据您选择绑定的腾讯微视、腾讯看点、腾讯新闻账号收集您的<span style="text-decoration: underline;"><strong>身份证号</strong></span>及姓名。</p>
+<p class="ql-align-justify">(5) &nbsp;使用第三方账号绑定功能时，为辅助证明您是视频原创作者并提高原创判定的准确性，我们将根据您选择绑定的Bilibili、抖音、头条号、快手等第三方平台的账号收集您的第三方账号昵称、第三方账号主页链接、第三方账号后台截图。</p>
+<p class="ql-align-justify">(6) &nbsp;使用提现功能时，为了绑定您的银行卡，我们将收集您的持卡人姓名、<span style="text-decoration: underline;"><strong>银行卡号</strong></span>、<span style="text-decoration: underline;"><strong>开户行</strong></span>、<span style="text-decoration: underline;"><strong>开户行所在地区</strong></span>。</p>
+<p class="ql-align-justify">(7) &nbsp;我们会采集您的粉丝列表（包括粉丝的头像和昵称），但该粉丝列表仅您个人可见。</p>
+<p class="ql-align-justify">(8) &nbsp;使用“钱包”功能时，我们会收集您的<span style="text-decoration: underline;"><strong>待提现收益</strong></span>、<span style="text-decoration: underline;"><strong>累计收益</strong></span>、<span style="text-decoration: underline;"><strong>收益分析/明细</strong></span>、<span style="text-decoration: underline;"><strong>收益能力</strong></span>（即开通的创作号能力）、<span style="text-decoration: underline;"><strong>提现明细</strong></span>、创作号信用分。</p>
+<p class="ql-align-justify">(9) &nbsp;使用“收益与提现”功能时，为了便于您管理和快速了解创作号整体情况，我们会收集您<span style="text-decoration: underline;"><strong>可提现收益</strong></span>、<span style="text-decoration: underline;"><strong>今日收益</strong></span>、<span style="text-decoration: underline;"><strong>本月收益</strong></span>、分成比例、<span style="text-decoration: underline;"><strong>收益账单</strong></span>、<span style="text-decoration: underline;"><strong>提现记录</strong></span>、<span style="text-decoration: underline;"><strong>礼物记录</strong></span>。</p>
+<p class="ql-align-justify"><strong>1.15 &nbsp;游戏</strong></p>
+<p><strong>1.15.1 游戏活动</strong></p>
+<p>当您使用“爱玩游戏”参与腾讯视频的游戏活动，且登录腾讯视频的QQ号或微信号与注册/登录该游戏的账号一致时，为了核实您是否满足领取奖励和/或参与活动的条件，腾讯视频需要对您在第三方游戏中的信息进行核实，核实范围会因为不同活动而不完全一致，但会限定在您确认授权并且第三方游戏提供的游戏账号信息（游戏角色以及角色自身的游戏属性、状态、战绩等信息）以及<span style="text-decoration: underline;"><strong>游戏好友数据</strong></span>（游戏角色之间的关系以及基于关系的行为，如<span style="text-decoration: underline;"><strong>游戏好友关系链</strong></span>、好友互动送心、<span style="text-decoration: underline;"><strong>好友聊天</strong></span>等）范围内。具体信息将以授权页面为准，如您拒绝授权，将无法参与相关活动，但不影响腾讯视频其他主要功能的使用；当您拒绝授权后，重新参与活动或参与第三方游戏其他活动时，我们会另行向您申请使用相关信息。腾讯视频仅会核实活动涉及的信息，获取“是”/“否”（满足条件）的反馈，不会核实其他无关信息，也不会获取您在第三方游戏中的实际数据。例如：您参加了注册登录第三方游戏即可领取礼包的活动，则腾讯视频会与第三方游戏核实您是否注册登录该游戏，当收到反馈为“是”，您即可领取礼包。您可以在“爱玩游戏-我的-设置”中进行游戏信息授权管理，取消授权、修改可见范围和授权信息类型，或直接在相关游戏内取消授权。</p>
+<p><strong>1.15.2 云游戏</strong></p>
+<p>当您使用云游戏功能时，腾讯视频PC端会收集您的账号信息，用于判断您的登录状态；腾讯视频APP会请求您授权麦克风权限、调用设备的传感器，用于提升云游戏的体验。特别说明：当您进入云游戏功能的特定游戏后，您的个人信息将由该特定游戏自行收集、使用，腾讯视频并不会收集、处理和存储您在云游戏功能特定游戏中的个人信息。</p>
+<p><strong>1.15.3 游戏推广</strong></p>
+<p><strong> </strong></p>
+<p>如您使用安卓设备，当您进入特定游戏的详情页时，为了展示下载状态按钮文案，我们会判断设备本地是否安装了该游戏应用；当您进入游戏频道、电竞频道、游戏中心及游戏活动页面时，为了更好地为您推荐相关游戏内容，我们会判断设备本地是否安装了推广的游戏应用。</p>
+<p class="ql-align-justify"><strong>1.16 &nbsp;其他自行收集信息场景</strong></p>
+<p class="ql-align-justify"><strong>1.16.1 护眼模式</strong></p>
+<p class="ql-align-justify">您在观看我们的视频时，我们为您提供了护眼模式（仅限iOS版用户），以帮助您保护眼睛。护眼模式需要请求您的相机权限。当您授权使用护眼模式时，我们会使用TrueDepth APIs，按一定频率获取您面部和设备屏幕之间的距离信息。当您面部与设备屏幕之间的距离小于40cm后，视频播放将自动暂停并用蒙层遮罩，并出现文字提示您保护眼睛，帮助您养成良好的观影习惯。</p>
+<p class="ql-align-justify">我们使用TrueDepth APIs不会收集您的面部识别特征，也不会收集缓存到文件或上传到云端的用于支持判断距离以外的任何其他信息。我们不会存储或与第三方共享您的该信息。</p>
+<p class="ql-align-justify">护眼实验室功能在您首次下载启动产品时默认为关闭状态，您可以通过产品功能设置页面主动进行授权/取消授权，路<span style="font-size: 14px;">径为：<span style="font-family: 宋体;">“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">播放设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">播放器护眼模式”。</span></span><span class="MsoCommentReference"><span style="font-size: 10.5pt; font-family: DengXian;"><a id="_anchor_1" class="msocomanchor" href="#_msocom_1" name="_msoanchor_1"></a></span></span></p>
+<p class="ql-align-justify"><strong>1.16.2 极光实验室</strong></p>
+<p class="ql-align-justify">当您使用我们的极光实验室功能时，为检测您的设备是否支持腾讯视频提供的特色服务，我们将收集您的设备能力信息（高效率视频编码、杜比等）。</p>
+<p class="ql-align-justify"><strong>1.16.3 投屏</strong></p>
+<p class="ql-align-justify">当您使用投屏功能时，为实现设备的互联互通，我们需要进行本地网络设备检测，我们将收集您的硬件类型、型号、固件版本、区域和语言设置、硬件系统版本号、IP地址、终端设备的类型、软硬件特征信息、互联网服务提供商、网络运营商、设备型号、终端制造厂商、终端设备操作系统版本、会话启动/停止时间和网络状态（WiFi等）、硬盘、CPU和内存使用情况。</p>
+<p><strong>1.16.4 用户调研</strong></p>
+<p>我们可能会不定期针对我们的产品和/或服务进行用户调研（包括但不限于在线问卷等形式），相关个人信息收集情况请关注特定用户调研的隐私声明文件。</p>
+<p><strong>1.16.5 机构创作者</strong></p>
+<p>当您以机构创作者的代表或联系人身份使用腾讯视频创作服务平台的服务时，可能需要您主动提交有关个人信息。包括：</p>
+<p>(1)&nbsp;&nbsp;在机构创作者申请单项内容授权合作时，我们会收集您的账号名称、账号简介、头像信息，用于明确您的合作方身份和从业经验，以便评估是否符合合作标准、保障交易安全；我们可能会收集机构创作者法定代表人或账号运营人的姓名、<span style="text-decoration: underline;"><strong>身份证信息（身份证号、身份证照片等）</strong></span>、<span style="text-decoration: underline;"><strong>面部信息（静态或动态）</strong></span>、手机号码等信息，用于身份验证，从而确保合作方身份真实性、保障交易安全和合作正常进行。如您作为机构创作者的法定代表人或账号运营人，或出现机构创作者基于其对您的个人信息的控制而向我们提供您的个人信息的其他情形，针对该等情形，我们已通过<strong>《<a href="https://v.qq.com/biu/agreement?type=platformServiceAgreement">腾讯视频创作平台服务协议</a>》</strong>等方式要求机构创作者确保有权进行前述行为，在此基础上，我们将收集您的上述个人信息。如您对此有任何疑问或意见，建议您优先联系相关机构创作者处理。</p>
+<p>(2)&nbsp;&nbsp;当机构创作者签订和履行项目合作合同时，我们会收集机构创作者的联系人姓名、联系手机号、联系邮箱、<span style="text-decoration: underline;"><strong>联系地址</strong></span>，用于发送与合同相关的通知，从而保障合作正常进行和维护合同权益。如您作为机构创作者的联系人，或出现机构创作者基于其对您的个人信息的控制而向我们提供您的个人信息的其他情形，针对该等情形，我们已通过<strong>《<a href="https://v.qq.com/biu/agreement?type=platformServiceAgreement">腾讯视频创作平台服务协议</a>》</strong>等方式要求机构用户确保有权进行前述行为，在此基础上，我们将收集您的上述个人信息。如您对此有任何疑问或意见，建议您优先联系相关机构创作者处理。</p>
+<p>(3) &nbsp;当机构创作者使用创作服务市场的供应商服务时，我们会收集机构创作者相应订单中提供的订购人姓名、订购人手机号码、<span style="text-decoration: underline;"><strong>订购信息</strong></span>（服务名称、服务费用、服务商家）用于客服联系，并将订购人姓名、订购人手机号码共享给供应商用于服务沟通。如您作为机构创作者的订购人，或出现机构创作者基于其对您的个人信息的控制而向我们提供您的个人信息的其他情形，针对该等情形，我们已通过<strong>《<a href="https://v.qq.com/biu/agreement?type=platformServiceAgreement">腾讯视频创作平台服务协议</a>》</strong>等方式要求机构用户确保有权进行前述行为，在此基础上，我们将收集您的上述个人信息。如您对此有任何疑问或意见，建议您优先联系相关机构创作者处理。</p>
+<p>(4)&nbsp;&nbsp;一般情况下，您可随时浏览自己提交的信息，但出于安全性和身份识别的考虑，您可能无法修改注册时提供的初始信息及其他验证信息。</p>
+<p>(5)&nbsp;&nbsp;在实名认证的过程中，为实现身份认证的目的，我们的合作方可能需要使用您的<span style="text-decoration: underline;"><strong>身份认证信息（可能包括真实姓名、身份证相关信息、面部信息（静态或动态）</strong></span>、手机号码） 。其中，部分信息是个人敏感信息，如您拒绝将导致您无法完成身份认证，您将无法使用本服务，您将因此无法便捷地与我们进行授权合作，但您可以采用其他合作方式。这些信息仅供实名认证及法律法规所规定的用途，未经您的明示授权，不会用作其他目的。如存在其他共享或转让您的个人信息或您需要我们将您的个人信息共享或转让至第三方情形时，我们会直接或确认第三方征得您对上述行为的明示同意。未经您的同意，我们不会向腾讯以外的任何公司、组织和个人披露您的个人信息，但法律法规另有规定的除外。</p>
+<p class="ql-align-justify"><strong>1.16.6 小组件</strong></p>
+<p class="ql-align-justify">如您通过部分品牌安卓设备的小组件使用腾讯视频，为了实现小组件的添加、删除和更新，腾讯视频可能会在您退出应用后在后台存在短暂启动的行为。</p>
+<p><strong>1.16.7 </strong><strong>隔空手势</strong></p>
+<p>隔空手势需要请求您的相机权限。当您授权使用隔空手势功能时，在内容播放期间我们会在您的设备本地收集并处理您的相机拍摄的画面，实现您通过手势控制内容播放的相关操作。</p>
+<p><strong>1.16.8&nbsp;</strong><strong>灵芽社区</strong></p>
+<p>当您使用腾讯视频灵芽社区（简称“灵芽社区”）的服务时，需要同意《<a href="https://pre.lumio.qq.com/html-content/%E7%81%B5%E8%8A%BD%E5%B9%B3%E5%8F%B0%E6%9C%8D%E5%8A%A1%E5%8D%8F%E8%AE%AE.html">灵芽社区服务协议</a>》，在以下功能中，我们会收集您的如下个人信息并申请相关权限：</p>
+<p>(1)&nbsp;&nbsp;&nbsp;您可以通过QQ账号、微信账号、手机号码注册/登录灵芽社区。如果您已经拥有腾讯视频账号，我们会收集您的腾讯视频账号ID、头像、昵称，用于灵芽社区内展示。如果您通过灵芽社区注册/登录腾讯视频账号，我们会为您分配默认的头像、昵称。您可以在灵芽社区内修改您的头像、昵称，该修改后的头像/昵称仅在灵芽社区内展示，不影响腾讯视频账号在其他服务内展示的头像、昵称。</p>
+<p>(2)&nbsp;&nbsp;&nbsp;当您使用创作工具时，我们将收集您提供或授权我们获取的输入内容（作为提示词的文字，以及其他用于引导输出的文字、图片、音频、视频等内容）、输出成果（包括：输出文字、音频、图片、视听内容等成果）、应用内操作记录（填写/点击/选择等操作指令等），并根据您具体使用到的功能和服务类型请求您授权存储权限。如果您拒绝授权，您将无法使用导入素材、导出生成内容等功能，但不影响您使用灵芽社区的其他功能。</p>
+<p>(3)&nbsp;&nbsp;&nbsp;在您浏览灵芽社区内容的过程中，我们会记录您的使用情况。如果您未登录账号，我们会记录您的点击、浏览信息。如果您已登录账号，我们会通过您的灵芽社区账号记录您的点击、浏览、下载、分享、关注、点赞、评论等。</p>
+<p>(4)&nbsp;&nbsp;&nbsp;当您使用搜索功能时，我们会自动收集您输入的搜索内容（如搜索关键字信息）、搜索时间，以便于快速匹配搜索内容。</p>
+<p>(5)&nbsp;&nbsp;&nbsp;当您使用图片等内容的下载功能时，我们会请求访问您设备的存储权限，以便将这些内容保存在您的设备中。</p>
+<p>(6)&nbsp;&nbsp;&nbsp;当您使用作品、评论等信息内容上传、发布功能时，我们将收集您在灵芽社区的昵称、头像、您主动提供的相关图文/音视频内容，并且您发布的内容中会展示您在灵芽社区的昵称、头像等信息。在您使用前述信息上传发布功能时，我们会根据您使用的功能和服务类型请求访问您设备的存储权限。如果您拒绝授权，将无法使用相应发布功能，但不影响您使用灵芽社区的其他功能。如果您上传发布的信息中包含他人的个人信息，请您务必取得他人的合法授权，避免非法泄露他人的个人信息。</p>
+<p>(7)&nbsp;&nbsp;&nbsp;当您进行交流互动时，我们将收集您在在灵芽社区的昵称、头像，互动内容与记录（包括在用户交流互动过程中，您主动提供的文字、图片、视频等交流互动内容，评论/关注/收藏/点赞/分享等交流互动记录）、互动数据信息（如作品数据、粉丝数据等）应用内操作记录（包括点击等操作记录、操作日期与时间）</p>
+<p>(8)&nbsp;&nbsp;&nbsp;当您购买我们的产品及/或服务时，包括购买、使用积分等，我们需要根据服务类型收集如下部分或全部的个人信息：网络身份标识信息（腾讯视频账号ID、IP地址、网络类型、时区）、设备信息（浏览器userAgent、系统语言、gpu信息、操作系统信息、屏幕尺寸、色彩深度、支持的字体类型、cpu核数、内存容量）、交易和消费记录（交易的商品或服务信息、下单时间、订单编号、订单状态、积分使用情况）。在使用支付功能时，我们可能会请求访问您设备的存储权限，用于保存支付日志，从而令我们可以回溯异常支付过程、定位您在支付时遇到的问题，以便解决异常支付问题。</p>
+<p><strong>1.16.9 AI</strong><strong>功能</strong></p>
+<p>当您使用腾讯视频AI功能时，我们收集您的个人信息或申请相关权限的情况详见《<a href="https://rule.tencent.com/rule/202512190001">腾讯视频AI功能服务规则</a>》。</p>
+<p><strong>1.16.10&nbsp;</strong><strong>车机互联</strong>（仅安卓版）</p>
+<p>当您使用车机互联功能时，我们会申请访问您的精确位置权限和蓝牙连接及扫描权限（Android API 30以上）用于发现附近的设备并连接，但不会主动获取您的位置信息。</p>
+<p class="ql-align-justify"><strong>1.17 从第三方间接收集个人信息</strong></p>
+<p class="ql-align-justify">我们可能会从第三方间接收集（如共享等）您的个人信息，但这只发生在：我们确认该等第三方已经就将相关个人信息分享给我们获得您的同意，或者第三方依法被许可或被要求向我们披露您的个人信息。</p>
+<p class="ql-align-justify">我们会要求第三方对个人信息来源的合法性和合规性作出承诺，如第三方有违反行为的，我们会明确要求对方承担相应法律责任。</p>
+<p class="ql-align-justify">我们会了解第三方已获得的个人信息处理的同意范围，包括使用目的，个人信息主体是否同意转让、共享、公开披露、删除等内容。</p>
+<p class="ql-align-justify">这些从第三方获取的个人信息将用于为您提供服务，以及用于保证我们所掌握的您的相关记录的准确性。如果我们对这些个人信息的处理活动超出第三方已获得的同意范围，在获取个人信息的合理期限内或处理个人信息前，我们会直接或通过提供信息的第三方征得您的同意。</p>
+<p class="ql-align-justify"><strong>1.18 &nbsp;与运营商合作免流量功能</strong></p>
+<p class="ql-align-justify">当您使用腾讯视频与运营商合作的免流量功能（如：“免流量看视频”模块中的“腾讯王卡”业务）时，为准确识别免流量用户身份及更好地记录定向应用消耗的流量，我们需要收集您的手机号码、IP地址、手机型号、运营商信息。</p>
+<p class="ql-align-justify">需提示的是，当您领取免流量电话卡或开通免流量服务时，您可能需要进行实名认证，并需要提供姓名、<strong><u>身份证号</u></strong>、联系电话、<strong><u>收货地址</u></strong>、<span style="text-decoration: underline;"><strong>详细地址</strong></span>（以实际运营方页面展示为准），<strong>此时，腾讯视频不会收集您的这些信息。提示您仔细识别实际服务的提供方，并在使用任何第三方服务之前仔细查看相关隐私政策或个人信息处理规则。</strong></p>
+<p class="ql-align-justify"><strong>1.19 &nbsp;第三方调用权限</strong></p>
+<p class="ql-align-justify"><strong><span style="text-decoration: underline;">位置权限</span>、</strong>蓝牙权限可能会用于部分第三方应用（含H5页面、小程序等）服务，提供基于地理位置的服务或通过蓝牙提高位置准确性等，该等权限仅在您使用第三方应用特定功能时通过腾讯视频申请获取。您授权使用<strong><u>位置权限</u></strong><u>的</u>第三方应用还可能采集您的SSID。详情参见第三方应用的隐私政策。</p>
+<p><strong>1.20 &nbsp;传感器应用场景声明</strong></p>
+<div>
+<div>
+<table>
+<tbody>
+<tr>
+<td style="text-align: center;" colspan="1" rowspan="1" width="281">
+<p><strong>功能板块</strong></p>
+</td>
+<td style="text-align: center;" colspan="1" rowspan="1" width="470">
+<p><strong>传感器名称</strong></p>
+</td>
+<td style="text-align: center;" colspan="1" rowspan="1" width="497">
+<p><strong>适用场景</strong></p>
+</td>
+<td style="text-align: center;" colspan="1" rowspan="1" width="579">
+<p><strong>使用目的</strong></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="281">
+<p><span data-font-family="宋体">1.2&nbsp;</span><span data-font-family="宋体">账号资料维护</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">加速度传感器、</span><span data-font-family="宋体">重力传感器、陀螺仪传感器&nbsp;</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">用户个人中心背景图及“成就勋章”功能</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器检测设备状态，并随重力在功能板块中展示动态效果的背景图以及晃动成就勋章的虚拟图像</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="281">
+<p><span data-font-family="宋体">1.3&nbsp;</span><span data-font-family="宋体">实名认证</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">光线传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">用户开通腾讯视频创作号（仅在使用炫彩光线活体作为实人认证方式时适用）</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">引导用户在光线正常环境进行炫彩光线活体检测（即实人认证），在光线异常情况下提示用户</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="5" width="281">
+<p><span data-font-family="宋体">1.5&nbsp;</span><span data-font-family="宋体">内容浏览/播放/下载/订阅</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">加速度传感器、</span><span data-font-family="宋体">方向传感器、设备运动数据（仅iOS版，用于采集陀螺仪数据）</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">视频播放过程中设备横竖屏状态切换</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器信息检测屏幕方向，进行视频播放横竖屏切换</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">旋转矢量传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">播放VR视频片源</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">获取传感器信息并据此调整VR视频画面角度</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">陀螺仪传感器、</span><span data-font-family="宋体">加速度传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">内容浏览中涉及创新交互功能（如摇动、扭动、扭转设备）的活动</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">调用传感器识别判断用户设备状态，以判断用户是否参与活动</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">陀螺仪传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">用户在视频播放中拖拽播放进度条和上拉底部提示</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">在用户操作时通过调用传感器使设备震动，即时提示用户操作</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">陀螺仪传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">频道页推荐内容海报动态效果</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器检测用户设备状态，并展示动态效果的推荐内容海报</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="2" width="281">
+<p><span data-font-family="宋体">1.7&nbsp;</span><span data-font-family="宋体">信息上传或发布、交流互动</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">光线传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">视频剪辑和制作过程中检测光线</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器检测光线，以调整屏幕亮度</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">加速度传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">AR</span><span data-font-family="宋体">视频剪辑和制作过程中检测方向和角度</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器获取方向信息和角度信息，以调整AR素材画面角度</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="281">
+<p><span data-font-family="宋体">1.9 运营及产品安全需要</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">加速度传感器、重力传感器、陀螺仪传感器、旋转矢量传感器、光线传感器、线性加速器、磁场传感器、压力传感器、相对湿度传感器、环境温度传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">为提供安全、可信的产品与使用环境，提供优质而可靠的服务与信息，检测是否存在相关传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">如建立推送链接时识别设备场景中，防止黑产及外部恶意攻击。</span></p>
+<p>&nbsp;</p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="281">
+<p><span data-font-family="宋体">1.11 广告（含个性化广告）</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">陀螺仪传感器、加速度传感器、重力传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">创新广告交互功能（如摇动、扭动、扭转设备）</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">调用设备传感器识别判断设备状态，以判断用户是否参与交互广告</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="281">
+<p><span data-font-family="宋体">1.13&nbsp;</span><span data-font-family="宋体">直播服务</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">方向传感器、</span><span data-font-family="宋体">加速度传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">直播开播时设备横竖屏状态检测</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器检测设备横竖屏状态，如果横竖屏状态与直播方式不一致，提示用户；根据设备横竖屏状态，设置美颜场景的拍摄起始位置</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="281">
+<p><span data-font-family="宋体">1.15&nbsp;</span><span data-font-family="宋体">游戏</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">加速度传感器、</span><span data-font-family="宋体">磁场传感器、</span><span data-font-family="宋体">陀螺仪传感器、环境温度传感器、</span><span data-font-family="宋体">方向传感器</span></p>
+<p>&nbsp;</p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">腾讯视频爱玩游戏小游戏平台为开发者提供传感器能力。</span><span data-font-family="宋体">该等传感器信息仅在用户使用第三方游戏的特定功能时通过腾讯视频获取，腾讯视频不会收集该等传感器信息，但该等第三方可能自行收集相关传感器信息</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p>&nbsp;</p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="2" width="281">
+<p><span data-font-family="宋体">其他通用功能</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">加速度传感器、</span><span data-font-family="宋体">磁场传感器、</span><span data-font-family="宋体">方向传感器、</span><span data-font-family="宋体">压力传感器、</span><span data-font-family="宋体">重力传感器、</span><span data-font-family="宋体">旋转矢量传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">应用内及小程序</span><span data-font-family="宋体">定位服务、室内定位场景</span><span data-font-family="宋体">。</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">经过用户授权后，辅助获得</span><span data-font-family="宋体">位置信息</span><span data-font-family="宋体">。单独的设备传感器数据不涉及任何个人位置信息且无法与其他信息结合用于识别特定自然人的身份。</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">光线传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">扫描二维码功能</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器检测光线，以调整屏幕亮度</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><strong>1.21 &nbsp;征得同意的例外情形</strong></p>
+<p class="ql-align-justify">根据法律法规的规定，我们在以下情况下收集和使用您的个人信息无需取得您的同意：</p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;为订立、履行您作为一方当事人的合同所必需，或者按照依法制定的劳动规章制度和依法签订的集体合同实施人力资源管理所必需；</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;为履行法定职责或者法定义务所必需；</p>
+<p class="ql-align-justify">(3)&nbsp;&nbsp;为应对突发公共卫生事件，或者紧急情况下为保护自然人的生命健康和财产安全所必需；</p>
+<p class="ql-align-justify">(4)&nbsp;&nbsp;为公共利益实施新闻报道、舆论监督等行为，在合理的范围内处理您的个人信息；</p>
+<p class="ql-align-justify">(5)&nbsp;&nbsp;依照《个人信息保护法》规定在合理范围内处理您自行公开或者其他已经合法公开的个人信息；</p>
+<p class="ql-align-justify">(6)&nbsp;&nbsp;法律、行政法规规定的其他情形。</p>
+<h3>&nbsp;</h3></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 2. Cookie等同类技术的使用 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">Cookie及同类技术是互联网中普遍使用的技术。当您使用我们的产品和/或服务时，我们可能会使用Cookie及同类技术收集您的登录信息、设备信息、<span style="text-decoration: underline;"><strong>个人上网记录</strong></span>等偏好数据，用于确保我们平台的正常运转、简化您重复操作的步骤（如注册、登录）、便于您查看使用历史（如视频观看历史）、向您提供更切合您个人需要或您更感兴趣的服务内容、保护您的信息和账号安全性、提升我们的产品和服务等。</p>
+<p class="ql-align-justify">我们不会将 Cookie 及同类技术用于本隐私保护指引所述目的之外的任何用途。如果您拒绝我们使用Cookie及同类技术收集和使用您的相关信息，您可在浏览器具备该功能的前提下，通过您的浏览器的设置以管理、部分/全部拒绝Cookie和/或同类技术；或删除已经储存在您的计算机、移动设备或其他装置内的Cookie和/或同类技术。您如需详细了解如何更改浏览器设置，请具体查看您使用的浏览器的相关设置页面。您理解并知悉：我们的某些产品/服务只能通过使用Cookie或同类技术才可得到实现，如您拒绝使用或删除的，您可能将无法正常使用我们的相关产品与/或服务或无法通过我们的产品与/或服务获得最佳的服务体验，同时也可能会对您的信息保护和账号安全性造成一定的影响。</p>
+<p class="ql-align-justify">更多有关我们使用Cookie和同类技术的情况，可点击查看查阅<strong>《<a href="https://privacy.qq.com/policy/cookie-privacypolicy">Cookie政策</a>》</strong>。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 3. 信息的存储 </h1><div data-v-49c41d7e=""><p class="ql-align-justify"><strong>3.1&nbsp;存储地点</strong></p><p class="ql-align-justify">我们在中华人民共和国境内运营中收集和产生的个人信息存储于中华人民共和国境内。目前我们暂时不存在向境外提供您的个人信息的场景。</p><p class="ql-align-justify">如我们因业务等需要，确需向中华人民共和国境外提供个人信息的，我们应具备法律规定的条件（通过国家网信部门组织的安全评估或按照国家网信部门制定的标准合同与境外接收方订立合同，约定双方的权利和义务等），并将向您告知境外接收方的名称或者姓名、联系方式、处理目的、处理方式、个人信息的种类以及您向境外接收方行使个人信息主体权利的方式和程序等事项，取得您的单独同意。我们将采取必要措施，保障境外接收方处理个人信息的活动达到中国法律规定的个人信息保护标准。</p><p class="ql-align-justify"><strong>3.2&nbsp;存储期限</strong></p><p class="ql-align-justify">我们将在实现您的个人信息处理目的所必要的最短时间内保存您的个人信息，但您行使删除权、注销账号或法律法规另有规定的除外（例如：《电子商务法》规定：商品和服务信息、交易信息保存时间自交易完成之日起不少于三年）。超出上述存储期限后，我们会对您的个人信息进行删除或匿名化处理。</p><p class="ql-align-justify">当我们的产品或服务停止运营时，我们将以推送通知、公告等形式通知您，并在合理期限内删除您的个人信息或进行匿名化处理，法律法规另有规定的除外。</p><p class="ql-align-justify"><br></p><p class="ql-align-justify"><br></p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 4. 信息安全 </h1><div data-v-49c41d7e=""><p class="ql-align-justify"><strong>4.1 安全保护措施</strong></p><p class="ql-align-justify">我们努力为您的个人信息安全提供保障，以防止个人信息的泄露、篡改、丢失、不当使用、未经授权的访问和披露等。我们采用多方位的安全保护措施，包括技术保护措施、管理制度控制、安全体系保障等方面，以确保您的个人信息保护处于合理的安全水平。</p><p class="ql-align-justify">(1)&nbsp;&nbsp;技术保护措施</p><p class="ql-align-justify">我们采用业界领先的技术保护措施保护您的个人信息，包括但不限于防火墙、加密（例如SSL）、去标识化或匿名化处理、访问控制措施等。此外，我们还会不断加强安装在您设备端的软件的安全能力。例如，我们会在您的设备本地完成部分信息加密工作，以巩固安全传输；我们会了解您设备安装的应用信息和运行的进程信息，以预防病毒、木马等恶意程序。</p><p class="ql-align-justify">(2)&nbsp;&nbsp;管理制度和操作规程</p><p class="ql-align-justify">我们建立了保障个人信息安全的内部管理制度和操作规程。对个人信息实行分类管理，合理确定个人信息处理的操作权限，并定期对从业人员进行安全教育和培训。</p><p class="ql-align-justify">(3)&nbsp;&nbsp;安全体系保障</p><p class="ql-align-justify">我们构建并完善包括安全体系认证、业务安全能力认证的个人信息安全管理体系。目前，我们的重要信息系统已经通过了国家网络安全等级保护（三级）的测评和备案。</p><p class="ql-align-justify"><strong>4.2&nbsp;安全事件处置措施</strong></p><p class="ql-align-justify">若发生或可能发生个人信息泄露、篡改、丢失等个人信息安全事件，我们会启动个人信息安全事件应急预案，阻止个人信息安全事件扩大。</p><p class="ql-align-justify">个人信息安全事件发生后，除非我们采取措施能够有效避免信息泄露、篡改、丢失造成危害的，我们将及时以推送通知、邮件等形式告知您个人信息安全事件的基本情况、我们即将或已经采取的处置措施和补救措施，以及我们对您的应对建议。如果难以实现逐一告知，我们将通过公告等方式发布警示。</p><p class="ql-align-justify"><br></p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 5. 信息共享 </h1><div data-v-49c41d7e=""><p class="ql-align-justify"><strong style="color: black;">5.1&nbsp;&nbsp;个人信息委托处理</strong></p>
+<p class="ql-align-justify">平台的部分功能可能由外部服务商提供，例如，我们可能会聘请专业数据处理服务机构来为我们的平台提供数据分析方面的技术支持。</p>
+<p class="ql-align-justify">对我们委托处理个人信息的公司、组织和个人，我们会与其签署协议，约定委托处理的目的、期限、处理方式、个人信息的种类、保护措施以及双方的权利和义务等，并对受托人的个人信息处理活动进行监督。</p>
+<p class="ql-align-justify"><strong style="color: black;">5.2&nbsp;&nbsp;与集团外第三方分享</strong></p>
+<p class="ql-align-justify">为向您提供完善的产品和服务，在某些情形下，我们需要与我们集团外的第三方公司、组织或个人共享您的个人信息。我们仅会出于合法、正当、最小必要且本指引所明确的目的与第三方分享您的个人信息，并且只会分享必要的个人信息。如果第三方改变或超越您原同意范围处理您的个人信息，我们会要求第三方再次征得您的同意。</p>
+<p class="ql-align-justify">对我们与之共享个人信息的公司、组织和个人，我们会要求其严格遵守我们关于数据隐私保护的措施和要求，包括但不限于根据数据保护协议、承诺书及相关数据处理政策进行个人信息的处理，避免识别出个人身份，保障隐私安全。</p>
+<p class="ql-align-justify">您可以点击查看<strong>《<a href="https://privacy.qq.com/document/preview/ba4294dc9d4a45a89f3d682eb07a489b">腾讯视频与第三方共享个人信息清单</a>》</strong>详细了解与第三方共享您个人信息的情况；此外，您可以直接点击查看<strong>《<a href="https://privacy.qq.com/document/priview/7900b34b6f8248e08313cf3f1899ea37">腾讯视频接入第三方SDK目录</a>》</strong>了解接入的第三方软件工具开发包（SDK）的具体信息。</p>
+<p class="ql-align-justify">与第三方共享的主要情形如下：</p>
+<p class="ql-align-justify"><strong>5.2.1&nbsp;为实现我们的功能/服务所必需进行的共享</strong></p>
+<p class="ql-align-justify">在某些情况下，我们必需共享您的个人信息，才能履行我们作为与您订立相关合同的一方当事人的义务或提供您需要的服务，具体第三方信息情况请点击查看<strong>《<a href="https://privacy.qq.com/document/preview/ba4294dc9d4a45a89f3d682eb07a489b">腾讯视频与第三方共享个人信息清单</a>》</strong>，主要包括以下情形：</p>
+<p class="ql-align-justify">(1) 支付服务：为帮助您完成款项支付，我们会将您的<strong><u>用户标识信息</u></strong>、<strong><u>网络IP地址</u></strong>、<strong><u>订单交易信息</u></strong>等信息（以实际共享的信息为准）提供给提供支付服务的合作方。</p>
+<p class="ql-align-justify">(2) 下单与交付：为实现购买商品/服务的需求（包括货物配送与交付等），我们会将您的<strong><u>订单相关信息</u></strong>、<strong><u>商品/服务信息</u></strong>、收货信息（如：<strong><u>收货人姓名</u></strong>、<strong><u>收货地址</u></strong>及<strong><u>联系电话</u></strong>）等信息（以实际共享的信息为准）提供给提供相关服务的合作方（如：供货等服务提供方）。</p>
+<p class="ql-align-justify">(3) 数字藏品服务：为实现您使用数字藏品服务，我们会将您的<span style="text-decoration: underline;"><strong>姓名</strong></span>、<span style="text-decoration: underline;"><strong>身份证号码</strong></span>、<span style="text-decoration: underline;"><strong>手机号码</strong></span>、个人拥有藏品数量和藏品列表提供给区块链技术服务的提供方。</p>
+<p class="ql-align-justify">(4) 联合会员：当您在腾讯视频内购买第三方产品/服务的会员权益时，为实现您的会员权益发放，我们可能会将您的<span style="text-decoration: underline;"><strong>订单消费信息</strong></span>（含消费明细、消费时间、消费金额、支付方式、开通会员天数）、账号信息、IP地址提供给第三方产品/服务的提供方。</p>
+<p class="ql-align-justify"><span style="color: #000000;">(5) 机构创作者供应商服务：</span><span style="color: #000000;">当机构创作者</span>使用创作服务市场的供应商服务时，我们会将机构创作者在相应订单中提供的订购人姓名、订购人手机号码提供给供应商用于服务沟通。</p>
+<p class="ql-align-justify">(6) 其他为实现我们的功能/服务所必须进行的共享。</p>
+<p class="ql-align-justify"><strong>5.2.2&nbsp;广告合作</strong></p>
+<p class="ql-align-justify">为了投放广告，评估、优化广告投放效果等目的，我们需要向广告主及其代理商等第三方合作伙伴共享您的部分数据，要求其严格遵守我们关于数据隐私保护的措施与要求，包括但不限于根据数据保护协议、承诺书及相关数据处理政策进行处理，避免识别出个人身份，保障隐私安全。</p>
+<p class="ql-align-justify"><strong>5.2.3&nbsp;第三方SDK类合作方</strong></p>
+<p class="ql-align-justify">我们可能会与第三方软件工具开发包（SDK）或其他类似的应用程序类服务商分享您的个人信息，以保障平台的稳定运行、功能实现，具体接入信息您可以点击查看<strong>《<a href="https://privacy.qq.com/document/priview/7900b34b6f8248e08313cf3f1899ea37">腾讯视频接入第三方SDK目录</a>》</strong>。我们会对该等获取个人信息的第三方软件工具开发包（SDK）、应用程序接口（API）进行严格的安全监测，令其按照本指引以及其他任何相关的保密和安全措施来处理个人信息，以保护数据安全。</p>
+<p class="ql-align-justify"><strong style="color: black;">5.3&nbsp;&nbsp;个人信息转移</strong></p>
+<p class="ql-align-justify">我们不会将您的个人信息转移给任何公司、组织和个人，但以下情形除外：</p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;在获得您的明确同意后，我们会向其他方转移您的个人信息；</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;因合并、分立、解散、被宣告破产等原因需要转移您的个人信息的，我们将向您告知接收方的名称或者姓名和联系方式，并会要求新的持有您个人信息的公司、组织继续受此政策的约束，否则我们将要求该公司、组织重新向您征求同意。</p>
+<p class="ql-align-justify"><strong>5.4&nbsp;&nbsp;公开披露</strong></p>
+<p class="ql-align-justify">我们不会对外公开披露所收集的个人信息，如必须公开披露时，我们会向您告知此次公开披露的目的、披露信息的类型及可能涉及的敏感信息，并征得您的单独同意。</p>
+<p class="ql-align-justify"><strong>5.5&nbsp;&nbsp;同意的例外情形</strong></p>
+<p class="ql-align-justify">根据《个人信息保护法》的规定，以下情形下，我们共享、转让、公开披露您的个人信息，无需事先取得您的同意：</p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;为订立、履行您作为一方当事人的合同所必需，或者按照依法制定的劳动规章制度和依法签订的集体合同实施人力资源管理所必需；</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;为履行法定职责或者法定义务所必需；</p>
+<p class="ql-align-justify">(3)&nbsp;&nbsp;为应对突发公共卫生事件，或者紧急情况下为保护自然人的生命健康和财产安全所必需；</p>
+<p class="ql-align-justify">(4)&nbsp;&nbsp;为公共利益实施新闻报道、舆论监督等行为，在合理的范围内处理个人信息；</p>
+<p class="ql-align-justify">(5)&nbsp;&nbsp;依照《个人信息保护法》的规定在合理的范围内处理个人自行公开或者其他已经合法公开的个人信息；</p>
+<p class="ql-align-justify">(6)&nbsp;&nbsp;法律、行政法规规定的其他情形。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 6. 您的权利 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">在您使用腾讯视频期间，为了让您更便捷地查询、复制、更正、删除您的个人信息，同时保障您撤回个人信息处理的同意和注销账户的权利，我们在产品设计中为您提供了相应的操作设置，您可参考下面的指引进行操作。此外，我们还设置了投诉举报渠道，您的意见将会得到及时的处理。如果您无法通过上述途径和方式行使您的个人信息主体权利，您可以通过本隐私保护指引中提供的联系方式提出您的请求，我们会按照法律法规的规定予以反馈。</p>
+<p class="ql-align-justify"><strong style="color: black;">6.1&nbsp;&nbsp;查询个人信息</strong></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">1</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">账号信息管理”查询您的微信或</span><span style="font-family: 'Segoe UI', sans-serif;">QQ</span><span style="font-family: 宋体;">头像、昵称、手机号码；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">2</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">观看历史”查询您的<strong><u>视频播放记录、小说漫画观看记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">3</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">预约</span><span style="font-family: 'Segoe UI', sans-serif;">/</span><span style="font-family: 宋体;">加追”查询您的剧集及个人专辑<strong><u>加追记录、预约记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">4</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的下载”查询您的视频、小说、应用<strong><u>下载记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">5</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的片单”查询您的片单<strong><u>创建及收藏记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">6</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的收藏”查询您的剧集、片单、个人专辑及短视频<strong><u>收藏记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">7</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">个人信息概览”查询您的生日、手机号码、电子邮箱地址、收货地址、关联账号、共享设备；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">8</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">头像</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">修改资料”查询您的昵称、性别、生日星座、所在地；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">9</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">草场地商城</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的”查询您的<strong><u>订单信息</u></strong>及收货人名称、地址及电话；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">10</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">爱玩游戏</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的”查询您的下载应用记录、游戏信息授权情况、礼包福利记录、预约游戏记录；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">11</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的积分”查询您的积分明细、<strong><u>积分订单</u></strong>；“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的积分</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">积分捐助”查询您的公益项目、捐助积分、筹到善款以及<strong><u>详情记录</u></strong></span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">12</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的书架”查询您的<strong><u>我的书架（已收藏书籍）及阅读记录</u></strong>；“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">小说频道</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">账户</span><span style="font-family: 'Segoe UI', sans-serif;">/</span><span style="font-family: 宋体;">书架”查询您的<strong><u>消费记录、</u></strong>书券明细、<strong><u>已购书籍、我的书架（已收藏书籍）及阅读记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">13</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的鸡腿”查询您的鸡腿数量信息及<strong><u>使用记录（投喂记录、领取记录、兑换记录）</u></strong>。</span> </span></p>
+<p class="ql-align-justify"><strong style="color: black;">6.2&nbsp;&nbsp;个人信息副本获取</strong></p>
+<p class="ql-align-justify">如您需要您的个人信息的副本，您可以通过<span style="font-size: 14px;"><span style="font-family: 宋体;">路径：“</span><span style="font-family: 宋体;">个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">个人信息下载”进行申请；您也可以通过</span>本隐私保护指引文末提供的方式联系我们，在核实您的身份后，我们将向您提供您在我们的服务中的个人信息副本（包括基本资料、身份信息），但法律法规另有规定的或本隐私保护指引另有约定的除外。</span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;">在技术可行的前提下，符合国家网信部门规定条件的，我们还可按您的要求，将您的个人信息副本传输给您指定的第三方。</span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;"><strong style="color: black;">6.3&nbsp;&nbsp;更正、补充个人信息</strong></span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;">6.3.1&nbsp;当您发现我们处理的您的个人信息不准确或者不完整时，您有权要求我们作出更正或补充。您可以通过下列路径，自行对您的个人信息进行更正、补充：</span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">1</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">头像</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">修改资料”更正、补充您的昵称、性别、生日星座、所在地；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">2</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">个人信息概览”更正、补充您的生日、手机号码、电子邮箱地址、收货地址、主设备；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">3</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">视频</span><span style="font-family: 'Segoe UI', sans-serif;">VIP-</span><span style="font-family: 宋体;">会员帮助中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">更多</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">绑定手机</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">更绑手机”更换您绑定腾讯视频账号的手机号码；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">4</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">草场地商城</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">收货地址”更正、补充您的收货人名称、地址及电话。</span></span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;">6.3.2&nbsp;您也可以通过本隐私保护指引第10节提供的方式联系我们，我们对您的个人信息予以核实后，会及时更正、补充您的个人信息。</span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;"><strong style="color: black;">6.4&nbsp;&nbsp;删除个人信息</strong></span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;">6.4.1&nbsp;您可以通过以下路径自行删除您的个人信息：</span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">1</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">观看历史</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">编辑”删除您的视频、小说漫画<strong><u>观看记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">2</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">预约</span><span style="font-family: 'Segoe UI', sans-serif;">/</span><span style="font-family: 宋体;">加追</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">编辑”删除您的剧集及个人专辑<span style="text-decoration: underline;"><strong>加追记录</strong></span>、<span style="text-decoration: underline;"><strong>预约记录</strong></span>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">3</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的下载</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">编辑”删除您的视频、小说、应用<span style="text-decoration: underline;"><strong>下载记录</strong></span>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">4</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的片单</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">编辑”删除您的<span style="text-decoration: underline;"><strong>片单创建及收藏记录</strong></span>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">5</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的收藏</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">编辑”删除您的剧集、片单、个人专辑及短视频<span style="text-decoration: underline;"><strong>收藏记录</strong></span>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">6</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">小说频道</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">账户</span><span style="font-family: 'Segoe UI', sans-serif;">/</span><span style="font-family: 宋体;">书架”或“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的书架</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">编辑”删除您的已收藏书籍、<strong><u>阅读记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">7</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">草场地</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">地址管理”删除您的收货人名称、地址及电话；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">8</span><span style="font-family: 宋体;">）</span>您可以进入腾讯视频后，通过访问您发表的帖子、评论、视频，删除您发表的帖子、评论、视频。</span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;">6.4.2&nbsp;&nbsp;在以下情形中，您可以通过本隐私保护指引文末提供的方式联系我们，请求我们删除您的个人信息：</span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">1</span><span style="font-family: 宋体;">）如果我们处理个人信息的行为违反法律法规；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">2</span><span style="font-family: 宋体;">）如果我们收集、使用您的个人信息，却未征得您的同意；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">3</span><span style="font-family: 宋体;">）如果您同意我们收集、使用您的个人信息后又撤回同意；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">4</span><span style="font-family: 宋体;">）如果我们处理个人信息的行为违反了与您的约定；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">5</span><span style="font-family: 宋体;">）如果您不再使用我们的产品或服务，或您注销了账号；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">6</span><span style="font-family: 宋体;">）如果我们不再为您提供产品或服务；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">7</span><span style="font-family: 宋体;">）如果您个人信息的处理目的已实现、无法实现或者为实现处理目的不再必要；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">8</span><span style="font-family: 宋体;">）如果您个人信息的保存期限已经届满。</span></span></p>
+<p class="ql-align-justify"><strong style="color: black;">6.5&nbsp;&nbsp;撤回同意</strong></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">1</span><span style="font-family: 宋体;">）您可以通过对您的硬件设备进行修改或通过下列路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">系统权限设置”撤回位置、相机、相册（图片、照片、视频、音频文件）、日历以及麦克风权限的授权；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">2</span><span style="font-family: 宋体;">）您可以通过下列路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">个性化内容管理”撤回个性化内容推荐授权；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">3</span><span style="font-family: 宋体;">）您可以通过以下路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">个性化广告管理”撤回个性化广告推送授权。</span></span></p>
+<p class="ql-align-justify">请您理解，每项业务功能需要一些必要的信息才能得以完成，当您撤回同意或授权后，我们将无法继续为您提供撤回同意或授权所对应的服务，也不再处理您相应的个人信息。但您撤回同意或授权的决定，不会影响此前基于您的授权而开展的信息处理。</p>
+<p class="ql-align-justify"><strong style="color: black;">6.6&nbsp;&nbsp;注销账号</strong></p>
+<p class="ql-align-justify">您可以通过路径<span style="font-size: 14px;"><span style="font-family: 宋体;">：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">注销账号”</span>&nbsp;</span>注销您的腾讯视频账号。</p>
+<p class="ql-align-justify">在您注销腾讯视频账号后，我们将停止为您提供腾讯视频的全部产品和/或服务，并依据法律法规相关要求通过匿名化等方式处理您的个人信息，或删除与您账号相关的个人信息，但法律法规或监管机构对用户信息存储时间另有规定的除外。有关注销账号的相关规则和流程，请参见<strong>《<a href="https://m.v.qq.com/app/restore/protocol.html">腾讯视频账号注销协议</a>》</strong>。</p>
+<p class="ql-align-justify"><strong style="color: black;">6.7&nbsp;&nbsp;获取本隐私保护指引的解释说明</strong></p>
+<p class="ql-align-justify">您可以通过本隐私保护指引第10节提供的方式联系我们，要求我们对本隐私保护指引进行解释说明。</p>
+<p class="ql-align-justify"><strong style="color: black;">6.8&nbsp;&nbsp;约束信息系统自动决策</strong></p>
+<p class="ql-align-justify">在某些业务功能中，我们可能仅依据信息系统、算法等在内的非人工自动决策机制作出决定。如果这些决定显著影响您的合法权益，您可以通过本隐私保护指引第10节提供的方式联系我们，要求我们予以说明，并拒绝我们仅通过自动化决策的方式作出决定。</p>
+<p class="ql-align-justify"><strong style="color: black;">6.9&nbsp;&nbsp;已故用户的个人信息保护</strong></p>
+<p class="ql-align-justify">用户不幸去世的，其近亲属为了自身的合法、正当利益，可以对已故用户的相关个人信息行使本隐私保护指引规定的查阅、复制、更正、删除等权利；已故用户生前另有安排的除外。</p>
+<p class="ql-align-justify"><strong style="color: black;">6.10 响应您的上述请求</strong></p>
+<p class="ql-align-justify">我们将尽快审核所涉问题，并在15日或法律法规规定的期限内予以反馈。如您不满意或有任何问题，您可以通过本隐私保护指引第10节提供的方式联系我们。</p>
+<p class="ql-align-justify">为保障安全，如您根据本隐私保护指引第6节向我们提出请求，我们将验证您的个人信息主体身份后处理您的请求。</p>
+<p class="ql-align-justify">对于您合理的请求，我们原则上不收取费用，但对多次重复、超出合理限度的请求，我们将视情况收取一定成本费用。对于那些技术上难以实现、根据法律、行政法规的规定无需响应的请求或响应您的请求将违反法律、行政法规时，我们可能会予以拒绝，并向您说明理由。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 7. 变更 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">我们可能会适时对本隐私保护指引进行修订。当本隐私保护指引的条款发生变更时，我们会在版本更新时向您提示变更后的隐私保护指引，并向您说明生效日期。当本隐私保护指引发生重大变更时，我们还会提供更为显著的通知，将变更部分告知您。</p><p class="ql-align-justify">上述“重大变更”包括：</p><p class="ql-align-justify">(1) 个人信息处理者的名称或者姓名和联系方式；</p><p class="ql-align-justify">(2) 个人信息的处理目的、处理方式，处理的个人信息种类、保存期限；</p><p class="ql-align-justify">(3) 个人行使本法规定权利的方式和程序；</p><p class="ql-align-justify">(4) 法律、行政法规规定应当告知的其他事项。</p><p class="ql-align-justify">请您仔细阅读变更后的隐私保护指引内容，您继续使用腾讯视频表示您同意我们按照更新后的隐私保护指引处理您的个人信息。如果个人信息的处理目的、处理方式和处理的个人信息种类发生变更的，我们将重新取得您的同意。</p><p><br></p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 8. 未成年人保护 </h1><div data-v-49c41d7e=""><p>我们非常重视对未成年人个人信息的保护。若您是18周岁以下的未成年人，在取得您或您的监护人同意之前，我们不会处理您的个人信息。若您是未成年人的监护人，当您对您所监护的未成年人的个人信息有相关疑问时，请通过“10. 联系我们”中的联系方式与我们联系。</p>
+<p><span style="color: #000000;">特别地，若您是14周岁以下的儿童，我们还专门为您制定了<strong>《<a href="https://privacy.qq.com/mb/policy/kids-privacypolicy">儿童隐私保护声明</a>》</strong>，儿童及其监护人在为14周岁以下的儿童使用腾讯视频服务前，还应仔细阅读<strong>《<a href="https://privacy.qq.com/mb/policy/kids-privacypolicy">儿童隐私保护声明</a>》</strong>。只有在取得监护人对<strong>《<a href="https://privacy.qq.com/mb/policy/kids-privacypolicy">儿童隐私保护声明</a>》</strong>的同意后，我们才会处理14周岁以下的<span style="text-decoration: underline;"><strong>儿童个人信息</strong></span>。</span></p>
+<p>&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 9. 其他 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">9.1《<a href="https://privacy.qq.com/policy/tencent-privacypolicy">腾讯隐私政策</a><strong>》</strong>是我们统一适用的一般性隐私条款，其中所规定的用户权利及信息安全保障措施均适用于腾讯视频用户。如<strong>《<a href="https://privacy.qq.com/policy/tencent-privacypolicy">腾讯隐私政策</a>》</strong>与本隐私保护指引存在不一致或矛盾之处，请以本隐私保护指引为准。</p>
+<p class="ql-align-justify"><span style="color: #000000;">9.2<strong>《<a href="https://privacy.qq.com/mb/policy/kids-privacypolicy">儿童隐私保护声明</a>》</strong>是适用于十四周岁以下的儿童用户的信息保护规则。在<strong>《<a href="https://privacy.qq.com/mb/policy/kids-privacypolicy">儿童隐私保护声明</a>》</strong>的适用范围内，如其与<strong>《<a href="https://privacy.qq.com/policy/tencent-privacypolicy">腾讯隐私政策</a>》</strong>、本指引存在不一致或矛盾之处，请以<strong>《<a href="https://privacy.qq.com/mb/policy/kids-privacypolicy">儿童隐私保护声明</a>》</strong>为准。</span></p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 10. 联系我们 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">我们设立了专门的个人信息保护团队和个人信息保护负责人，如果您对本隐私保护指引或个人信息保护相关事宜有任何疑问或投诉、建议时，您可以通过以下方式与我们联系：</p>
+<p class="ql-align-justify">(1) 您可以填写<a style="color: black;" href="https://privacy.qq.com/mb/questionnaire" target="_blank" rel="noopener noreferrer"><strong>个人信息保护和隐私问题反馈问卷</strong></a>与我们联系；</p>
+<p class="ql-align-justify">(2) 将问题发送至Dataprivacy@tencent.com；</p>
+<p class="ql-align-justify">(3) 通过 https://kf.qq.com/ 与我们联系；</p>
+<p class="ql-align-justify">(4) 将您的问题邮寄至下列地址：</p>
+<p class="ql-align-justify">中国广东省深圳市南山区海天二路33号腾讯滨海大厦 数据合规与隐私保护部（收）</p>
+<p class="ql-align-justify">邮编：518054</p>
+<p class="ql-align-justify">我们将尽快审核所涉问题，并在15日或法律法规规定的期限内予以反馈。</p>
+<p class="ql-align-justify">&nbsp;</p>
+<p style="text-align: right;">深圳市腾讯计算机系统有限公司</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 附录：定义 </h1><div data-v-49c41d7e=""><p class="ql-align-justify"><strong>个人信息</strong>：指以电子或者其他方式记录的与已识别或者可识别的自然人有关的各种信息，不包括匿名化处理后的信息（出自《中华人民共和国个人信息保护法》第四条）。</p>
+<p class="ql-align-justify"><strong>敏感个人信息</strong>：一旦泄露或者非法使用，容易导致自然人的人格尊严受到侵害或者人身、财产安全受到危害的个人信息，包括生物识别、宗教信仰、特定身份、医疗健康、金融账户、行踪轨迹等信息，以及不满十四周岁未成年人的个人信息（出自《中华人民共和国个人信息保护法》第二十八条）。</p>
+<p class="ql-align-justify"><strong>匿名化</strong>：是指个人信息经过处理无法识别特定自然人且不能复原的过程（出自《中华人民共和国个人信息保护法》第七十三条）.</p>
+<p class="ql-align-justify"><strong>去标识化</strong>：是指个人信息经过处理，使其在不借助额外信息的情况下无法识别特定自然人的过程（出自《中华人民共和国个人信息保护法》第七十三条）.</p>
+<p class="ql-align-justify"><strong>关联公司</strong>：是指与我们间存在直接或间接控制关系或重大影响关系的公司。</p>
+<p class="ql-align-justify"><strong>儿童</strong>：指不满十四周岁的未成年人。</p>
+<p class="ql-align-justify"><strong>处理个人信息</strong>：指个人信息的收集、存储、使用、加工、传输、提供、公开、删除等。</p>
+<p class="ql-align-justify"><strong>自动化决策：</strong>指通过计算机程序自动分析、评估个人的行为习惯、兴趣爱好或者经济、健康、信用状况等，并进行决策的活动（出自《中华人民共和国个人信息保护法》第七十三条）.</p>
+<p class="ql-align-justify"><strong>Cookie：</strong>Cookie是包含字符串的小文件，在您登入和使用网站或其他网络内容时发送、存放在您的计算机、移动设备或其他装置内（通常经过加密）。Cookie同类技术是可用于与Cookie类似用途的其他技术，例如：Web Beacon、Proxy、嵌入式脚本、像素标签等。</p>
+<p class="ql-align-justify"><strong>SSL</strong>：SSL（Secure Socket Layer）又称为安全套接层，是在传输通信协议（TCP/IP）上实现的一种安全协议。SSL支持各种类型的网络，同时提供三种基本的安全服务，均通过使用公开密钥和对称密钥技术以达到信息保密的效果。</p>
+<p>&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold; margin-top: 50px;"> 历史版本 </h1><div data-v-5927abc0="" data-v-49c41d7e="" list="[object Object],[object Object],[object Object],[object Object]"><div data-v-5927abc0="" class="history-item"><div data-v-5927abc0="" class="item-wrapper"><div data-v-5927abc0="" style="margin-right: 5px;">腾讯视频隐私保护指引
+</div><div data-v-5927abc0="" class="time">2022-05-02</div></div><a data-v-5927abc0="" href="https://privacy.qq.com/document/preview/3fab9c7fc1424ebda42c3ce488322c8a/v_20220502213056">查看</a></div><div data-v-5927abc0="" class="history-item"><div data-v-5927abc0="" class="item-wrapper"><div data-v-5927abc0="" style="margin-right: 5px;">腾讯视频隐私保护指引
+</div><div data-v-5927abc0="" class="time">2022-03-02</div></div><a data-v-5927abc0="" href="https://privacy.qq.com/document/preview/3fab9c7fc1424ebda42c3ce488322c8a/v_20220302092655">查看</a></div><div data-v-5927abc0="" class="history-item"><div data-v-5927abc0="" class="item-wrapper"><div data-v-5927abc0="" style="margin-right: 5px;">腾讯视频隐私保护指引
+</div><div data-v-5927abc0="" class="time">2021-12-13</div></div><a data-v-5927abc0="" href="https://privacy.qq.com/document/preview/3fab9c7fc1424ebda42c3ce488322c8a/v_20211213150515">查看</a></div><div data-v-5927abc0="" class="history-item"><div data-v-5927abc0="" class="item-wrapper"><div data-v-5927abc0="" style="margin-right: 5px;">腾讯视频隐私保护指引</div><div data-v-5927abc0="" class="time">2021-10-29</div></div><a data-v-5927abc0="" href="https://privacy.qq.com/document/preview/3fab9c7fc1424ebda42c3ce488322c8a/v_20211029221320">查看</a></div></div></div></div></div></div></div></div><div data-v-49c41d7e="" class="app-container scroll-wrapper"><div data-v-49c41d7e="" class="app-header"><div data-v-49c41d7e="" aria-label="展开菜单" class="drawer-button"><img data-v-49c41d7e="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAJnElEQVR4nO3d4XGT5xKG4X0riE4FiAoiKkBUgKgAuQJMBZErwFSAXUFMBdgVWFSAqCByBTr3N8KTTM5hsWFf2dLc18wz+0+zX2afWDb2qIWk77IgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlHqQgm81mHBFPyE1rbcmUHqWdFIRCjBgvyexb/m1JziLivLW2Zj64bzv/TvR47Px/qN0LwqG9ZiwiYhw/tibH/Ec4Z+4cu44j4g8yjbvtq4dxMWQXd9JINxzcB8Y87u+Mhz9i7gR7jhjvyDy0T1YR8ZZbuWB20UgXHN0nxjR+3iUP/oLZFXtOGB/IMLWfjrmV98xyjZTj6IaDm8eve8+DHzO7YM8R45qMQ/vuLbdyyizVSCmObhoRn0iVF621y+iAXYc9p6FD8aIV30qPgnxhjKNOl7da7Dlj/El0OMpvpZEyHY/uGQ++ZJZh12vGhOiwvOJWLpglqgtyFhGvSbW3PPQpswR7jiPiC9HhOW+tzaNIdUH+YoxItavW2jSKsOcx4x3R4VlzK/9hlqguyIbRw1WrLcgitv8gqAPErZTdddkLDTi8DaMLnrlsV9ZchAU5WJxK2a2UvdCAw9swerhqfgXRHXErZXdd9kIDDm8V29/SrXbVagsyj+2/nuvwfG2tjaNII2U4vLPwp1h6WO+5lWNmieqCTKP2X9FvPW2traIQu15GxHOiw/KMW1kyS5QWZNDh8M5b4c+1b7HnNPqUWQ/nI7cyY5bpUZAJ45pUuCETHnoVHbDrKeMN0f7rcivlBRlwePOo+Sb4qLV2Fh2x61n0+b5JuzOUY8qtLJmluhRkwOHN49dKctQ6l+MWu54y/Eqyn76SGbeyZJZrpBsOb8Y4i4jfyF0N/zeY88AXzJ1h12ls/zT4OdHjN9zJ6RBuZc3somtBBhzeiHH8LT8qynuy6PnAP8K+E8Y0+L8S0eOzJJdBdnEn3QvyTxzfjDEh0/jb8lsudvHA0n3stCDSvrEgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiU2FlBNpvNS8bsW0bk1ppcxvYTps6ZD45dxxHxhEzIiOhxWJI1d3LF3IlGuuLYZox3ZBw/tortZxSeM3eOXV8zjsmE6PFakwty0oo/F/3fGumGg/vAmMf9nfHgR8ydYM8JY9h1mNovC27lhNlFI+U4uBHjE5mQn7XkwZ8xu2LXYcdh1xHRfjrjVo6Y5Ropx9F9YMzj13V78AF7ThifyIhov3W5lUZKcXTz2L5dqfKitXYZHbDrF8Y4dChecSsXzDKNlOHgRoxrMo46Xd5qsesx4x3R4VhxK0+ZZRopw9HNo/arx61nPPiSWYZdvzDGoUNz1Fo7iyKNlOHoLhgvSbX3PPQxswR7ThjXRIfnI7cyY5aoLsiG0cNVa20aRVhzERF/EB0gbqXsrsteaMDhbRg9lH4fwpqLsCAHi1spu+uyFxpweBtGDzc884hZgjUXYUEOFrdSdtdlLzTg8DaMHq6ab7F0R9xK2V2XvdCAw1vF9pf8qn3kmWfMEuw5jz4/bdPD+8ytTJglqgtyynhDqh21wh/dseeI8RfR4XnPrRwzS1QXZMK4JpVuyJiHXjPLsOtZRLwmOixPW+Fv+JYWZNDh8E5aa4soxp7jiPhCdDjOW2vzKNSjIOPgx7LkN/Krunz1uMWui/Cb9UPR5VbKCzLg8CaMa/Irhgee8sBLZjfseha1X/G0e91upUtBBhzejHEWP/eVZHjgOQ98weyOXU8Zb4j2z1cy41aWzHKNdMPhTRin5Dm5q89kKMeSuTPsOo1toZ8Q7YcTcsqtrJldNNIdxzeP7d96/06+ZyjG8LBn8YDYdcaYxvavIcdhYR6TK7ImF+SSW1lFZ43sDMc3ju3xjeNvq9jRw0r31Yik77AgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIldl6QzfZD/P/5SVNfmx+eo0dqJwWhFOPYfkjmjIzjf61i+7Fa7x9DWdj3JWNCRmRC9PDWZEnW5OOu7qSRrji2PxjHZETu4pSctI4fzPj/sOeIcburHr8lecudXEZH3Qry7eA+kQm5ryV50XZUEnadMT6QEdF+uSBHrdOtdCkIBzdiXJNx/LxVRDzr9eC32HUe23Jofy3Ji9bhVhopx9EN5ZiQX7XkoZ8xu2DPGeNPov03fFLyC2apRkpxdIvYvpevctQ6fHY6e44YX8gwdRhOWmuLKFRaEI5uHNu3VpVHt+KhnzJLsesiaoush7cmT1vhW61GynB0x4x3pNorHvqCWYZd/2KMiA7LW27llFmiuiCXEfGcVDtvrc2jCHvOGH8SHZ6r1to0ilQXZMPo4aoVPjRrLsK3VweLWym767IXGnB4G0YPK575KbMEay7CghwsbqUxSpS90IDD2zB6+NpaG0cR1lyEBTlY3EpjlCh7oQGHt2H0cNV8i6U74lbK7rrshQYc3pLxO6l23vwmXXfzmVuZMEtUF+SY8Y5Ue8VDXzDLsOua8RvRYXnLrZwyS1QXZBzbf52udMMDj5il2PWU8YbocNyQCfeyiiKlBRl0OLyTVvzrAwP2HDFW4VeRQ3LSim+lR0EqD+8zDzxhdsGu8/A3eQ/FZzLlXtbMMuUFGXB4E8Zl/FpJbsjwwEtmN+x6zHhHtL8+k+FW1sxSXQoy4PCmsf1jlt/Ifd2Q4YGXzO7YdR7bv2T8mV31sK7IjFtZM8s10g2HN2Gcxf1+9PuVDA+8ZO4Mu44jYhERr4kev+FOFtzJWXTUSHcc3zx4mIh4Qr7nKznlgU+ZD4ZdR4wZGQdfxUKPySq2ueBOlszuGtkZjm/CmJERmZAlWZOdPbB0HzstiLRvLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSIn/AsNn3+fk0R0/AAAAAElFTkSuQmCC" alt="展开菜单" width="24"></div><div data-v-49c41d7e="" class="title-text">腾讯视频隐私保护指引
+</div></div><!----><div data-v-49c41d7e="" class="time-wrapper" style="padding-top: 6px;"><div data-v-49c41d7e="" class="time-container"><span data-v-49c41d7e="" class="updata-time" style="margin-right: 0px;"> 更新日期：2026-07-10 </span><span data-v-49c41d7e="" class="effect-time" style="margin-right: 20px;"> 生效日期：2026-07-17 </span></div><div data-v-49c41d7e="" style="padding-right: 20px;"><span data-v-49c41d7e="" class="app-download-btn"><span data-v-49c41d7e="" class="iconfont privacy-xiazai"></span> 下载 </span></div></div><div data-v-49c41d7e="" class="el-container app-container scroll-main" style="overflow: auto;"><div data-v-49c41d7e="" class="el-aside side-bar"><div data-v-49c41d7e="" tabindex="-1" class="el-drawer__wrapper" style="display: none;"><div role="document" tabindex="-1" class="el-drawer__container"><div aria-modal="true" aria-labelledby="el-drawer__title" aria-label="腾讯视频隐私保护指引
+" role="dialog" tabindex="-1" class="el-drawer ltr" style="width: 30%;"><!----><!----></div></div></div></div><div data-v-49c41d7e="" class="el-container"><div data-v-49c41d7e="" class="el-main main"><div data-v-49c41d7e="" id="app-document" style="padding-bottom: 40px;"><!----><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64186" name="content-item">版本更新提示：</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">为了更好地保障您的权益，我们于近日更新了《腾讯视频隐私保护指引》。</p>
+<p class="ql-align-justify">本次更新的内容为：</p>
+<p>1、基于新增功能，增加相关权限调用情况说明。</p>
+<p class="ql-align-justify">请您在使用/继续使用腾讯视频产品与/或服务前仔细阅读、充分理解全文，并在同意全部内容后使用/继续使用。</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64187" name="content-item">阅读提示</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">(1)&nbsp;&nbsp;请您在使用/继续使用腾讯视频的产品和/或服务前仔细阅读、充分理解《腾讯视频隐私保护指引》完整版全文，并在同意全部内容后使用/继续使用。除非另有说明，不同意《腾讯视频隐私保护指引》或其更新（我们将及时通知您此类更新）可能会影响您正常使用或继续正常使用我们的产品和/或服务。</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;为便于您快速了解《腾讯视频隐私保护指引》内容，我们将通过<strong>《<a href="https://privacy.qq.com/document/preview/5ad5e58d1456498bbeaf670cf1f8b6cc" target="_blank" rel="noopener noreferrer">腾讯视频隐私政策摘要</a>》</strong>向您简单、直观地说明我们是如何处理和保护您的个人信息，更多有关我们对您的个人信息的处理规则，请查阅完整版《腾讯视频隐私保护指引》。</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64188" name="content-item">导言</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">(1)&nbsp;&nbsp;腾讯视频是由<strong>深圳市腾讯计算机系统有限公司</strong>（以下简称为“我们”）提供服务的在线影音类产品，我们的<strong>注册地为广东省深圳市南山区粤海街道麻岭社区科技中一路腾讯大厦35层</strong>，同时产品运营过程中我们也会与关联公司联合运营。如果您对本指引或相关问题有任何疑问或顾虑，请通过本指引第10节“联系我们”中所提供的联系方式与我们联系。</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;本隐私保护指引适用于我们通过腾讯视频网站（https://v.qq.com/）、腾讯视频PC端、TV端、APP（包括但不限于iOS版、安卓版、<span style="font-size: 14px;"><span style="font-family: 'Segoe UI', sans-serif;">HarmonyOS</span><span style="font-family: 宋体;">版</span></span>）、Ipad端、以及小程序等全部终端客户端（以下单称或统称“平台”）向您提供的各项产品和服务。如某一客户端或某一应用软件版本有特殊功能或特殊个人信息处理活动的，我们会予以说明。如我们的客户端、产品和/或服务单独设置了隐私政策/隐私协议的，单独的隐私政策/隐私协议优先于本隐私保护指引适用；单独的隐私政策/隐私协议未提及的内容，适用本隐私保护指引。具体而言：</p>
+<p class="ql-align-justify">1）我们通过腾讯视频车载端以及腾讯视频音箱端向您提供的各项产品和服务，适用<strong>《<a href="https://privacy.qq.com/document/preview/2e2a152412a34812b6dda3256de419e2">腾讯视频（智慧屏版）隐私保护指引</a>》。</strong></p>
+<p class="ql-align-justify">2）我们通过腾讯视频小程序向您提供的各项产品和服务，适用<strong>《<a href="https://privacy.qq.com/document/preview/1929fad4a426443bb0cb438b174b783a">腾讯视频（小程序）隐私保护指引</a>》。</strong></p>
+<p>3）我们通过腾讯视频visionOS版向您提供的各项产品和服务，适用<strong>《<a href="https://privacy.qq.com/document/preview/9cd5a6dc7916464d81b502d6da903129">腾讯视频visionOS版隐私保护指引</a>》</strong>。</p>
+<p class="ql-align-justify"><strong>请您注意，本隐私保护指引不适用于与我们的平台、产品和/或服务集成的任何第三方应用程序或软件，或者任何其他第三方产品、服务或业务（统称“第三方服务”）。</strong> 第三方服务由第三方负责运营，您使用第三方服务应遵守第三方为此制定的的隐私政策或其他个人信息处理规则，我们提示您仔细识别实际服务的提供方，并在使用任何第三方服务之前仔细查看相关规则。</p>
+<p class="ql-align-justify">(3) &nbsp;<strong>针对涉及与您的权益（可能）存在重大关系的条款以及涉及敏感个人信息（定义见附录）的处理，我们在本指引中将采用粗体、下划线或其他合理方式提示您重点阅读。</strong></p>
+<p class="ql-align-justify">(4)&nbsp;&nbsp;<strong>您同意本指引表示您已经了解并同意在相关场景下，为实现功能运行，我们将对您的相关个人信息进行处理。但这并不代表只要您开始使用我们的产品与/或服务，我们将处理本指引中涉及的全部个人信息。仅当您使用特定功能时，我们才会根据“最小必要”原则，为实现向您提供服务的目的，处理您的相关个人信息。</strong></p>
+<p class="ql-align-justify"><span style="color: #000000;">(5)&nbsp;&nbsp;除本指引外，在特定场景下，我们将以及时告知的方式（包括但不限于更新本指引、重新签署文件、页面提示、弹窗、站内信、邮件、网站公告或其他便于您获知的方式）另行向您详细说明对应信息的处理目的、方式、范围等规则，并在征得您的授权同意后处理。</span></p>
+<p class="ql-align-justify">&nbsp;</p>
+<p class="ql-align-justify">本隐私保护指引将帮助您了解以下内容：</p>
+<p>1.&nbsp;<span style="color: black;">个人信息的收集和使用</span></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224408" target="_blank" rel="noopener noreferrer">2.&nbsp;&nbsp;Cookie等同类技术的使用</a></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224409" target="_blank" rel="noopener noreferrer">3.&nbsp;&nbsp;信息的存储</a></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224410" target="_blank" rel="noopener noreferrer">4.&nbsp;&nbsp;信息安全</a></p>
+<p class="ql-align-justify"><span style="color: black;">5.</span>&nbsp;&nbsp;&nbsp;<span style="color: black;">信息共享</span></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224433" target="_blank" rel="noopener noreferrer">6.&nbsp;&nbsp;您的权利</a></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224469" target="_blank" rel="noopener noreferrer">7.&nbsp;&nbsp;变更</a></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224472" target="_blank" rel="noopener noreferrer">8.&nbsp;&nbsp;未成年人保护</a></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224473" target="_blank" rel="noopener noreferrer">9.&nbsp;&nbsp;其他</a></p>
+<p class="ql-align-justify"><a style="color: black;" href="#_Toc88224474" target="_blank" rel="noopener noreferrer">10. 联系我们</a></p>
+<p class="ql-align-justify">&nbsp;</p>
+<p class="ql-align-center"><a style="color: #1890ff;" href="https://privacy.qq.com/document/preview/18f3ac8cb4364ed8b2ba596a9bfe3111" target="_blank" rel="noopener noreferrer"><img src="https://images-75651.picgzc.qpic.cn/9aPzOpIzpPxI4lmeRmGY6MQpSFUiskRi?sign=q-sign-algorithm%3Dsha1%26q-ak%3DZPi8634lYM6UOHNiZkhRFB6X%26q-sign-time%3D1632390695%3B1632397895%26q-key-time%3D1632390695%3B1632397895%26q-header-list%3Dhost%26q-url-param-list%3D%26q-signature%3Dd55ad54f7a038b521a1f743a5b7ab922ff9f5b4d"></a><img src="https://images-75651.picgzc.qpic.cn/jVcROnqQXR5V4IH74cU9F6dYUdQSaXvN?sign=q-sign-algorithm%3Dsha1%26q-ak%3DZPi8634lYM6UOHNiZkhRFB6X%26q-sign-time%3D1632390695%3B1632397895%26q-key-time%3D1632390695%3B1632397895%26q-header-list%3Dhost%26q-url-param-list%3D%26q-signature%3D5b9c8fd7a6f75444b7e30716d6420f3047360ba6"><a style="color: #1890ff;" href="https://privacy.qq.com/document/preview/ba4294dc9d4a45a89f3d682eb07a489b" target="_blank" rel="noopener noreferrer"><img src="https://images-75651.picgzc.qpic.cn/sM7LQ2L5xoI0zUtTvZilUUutw-7eocOI?sign=q-sign-algorithm%3Dsha1%26q-ak%3DZPi8634lYM6UOHNiZkhRFB6X%26q-sign-time%3D1632390695%3B1632397895%26q-key-time%3D1632390695%3B1632397895%26q-header-list%3Dhost%26q-url-param-list%3D%26q-signature%3D63b063d97e6ad830813ed17989da5db27a05f733"></a></p>
+<p class="ql-align-center">我们收集使用的信息<img src="https://images-75651.picgzc.qpic.cn/bL3Kbw6BSPazS5Xbt4VlAJYcRAsFROa4?sign=q-sign-algorithm%3Dsha1%26q-ak%3DZPi8634lYM6UOHNiZkhRFB6X%26q-sign-time%3D1632390695%3B1632397895%26q-key-time%3D1632390695%3B1632397895%26q-header-list%3Dhost%26q-url-param-list%3D%26q-signature%3D24581513643944a27feb9e9e1ebbb5d5e50b0bb5">我们共享的信息<img src="https://images-75651.picgzc.qpic.cn/MkIQNTo00qbuWFv77tkc4sEsYhYHlqkD?sign=q-sign-algorithm%3Dsha1%26q-ak%3DZPi8634lYM6UOHNiZkhRFB6X%26q-sign-time%3D1632390714%3B1632397914%26q-key-time%3D1632390714%3B1632397914%26q-header-list%3Dhost%26q-url-param-list%3D%26q-signature%3D68b47b7b7d57af177d2622e43ea4c26a45b12a92"></p>
+<p class="ql-align-center">&nbsp;</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64189" name="content-item">1. 个人信息的收集和使用</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">为帮您快速了解我们关于您的个人信息收集、使用的主要情况，我们以清单的方式进行了说明，您可以点击查看<strong>《<a href="https://privacy.qq.com/document/preview/18f3ac8cb4364ed8b2ba596a9bfe3111">腾讯视频已收集个人信息清单</a>》</strong>。</p>
+<p class="ql-align-justify">【原则与途径】我们会遵循合法、正当、最小必要、公开透明的原则，收集和使用您在使用我们的产品和/或服务过程中主动提供或因使用我们的产品和/或服务而产生的个人信息。</p>
+<p class="ql-align-justify">【系统权限】相机、相册（存储）、麦克风等系统权限，不会默认开启。只有在您触发相关业务功能时，我们才会向您申请相关权限，并获取相应信息（如涉及）。请您放心，我们申请访问的权限只限于实现特定的功能所必需，并且您可以随时撤回系统权限的授权。如您拒绝或撤回授权系统权限，会使您无法使用相应功能，但并不影响您正常使用产品与/或服务的其他功能。点击查看<strong>《<a href="https://privacy.qq.com/document/preview/3ddf57b1296348b3b14c37b8310b7d1b">腾讯视频应用权限申请与使用情况说明</a>》</strong>。</p>
+<p class="ql-align-justify">【业务功能】我们收集的您的个人信息类型会因产品/服务的内容不同而有所区别，具体以产品/服务实际提供为准。为提供完善的体验，我们会不断改进我们的产品和服务，并可能因此需要收集新的个人信息或变更个人信息使用目的或方式。如果某一需要收集您的个人信息的功能或场景未能在本指引中予以说明的，或者我们超出了与收集您的个人信息时所声称的目的及具有直接或合理关联范围的，我们会再次向您告知，并根据法律法规的相关要求征得您的同意。</p>
+<p class="ql-align-justify"><strong>&nbsp;</strong></p>
+<p class="ql-align-justify"><strong>通常情况下，我们会在以下场景中收集您的个人信息或申请相关权限：</strong></p>
+<p class="ql-align-justify"><strong>1.1&nbsp;&nbsp;账号注册、登录与绑定</strong></p>
+<p>您可以通过QQ账号、微信账号、手机号码注册/登录腾讯视频。当您通过QQ账号或微信账号授权登录腾讯视频时，我们将收集您的QQ账号标识符或微信账号标识符、头像、昵称，用于您登录账号时验证您的身份；当您通过手机号码注册登录腾讯视频时，我们将收集您的手机号码，用于您登录账号时接收验证码或本机号码一键登录、验证您的身份。通过手机号码注册的腾讯视频账号，可以绑定社交账号（微信账号或QQ账号）实现快捷登录，您通过此种方式登录的，我们将收集您的手机号码、微信标识符或QQ账号标识符、头像、昵称，用于您登录账号时验证您的身份；同时，我们还将收集您的<strong><u>QQ</u></strong><strong><u>或微信好友关系</u></strong>，用于您完成腾讯视频内的消费购买，详情请见1.6“下单与支付”。</p>
+<p class="ql-align-justify">您可以在腾讯视频内补充个人资料，您可自主选择填写您的性别、昵称、头像、自我介绍、生日、星座、所在地，并决定是否展示。如您未填写，不影响您使用我们产品和/或服务的基本功能。</p>
+<p class="ql-align-justify">当您使用腾讯视频数字藏品服务时，我们将收集您登录腾讯视频时所使用的<strong><u>QQ账号或微信账号</u></strong>、<span style="text-decoration: underline;"><strong>昵称</strong></span>、<strong><span style="text-decoration: underline;">头像</span>、<span style="text-decoration: underline;">手机号码</span>、<span style="text-decoration: underline;">身份证号</span>、<u>人脸比对信息</u></strong>、<strong><u>姓名</u></strong>，并基于<span style="text-decoration: underline;"><strong>手机号码</strong></span>、<span style="text-decoration: underline;"><strong>身份证号</strong></span>、<span style="text-decoration: underline;"><strong>姓名</strong></span>、<span style="text-decoration: underline;"><strong>人脸对比信息</strong></span>为您生成至信链地址。</p>
+<p class="ql-align-justify">当您使用腾讯视频APP扫码登录腾讯视频其他类型的客户端时，我们会收集您在APP已登录腾讯视频账号的头像及昵称，以及拟登录客户端所在设备型号、地理位置（基于IP地址解析所在城市），用于您确认授权登录账号及设备的情况。</p>
+<p>如您使用相同的手机号码、QQ账号或微信账号注册/授权登录腾讯视频和腾讯视频系列产品（如火龙漫剧）时，我们会收集腾讯视频系列产品账号ID并与您的腾讯视频账号进行关联。</p>
+<p class="ql-align-justify"><strong>1.2&nbsp;&nbsp;账号资料维护</strong></p>
+<p class="ql-align-justify">为便于您在腾讯视频内对个人资料进行查看与维护，您可自主选择填写您的性别、昵称、头像、<strong><u>手机号码</u></strong>、电子邮箱地址、<strong><u>收货地址</u></strong>、自我介绍、生日、星座、所在地、腾讯视频账号ID、关联账号、共享设备，这将有助于我们给您提供更具个性化的体验。如您未填写，不影响您使用我们产品和/或服务的基本功能。</p>
+<p class="ql-align-justify">您在上传/更换头像时，我们会请求您的<strong><u>相机</u>、<u>相册权限</u></strong>，并在经您授权后收集您上传/更换的图片信息。</p>
+<p class="ql-align-justify">请您注意，如您使用iOS设备登录我们的平台并且您的设备系统为iOS14及以上时，您可以选择关闭精准定位信息，此时我们将仅获取您的粗略地理位置，关闭精准定位信息不会影响您正常使用该功能。您也可以随时通过您设备的系统相关功能设置页面开启/取消该权限。当您更新APP版本后，未经您的明确同意，我们不会更改您之前设置的权限状态。</p>
+<p class="ql-align-justify">如您为腾讯视频会员，您可查看您的会员身份、等级、V力值、积分、权益回顾数据（包括活动奖品、会员礼品卡、优惠券等）；为验证您的会员身份，我们将收集您的会员状态、会员时长有效期、会员等级、<strong><u>开通及续费VIP记录</u></strong>、<strong><u>观影记录</u></strong>，权益中奖信息。为了保障您使用腾讯视频会员时的账号安全，我们建议您绑定手机号码，当您使用会员服务时，可能会通过您的绑定手机号码获取验证码进行验证。当您在“VIP帮助服务中心”使用CDK兑换会员权益功能时，我们将收集<span style="text-decoration: underline;"><strong>兑换码</strong></span>和您的绑定<span style="text-decoration: underline;"><strong>手机号码</strong></span>，并通过您的绑定手机号码获取验证码后完成验证和兑换。我们可能会根据您会员账号登录设备的数量、同一时间段使用会员服务的情况等，判断是否存在违规行为，您可以访问“VIP会员帮助服务中心”查看相关记录。</p>
+<p class="ql-align-justify">当您注销腾讯视频账号时，为了验证您的身份，我们将收集您的微信或QQ账号、头像、昵称；如您的账号已绑定手机号码，您需要通过接收短信验证码的方式进行增强验证；如您的账号未绑定过手机号码，您需要通过勾选常用登录地点、常用登录设备型号的方式进行增强验证。</p>
+<p class="ql-align-justify"><strong>1.3&nbsp;&nbsp;实名认证</strong></p>
+<p class="ql-align-justify">在您开通腾讯视频直播、上传本地视频、进入游戏、开通腾讯视频VIP/腾讯体育VIP青春V卡、开启青少年守护模式（含密码找回）、创作号注册、认证、钱包提现及数字藏品交易、使用“一起看”功能、使用“鸡腿”功能、购买我们的免流量服务时，为符合相关法律法规、监管要求以及腾讯未成年人健康上网保护计划，确保用户身份真实性、验证您的身份、保障您及其他用户的安全以及便于您参与专属优惠活动，我们将收集您的真实身份信息，包括您的<span style="text-decoration: underline;"><strong>姓名</strong></span>、<strong><u>身份证号码</u>、<span style="text-decoration: underline;">手机号码</span>、</strong><strong><u>人脸比对信息</u></strong>、学校（选填）（根据实际情况，不同场景下收集的真实身份信息可能不同）。但请注意，腾讯健康系统将独立收集和使用您的信息，其中可能包括您的敏感个人信息，腾讯视频不会收集这些信息，您需在提交信息前同意<strong>《<a href="https://rule.tencent.com/rule/preview/bf425d4a-a102-4291-a108-5c0341ee8393">腾讯健康系统个人信息保护规则</a>》</strong>。</p>
+<p class="ql-align-justify">如您是腾讯视频会员，为维护账户安全及参与专属优惠活动，您可在“VIP帮助服务中心”自行选择实名认证，向我们提供您的姓名及<strong><u>身份证号码</u></strong>，完成实名认证。</p>
+<p class="ql-align-justify">在您进行数字藏品购买时，为符合相关法律法规、监管要求，确保用户身份真实性、验证您的身份、保障您及其他用户的安全，我们将收集您的真实身份信息，包括您的<span style="text-decoration: underline;"><strong>姓名</strong></span>、<strong><u>身份证号码</u>、<span style="text-decoration: underline;">手机号码</span></strong>和<strong><u>人脸比对信息</u></strong>。</p>
+<p class="ql-align-justify"><strong>需提示的是，第三方服务（例如：第三方运营的游戏、第三方电信运营商的免流量服务）也可能需要您进行实名认证并收集您的信息，此时，腾讯视频不会收集您的这些信息。提示您仔细识别实际服务的提供方，并在使用任何第三方服务之前仔细查看相关隐私政策或个人信息处理规则。</strong></p>
+<p class="ql-align-justify"><strong>1.4&nbsp;&nbsp;内容搜索</strong></p>
+<p class="ql-align-justify">当您使用搜索功能时，我们会自动收集您输入的关键字信息和<strong><u>搜索记录</u></strong>。为了提供高效的搜索服务，部分前述信息会暂时存储在您的本地设备端，并可向您展示搜索历史记录。</p>
+<p class="ql-align-justify">当您使用语音搜索功能时，我们会请求您授权<strong><u>麦克风权限</u></strong>，并收集您的<strong><u>语音信息</u></strong>。</p>
+<p class="ql-align-justify"><strong>1.5&nbsp;&nbsp;内容浏览/播放/下载/订阅</strong></p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;&nbsp;为了更好地为您提供内容推荐展示，对搜索结果进行优化，了解产品对不同硬件设备适配性、确保操作环境安全、识别账号异常状态等用途，当您使用我们视频、音频、直播、电子读物（书籍、漫画）等服务内容的播放、<strong><u>浏览</u></strong>功能时，我们将收集您的设备信息及日志信息。</p>
+<p class="ql-align-justify">上述<strong><u>设备信息</u></strong>包括：Android ID、GUID、设备型号、系统版本；<strong><u>日志信息</u></strong>包括腾讯视频账号、播放视频ID、播放时间、软件版本型号、您的操作、行为日志信息（<strong><u>浏览记录</u></strong>、<strong><u>播放记录</u></strong>、播放时长、访问日期和时间、<strong><u>收藏/关注/订阅/阅读记录</u></strong>）。浏览记录亦称“上网记录”。&nbsp;</p>
+<p class="ql-align-justify">(2) &nbsp; 当您使用视频下载功能时，我们会请求您授权<strong><u>存储权限</u></strong>，以便在您设备外置存储空间内写入音视频文件的相关信息。</p>
+<p>(3)&nbsp;&nbsp;&nbsp;当您使用短视频服务内容的播放、<strong><u>浏览</u></strong>功能时，为了预加载播放地址并缓存不同清晰度的播放资源，我们会在您的网络状态发生变化时，采集您的SSID。</p>
+<p class="ql-align-justify">(4)&nbsp;&nbsp;&nbsp;当您作为粉丝关注特定创作号时，我们会将您在腾讯视频内的头像、昵称同步给该创作号，用于生成其粉丝列表，但粉丝列表仅该创作号可见；我们会根据您登录的账号信息及<span style="text-decoration: underline;"><strong>观影记录</strong></span>，用于帮助该创作者更好的了解粉丝群体整体情况（包括性别、生日、地区、兴趣标签等分布），您的信息将以汇总的形式呈现，不会与具体用户相关联。</p>
+<p class="ql-align-justify">(5)&nbsp;&nbsp;&nbsp;在断开与您身份的关联后，我们可能会使用部分信息（以用户实际提交及使用情况为准，包括<span style="text-decoration: underline;"><strong>观影记</strong><strong>录</strong></span>、性别、年龄区间、弹幕等）以汇总的方式用于分析与研究，优化我们的产品和服务。</p>
+<p>(6)&nbsp;&nbsp;&nbsp;当您使用电子纪念票功能时，我们会收集您完成特定任务的相关记录（如完成观影任务的<span style="text-decoration: underline;"><strong>浏览记录</strong></span>、<span style="text-decoration: underline;"><strong>会员购买记录</strong></span>、<span style="text-decoration: underline;"><strong>交流互动记录</strong></span>等）用于发放纪念票。当您获得纪念票时，我们会收集并在票面展示您的腾讯视频账号昵称、获得纪念票的时间以及纪念票编号，当您分享获得的纪念票时，前述票面信息也会对外展示。</p>
+<p class="ql-align-justify"><strong>1.6&nbsp;&nbsp;下单与支付</strong></p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;&nbsp;当您在购买我们的产品及/或服务时，包括开通/续费VIP、开通联合会员、购买青春V卡、企业内购、付费购买点播与直播、充值钻石、购买数字藏品数字纪念品、在商城、草场地以及鹅外惊喜（直播）下单、游戏付费，为便于协助您顺利完成交易、查询订单信息，以及向您提供客户服务和保障您的交易安全，我们需要根据商品或服务类型收集如下部分或全部的个人信息：<span style="text-decoration: underline;"><strong>交易商品或服务信息</strong></span>、收货信息（<span style="text-decoration: underline;"><strong>收货人姓名</strong></span>、<strong><u>收货地址</u></strong>及<strong><u>联系电话</u></strong>）、<strong><u>交易金额</u>、<u>下单时间</u></strong>、<strong><u>交易日期</u></strong>、<strong><u>订单商户</u></strong>、<strong><u>订单编号</u></strong>、<strong><u>订单状态</u>、<u>支付方式</u>、<u>支付账号</u></strong>、支付状态、<span style="text-decoration: underline;"><strong>虚拟商品及服务消费使用记录</strong></span>（如超能力、道具、钻石、观赛券、积分）、<span style="text-decoration: underline;"><strong>QQ卡（卡号及密码）</strong></span>、相关会员账户开通时间、联合会员账户信息、企业邮箱地址。在您购买青春V卡、数字藏品数字纪念品时，我们还需在交易前对您进行身份验证，以确保交易对象的正确及交易安全，为身份验证目的而收集的信息请见1.3“实名认证”。如果您的账号涉及手机号码会员资产权益，我们还会记录您的账号绑定手机号码以及<span style="text-decoration: underline;"><strong>会员资产转移记录</strong></span>。</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;&nbsp;当您使用邀请好友有礼（邀请好友加入腾讯视频VIP）、亲密付（帮亲友开通VIP）、赠送好友VIP、赠送超级影视VIP、好友分享功能时，我们将收集您的<strong><u>微信或QQ账号、微信或QQ好友关系列表</u></strong>、<strong><u>微信或QQ头像及昵称</u></strong>。</p>
+<p class="ql-align-justify">(3)&nbsp;&nbsp;&nbsp;当您使用数字人民币进行支付时，我们将使用您的手机号码用于和您的<span style="text-decoration: underline;"><strong>数字人民币账号</strong></span>进行匹配以实现支付。</p>
+<p class="ql-align-justify">(4) &nbsp; 为了便于您查看历史记录，当您使用以下功能时，我们将收集您的相关记录：</p>
+<table style="width: 63.92235609103079%; height: 114px;" border="1">
+<tbody>
+<tr style="height: 19px;">
+<td style="width: 27.30055596796302%; text-align: center; height: 19px;"><strong>功能</strong></td>
+<td style="width: 72.49864081918557%; text-align: center; height: 19px;"><strong>收集信息</strong></td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 27.30055596796302%; height: 19px;">福利中心（福利兑换）</td>
+<td style="width: 72.49864081918557%; height: 19px;"><span style="text-decoration: underline;"><strong>金币记录</strong></span>、<span style="text-decoration: underline;"><strong>现金提现记录</strong></span>以及<span style="text-decoration: underline;"><strong>奖品记录</strong></span>。</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 27.30055596796302%; height: 19px;">小说频道</td>
+<td style="width: 72.49864081918557%; height: 19px;"><span style="text-decoration: underline;"><strong>消费记录</strong></span>、书券明细、已购书籍、我的书架（已收藏书籍）以及<span style="text-decoration: underline;"><strong>阅读记录</strong></span>（仅包含章节进度）</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 27.30055596796302%; height: 19px;">鸡腿</td>
+<td style="width: 72.49864081918557%; height: 19px;">鸡腿数量信息及<span style="text-decoration: underline;"><strong>使用记录（<strong style="text-decoration: underline;">投喂记录</strong>、<strong style="text-decoration: underline;">领取记录</strong>、兑换记录）</strong></span></td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 27.30055596796302%; height: 19px;">积分公益捐</td>
+<td style="width: 72.49864081918557%; height: 19px;">
+<div>公益项目、捐助积分、筹到善款以及<span style="text-decoration: underline;"><strong>详情记录</strong></span></div>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="ql-align-justify">(5)&nbsp;&nbsp;&nbsp;此外，为方便您查询货物的交付与配送状态，我们还会自物流相关服务主体处收集与您的货物交付进度相关的信息。</p>
+<p class="ql-align-justify"><strong>1.7&nbsp;&nbsp;信息上传或发布、交流互动</strong></p>
+<p class="ql-align-justify">当您上传视频或照片、使用直播、帖子、弹幕、在圈儿社区及直播页面评论等功能时，我们将收集您上传的图文/音视频内容、您的<strong><u>昵称</u></strong>、<strong><u>头像</u></strong>、发布的信息内容、<strong><u>腾讯视频账号ID</u></strong>以及您的互动信息，包括<strong><u>点赞/分享/评论/互动记录</u></strong>、<strong><u>收藏记录</u></strong>。在您使用前述信息发布功能时，我们可能会请求您授权<strong><u>相机权限、相册权限</u></strong>。当您主动复制文字或表情等内容时，我们会调用您的剪切板功能。当您使用语音转文字功能时，我们会请求您授权<strong><span style="text-decoration: underline;">麦克风权限</span></strong>，并收集您的<strong><span style="text-decoration: underline;">语音信息</span></strong>。如您在发布内容时使用发布地快速填写功能，我们会请求您授权并展示<strong><u>IP属地</u></strong>（境内IP地址展示至省/自治区/直辖市、境外IP地址展示至国家/地区，具体信息以网络运营商数据为准）。</p>
+<p class="ql-align-justify">根据相关法律法规对于互联网账号管理的监管要求，为维护网络安全和良好的网络内容生态，我们会在您的个人主页内、您发布的内容下展示您的<span style="text-decoration: underline;"><strong>IP属地</strong></span>（境内IP地址展示至省/自治区/直辖市、境外IP地址展示至国家/地区，具体信息以网络运营商数据为准）。</p>
+<p class="ql-align-justify"><strong>1.8&nbsp;&nbsp;活动参与及消息通知</strong></p>
+<p class="ql-align-justify"><strong>1.8.1&nbsp;活动参与</strong></p>
+<p class="ql-align-justify">当您参与我们的活动时，可能需要您主动提交有关个人信息。包括：</p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;&nbsp;您参与抽奖活动时，我们将收集您的<strong><u>微信或QQ账号</u></strong>、<strong><u>头像</u></strong>、<strong><u>昵称</u></strong>、<strong><u>购买记录</u></strong>；如涉及以邮寄方式进行奖品发放，我们还将收集您的<strong><u>收货信息</u></strong>，包括<strong><u>收货地址</u></strong>、<strong><u>联系人名称</u></strong>及<strong><u>联系人电话</u></strong>。</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;&nbsp;当您在腾讯视频界面通过点击“免费领VIP”、“我的电影票”登录“小鹅花钱”、猫眼小程序时，我们将收集您的<strong><u>微信或QQ头像、昵称</u></strong>。</p>
+<p class="ql-align-justify">(3)&nbsp;&nbsp;&nbsp;当您通过扫一扫参加活动时，我们将申请您的<strong><u>相机权限</u></strong>。</p>
+<p class="ql-align-justify">(4) &nbsp;&nbsp;当您分享活动口令与链接时，我们将收集您的<span style="text-decoration: underline;"><strong>头像</strong></span>、<span style="text-decoration: underline;"><strong>昵称</strong></span>，并调用您的剪切板功能以判断是否有相关口令码信息。需要特别提示的是，为了判断是否有相关口令码信息，我们会在您启动腾讯视频、后台切前台时调用您的剪切板功能，如有相关口令码信息，则我们会收集该信息在服务器做校验后，向您反馈您所需的内容或绑定相关权益。我们并不会存储您剪切板的其他信息。</p>
+<p class="ql-align-justify">(5)&nbsp;&nbsp;&nbsp;当您参与基于精确位置的打卡任务时，我们将申请您的<span style="text-decoration: underline;"><strong>精确位置权限</strong></span>。</p>
+<p class="ql-align-justify">(6)&nbsp;&nbsp;&nbsp;我们可能会将通过活动获得的您的相关信息，用于研发和改进产品和服务、综合统计、数据分析或加工等以及经您同意的其他用途。</p>
+<p align="left">(7)&nbsp;&nbsp;&nbsp;针对部分活动我们可能会短期采集您的个人信息，相关个人信息收集情况请关注特定活动的活动规则、授权文件等隐私声明文件。</p>
+<p>此外，为判断您是否满足活动要求的参与资格（如：新用户）或者为保障活动的正常秩序、防范作弊与欺诈等违法违规情况，我们同时可能需要收集和使用您的设备信息（例如：设备型号、设备厂商、操作系统及版本信息）。</p>
+<p class="ql-align-justify"><strong>1.8.2&nbsp;消息通知</strong></p>
+<p class="ql-align-justify">(1) &nbsp; <span style="text-decoration: underline;"><strong>写入</strong><strong>设备日历权限</strong></span>用于正片上线、空降活动、学习提醒、游戏预约和游戏活动预约提醒，仅在您预约提醒时申请获取。在您开启相关权限后，我们会访问您的日历，帮助您预约或调整已预约的时间，以在您预约的时间通过日历功能提醒您。如您在预约提醒时时间尚未确定，我们将在时间确定后通过日历权限写入具体时间。拒绝授权将无法使用预约服务，但不会影响腾讯视频其他功能的正常使用。</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;&nbsp;使用商品上架、视频上线提醒功能的，我们还将收集您的腾讯视频账号ID、预约记录；使用游戏上线提醒功能的，我们还将收集您的手机号码，用于向您发送短信提醒。</p>
+<p class="ql-align-justify">(3)&nbsp;&nbsp;&nbsp;您知悉并同意，对于您在使用过程中提供的您的一种或多种联系方式，我们在运营中可能会向其中的一种或多种发送多类通知，用于用户消息告知、身份验证、安全验证、用户使用体验调研等用途。</p>
+<p class="ql-align-justify">(4)&nbsp; &nbsp;针对特定设备厂商，我们会收集OAID<span style="font-size: 14px; font-family: 宋体;">（仅安卓版）</span><span class="MsoCommentReference"><span style="font-size: 10.5pt; font-family: DengXian;"><a id="_anchor_1" class="msocomanchor" href="#_msocom_1" name="_msoanchor_1"></a></span></span>用于消息推送。</p>
+<p class="ql-align-justify"><strong>1.9&nbsp;&nbsp;运营及产品安全需要</strong></p>
+<p class="ql-align-justify">我们致力于为您提供安全、可信的产品与使用环境，提供优质而可靠的服务与信息。为了维护我们产品及服务的正常稳定运行，保护您或其他用户或公众的安全及合法利益，我们会收集如下信息：</p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;为检测腾讯视频版本是否有升级更新，我们将收集您的设备信息（GUID）。</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;为根据您的网络状态，为您推荐最佳的视频清晰度，我们将收集您的IP地址。</p>
+<p class="ql-align-justify">(3)&nbsp;&nbsp;为实现腾讯视频运行故障报错及分析和解决您在使用腾讯视频过程中所遇到的问题，我们将收集您的设备信息（GUID）、<strong><u>浏览和操作记录</u></strong>，并请求您的<strong><u>存储权限</u></strong>。</p>
+<p class="ql-align-justify">(4)&nbsp;&nbsp;为了校验应用标识符本身的有效性，并甄别异常设备环境，以便识别登录风险，我们将收集您的IDFV（仅iOS版）。</p>
+<p>(5)&nbsp; 技术处理说明：采取安全加密、去标识化、匿名化等安全技术措施后，并在无法重新识别个人身份的前提下，我们可能将所收集的数据进行算法优化、统计分析或其他必要的数据分析处理，用于研发、提供、运营我们或关联公司的各类产品和服务，例如：商业决策分析、个性化服务、风险识别等。</p>
+<p class="ql-align-justify"><strong>1.10 &nbsp;个性化内容推荐</strong></p>
+<p class="ql-align-justify">我们会基于收集的信息，包括您的设备信息（例如Android ID、GUID、设备型号、系统版本）、日志信息（<strong><u>购买记录</u>、<u>关注</u></strong>、<span style="text-decoration: underline;"><strong>点击</strong></span>、<strong><u>收藏</u></strong>、<strong><u>浏览</u></strong>、<strong><u>下载记录</u></strong>、<span style="text-decoration: underline;"><strong>点赞/分享/评论/互动的对象</strong></span>、<span style="text-decoration: underline;"><strong>搜索的字词</strong></span>）、<strong><u>性别</u></strong>、<strong><u>年龄</u></strong>、粗略的位置信息，通过自动化决策的方式对您的偏好、习惯作特征分析，以便为您提供符合您兴趣的定制化服务，例如向您展现或推荐相关程度更高（而非普遍推送）的视频、游戏、阅读、直播、圈儿社区的服务内容。自动化决策是指通过计算机程序自动分析、评估个人的行为习惯、兴趣爱好，并进行决策的活动。</p>
+<p class="ql-align-justify">另需提示，在更快地为您提供感兴趣内容的同时，个性化内容推荐可能会导致您所看到的内容越来越趋于同质化。如您不希望接收到我们为您推荐的个性化内容，您可以随时使用我们的产品和/或服务的相关功能设置页面开启/关闭个性化推荐。腾讯视频APP的个性化推荐设置路径为：<span style="font-size: 14px;"><span style="font-family: 宋体;">“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">个性化内容管理”</span> </span>。<strong> 若您选择关闭，我们不会基于个性化内容推送的目的处理您的个人信息，您看到的内容将可能与您的偏好相关度降低。</strong>当您更新腾讯视频APP版本后，未经您的同意，我们不会更改您之前设置的权限状态。</p>
+<p class="ql-align-justify"><strong>1.11 &nbsp;广告（含个性化广告）</strong></p>
+<p align="left">(1) &nbsp; 我们可能使用您的设备标识符（OAID、IDFV、IDFA）、广告数据（曝光、点击、转化数据）、设备信息（设备型号、系统语言、运营商、屏幕高宽、屏幕方向）、APP应用及使用数据（应用包名、操作日志、订单信息）、IP地址、会员身份、所选的兴趣标签等信息，通过自动化分析和计算预测您的特征偏好， 向您提供您可能感兴趣的广告，评估、改善我们的广告投放和其他促销及推广活动、商业分析的效果。<strong>请您放心，个性化广告推荐算法并不会识别您的真实身份，仅是基于推测的特征提供对您更有价值的广告信息、节约您的交易成本。</strong></p>
+<p align="left">(2) &nbsp; 当您使用创新广告交互功能（如摇动、扭动、扭转设备）时，我们会调用设备的陀螺仪、加速度、重力传感器以识别判断您的设备状态。</p>
+<p align="left">(3) &nbsp; 当您主动复制广告落地页上的链接等内容时，我们会写入剪切板，从而便于分享链接等功能的实现。</p>
+<p>(4) &nbsp; 若您不想接受个性化广告服务，您可以在我们的产品和/或服务的相关功能设置页面开启/关闭个性化广告。APP的个性化广告设置路径为：“个人中心-设置-隐私管理-个性化广告管理”。<strong>若您选择关闭，您看到的广告数量不会减少，但</strong><strong>APP</strong><strong>将不再向您展示个性化广告，您看到的广告将可能与您的偏好相关度降低。</strong></p>
+<p align="left">(5) &nbsp; 为了您获取更有价值的广告信息，我们可能基于您在腾讯视频内的搜索记录、行为数据推测您的间接画像，用于供您在腾讯及合作的第三方网站、应用等其他平台中收到您可能更感兴趣的广告内容。我们不会关联使用您的真实身份信息，不会使用您的具体搜索内容。若您不想接受跨平台广告服务，可以在APP设置页面开启/关闭：“个人中心-设置-隐私设置管理-跨平台广告推荐管理。</p>
+<p class="ql-align-justify"><strong> </strong></p>
+<p>(6) &nbsp; 针对部分通过第三方H5页面展示的广告，为了提供基于地理位置的服务，我们可能会申请您的<strong><u>位置权限</u></strong>，收集<span style="text-decoration: underline;"><strong>GPS信息</strong></span>、CellID、附近的WiFi（WLAN）。该等权限调用和信息采集仅在您访问和使用通过第三方H5页面展示的广告时通过腾讯视频申请获取。</p>
+<p class="ql-align-justify"><strong>1.12&nbsp;&nbsp;客户服务及其他用户响应功能</strong></p>
+<p class="ql-align-justify">当您联系我们的客服时，为了您的账号与系统安全，我们将收集您的微信号、QQ号及账号资料，并与您之前的个人信息相匹配以验证您的用户身份。 同时，为了调查事实与帮助您解决问题，我们可能还需要收集您的如下个人信息：联系方式（您使用的或主动向我们提供的手机号码、微信号、QQ号或其他联系方式）、您与我们的<strong><u>沟通记录</u></strong>。</p>
+<p class="ql-align-justify">当您使用帮助与反馈功能时，为便于您反馈在使用腾讯视频中所遇到的问题，我们将收集您的设备信息（GUID）、腾讯视频账号ID、网络情况、应用版本、访问页面、<span style="text-decoration: underline;"><strong>支付单号</strong></span>，并申请您的存储权限。当您反馈播放类和下载类问题时，为识别可能与地理位置相关的故障，我们还会收集您的IP地址及其对应的粗略地理位置（境内IP地址至地市级、境外IP地址至国家/地区，具体信息以网络运营商数据为准）。您可以在帮助与反馈功能页面查看反馈历史记录。</p>
+<p class="ql-align-justify">当您进行侵权投诉时，为核验侵权投诉人身份和权利情况、依法处置侵权投诉，您可能需要提供您的身份信息、权利证明材料相关信息等，但请注意，上述信息是由腾讯文犀·侵权投诉平台（下称“腾讯文犀”）收集和使用，其中可能包括您的敏感个人信息，腾讯视频不会收集这些信息，您需在提交侵权投诉材料前同意腾讯文犀的个人信息保护规则，请您仔细阅读该等规则，具体可点击查看<strong>《<a href="https://privacy.qq.com/document/preview/67ac39dc7b104207a66350b02123dce7">腾讯文犀 · 侵权投诉平台隐私保护指引</a>》。</strong></p>
+<p class="ql-align-justify">当您要求下载个人信息时，我们将收集您填写的电子邮箱地址用于把对应资料生成文件发送至您指定的邮箱。</p>
+<p class="ql-align-justify">如您是腾讯视频会员，您可在“VIP帮助服务中心”查看会员客户服务相关记录。</p>
+<p class="ql-align-justify"><strong>1.13&nbsp; 直播服务</strong></p>
+<p class="ql-align-justify">为了您使用直播互动功能，在您授权同意后，我们会访问您的麦克风、摄像头、相册（iOS版）或存储权限（安卓版），为您提供视频拍摄、声音录制、视频读取、上传直播封面等功能。您在使用直播功能时，我们仅在设备端侧处理您的<span style="text-decoration: underline;"><strong>面部像素信息</strong></span>，用于提供美颜效果，并不会上传到我们的服务器，也不会将您的<span style="text-decoration: underline;"><strong>面部像素信息</strong></span>用于其他用途。</p>
+<p class="ql-align-justify"><strong>1.14 &nbsp;创作号</strong></p>
+<p class="ql-align-justify">当您注册腾讯视频创作号（即以个人创作者身份使用腾讯视频创作平台的服务）时，我们将收集您的昵称、头像、简介、注册地。此外，为履行国家法律法规关于网络实名制（互联网用户账号真实身份信息认证）的要求，我们还将收集您的姓名、<span style="text-decoration: underline;"><strong>身份证号码</strong></span>、手机号码、<strong><u>人脸比对信息</u></strong>；您可自主选择填写您的性别、生日。</p>
+<p class="ql-align-justify">当您成功注册腾讯视频创作号后，我们会为您配置并收集主播ID。</p>
+<p class="ql-align-justify">当您通过腾讯视频创作号使用以下功能时，我们会收集您的如下个人信息并申请相关权限：</p>
+<p class="ql-align-justify">(1) &nbsp;认证直播功能时，我们将识别您当前创作号头像和昵称，用于验证创作号的的开播功能。</p>
+<p class="ql-align-justify">(2) &nbsp;进行实名认证且<span style="font-size: 10.5pt;">使用炫彩光线活体作为实人认证方式时，我们会调用设备的光线传感器。</span></p>
+<p class="ql-align-justify">(3) &nbsp;进行官方认证时，为确保是您本人操作，我们将根据您申请认证的身份类型收集您的<span style="text-decoration: underline;"><strong>人脸比对信息</strong></span>，并收集含有您的姓名、职位、签章和有效期的<span style="text-decoration: underline;"><strong>职业认证信息</strong></span>，来添加对应的职业认证。</p>
+<p class="ql-align-justify">(4) &nbsp;上传视频并使用内容同步功能时，为履行国家法律法规关于网络实名制（互联网用户账号真实身份信息认证）的要求，我们将根据您选择绑定的腾讯微视、腾讯看点、腾讯新闻账号收集您的<span style="text-decoration: underline;"><strong>身份证号</strong></span>及姓名。</p>
+<p class="ql-align-justify">(5) &nbsp;使用第三方账号绑定功能时，为辅助证明您是视频原创作者并提高原创判定的准确性，我们将根据您选择绑定的Bilibili、抖音、头条号、快手等第三方平台的账号收集您的第三方账号昵称、第三方账号主页链接、第三方账号后台截图。</p>
+<p class="ql-align-justify">(6) &nbsp;使用提现功能时，为了绑定您的银行卡，我们将收集您的持卡人姓名、<span style="text-decoration: underline;"><strong>银行卡号</strong></span>、<span style="text-decoration: underline;"><strong>开户行</strong></span>、<span style="text-decoration: underline;"><strong>开户行所在地区</strong></span>。</p>
+<p class="ql-align-justify">(7) &nbsp;我们会采集您的粉丝列表（包括粉丝的头像和昵称），但该粉丝列表仅您个人可见。</p>
+<p class="ql-align-justify">(8) &nbsp;使用“钱包”功能时，我们会收集您的<span style="text-decoration: underline;"><strong>待提现收益</strong></span>、<span style="text-decoration: underline;"><strong>累计收益</strong></span>、<span style="text-decoration: underline;"><strong>收益分析/明细</strong></span>、<span style="text-decoration: underline;"><strong>收益能力</strong></span>（即开通的创作号能力）、<span style="text-decoration: underline;"><strong>提现明细</strong></span>、创作号信用分。</p>
+<p class="ql-align-justify">(9) &nbsp;使用“收益与提现”功能时，为了便于您管理和快速了解创作号整体情况，我们会收集您<span style="text-decoration: underline;"><strong>可提现收益</strong></span>、<span style="text-decoration: underline;"><strong>今日收益</strong></span>、<span style="text-decoration: underline;"><strong>本月收益</strong></span>、分成比例、<span style="text-decoration: underline;"><strong>收益账单</strong></span>、<span style="text-decoration: underline;"><strong>提现记录</strong></span>、<span style="text-decoration: underline;"><strong>礼物记录</strong></span>。</p>
+<p class="ql-align-justify"><strong>1.15 &nbsp;游戏</strong></p>
+<p><strong>1.15.1 游戏活动</strong></p>
+<p>当您使用“爱玩游戏”参与腾讯视频的游戏活动，且登录腾讯视频的QQ号或微信号与注册/登录该游戏的账号一致时，为了核实您是否满足领取奖励和/或参与活动的条件，腾讯视频需要对您在第三方游戏中的信息进行核实，核实范围会因为不同活动而不完全一致，但会限定在您确认授权并且第三方游戏提供的游戏账号信息（游戏角色以及角色自身的游戏属性、状态、战绩等信息）以及<span style="text-decoration: underline;"><strong>游戏好友数据</strong></span>（游戏角色之间的关系以及基于关系的行为，如<span style="text-decoration: underline;"><strong>游戏好友关系链</strong></span>、好友互动送心、<span style="text-decoration: underline;"><strong>好友聊天</strong></span>等）范围内。具体信息将以授权页面为准，如您拒绝授权，将无法参与相关活动，但不影响腾讯视频其他主要功能的使用；当您拒绝授权后，重新参与活动或参与第三方游戏其他活动时，我们会另行向您申请使用相关信息。腾讯视频仅会核实活动涉及的信息，获取“是”/“否”（满足条件）的反馈，不会核实其他无关信息，也不会获取您在第三方游戏中的实际数据。例如：您参加了注册登录第三方游戏即可领取礼包的活动，则腾讯视频会与第三方游戏核实您是否注册登录该游戏，当收到反馈为“是”，您即可领取礼包。您可以在“爱玩游戏-我的-设置”中进行游戏信息授权管理，取消授权、修改可见范围和授权信息类型，或直接在相关游戏内取消授权。</p>
+<p><strong>1.15.2 云游戏</strong></p>
+<p>当您使用云游戏功能时，腾讯视频PC端会收集您的账号信息，用于判断您的登录状态；腾讯视频APP会请求您授权麦克风权限、调用设备的传感器，用于提升云游戏的体验。特别说明：当您进入云游戏功能的特定游戏后，您的个人信息将由该特定游戏自行收集、使用，腾讯视频并不会收集、处理和存储您在云游戏功能特定游戏中的个人信息。</p>
+<p><strong>1.15.3 游戏推广</strong></p>
+<p><strong> </strong></p>
+<p>如您使用安卓设备，当您进入特定游戏的详情页时，为了展示下载状态按钮文案，我们会判断设备本地是否安装了该游戏应用；当您进入游戏频道、电竞频道、游戏中心及游戏活动页面时，为了更好地为您推荐相关游戏内容，我们会判断设备本地是否安装了推广的游戏应用。</p>
+<p class="ql-align-justify"><strong>1.16 &nbsp;其他自行收集信息场景</strong></p>
+<p class="ql-align-justify"><strong>1.16.1 护眼模式</strong></p>
+<p class="ql-align-justify">您在观看我们的视频时，我们为您提供了护眼模式（仅限iOS版用户），以帮助您保护眼睛。护眼模式需要请求您的相机权限。当您授权使用护眼模式时，我们会使用TrueDepth APIs，按一定频率获取您面部和设备屏幕之间的距离信息。当您面部与设备屏幕之间的距离小于40cm后，视频播放将自动暂停并用蒙层遮罩，并出现文字提示您保护眼睛，帮助您养成良好的观影习惯。</p>
+<p class="ql-align-justify">我们使用TrueDepth APIs不会收集您的面部识别特征，也不会收集缓存到文件或上传到云端的用于支持判断距离以外的任何其他信息。我们不会存储或与第三方共享您的该信息。</p>
+<p class="ql-align-justify">护眼实验室功能在您首次下载启动产品时默认为关闭状态，您可以通过产品功能设置页面主动进行授权/取消授权，路<span style="font-size: 14px;">径为：<span style="font-family: 宋体;">“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">播放设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">播放器护眼模式”。</span></span><span class="MsoCommentReference"><span style="font-size: 10.5pt; font-family: DengXian;"><a id="_anchor_1" class="msocomanchor" href="#_msocom_1" name="_msoanchor_1"></a></span></span></p>
+<p class="ql-align-justify"><strong>1.16.2 极光实验室</strong></p>
+<p class="ql-align-justify">当您使用我们的极光实验室功能时，为检测您的设备是否支持腾讯视频提供的特色服务，我们将收集您的设备能力信息（高效率视频编码、杜比等）。</p>
+<p class="ql-align-justify"><strong>1.16.3 投屏</strong></p>
+<p class="ql-align-justify">当您使用投屏功能时，为实现设备的互联互通，我们需要进行本地网络设备检测，我们将收集您的硬件类型、型号、固件版本、区域和语言设置、硬件系统版本号、IP地址、终端设备的类型、软硬件特征信息、互联网服务提供商、网络运营商、设备型号、终端制造厂商、终端设备操作系统版本、会话启动/停止时间和网络状态（WiFi等）、硬盘、CPU和内存使用情况。</p>
+<p><strong>1.16.4 用户调研</strong></p>
+<p>我们可能会不定期针对我们的产品和/或服务进行用户调研（包括但不限于在线问卷等形式），相关个人信息收集情况请关注特定用户调研的隐私声明文件。</p>
+<p><strong>1.16.5 机构创作者</strong></p>
+<p>当您以机构创作者的代表或联系人身份使用腾讯视频创作服务平台的服务时，可能需要您主动提交有关个人信息。包括：</p>
+<p>(1)&nbsp;&nbsp;在机构创作者申请单项内容授权合作时，我们会收集您的账号名称、账号简介、头像信息，用于明确您的合作方身份和从业经验，以便评估是否符合合作标准、保障交易安全；我们可能会收集机构创作者法定代表人或账号运营人的姓名、<span style="text-decoration: underline;"><strong>身份证信息（身份证号、身份证照片等）</strong></span>、<span style="text-decoration: underline;"><strong>面部信息（静态或动态）</strong></span>、手机号码等信息，用于身份验证，从而确保合作方身份真实性、保障交易安全和合作正常进行。如您作为机构创作者的法定代表人或账号运营人，或出现机构创作者基于其对您的个人信息的控制而向我们提供您的个人信息的其他情形，针对该等情形，我们已通过<strong>《<a href="https://v.qq.com/biu/agreement?type=platformServiceAgreement">腾讯视频创作平台服务协议</a>》</strong>等方式要求机构创作者确保有权进行前述行为，在此基础上，我们将收集您的上述个人信息。如您对此有任何疑问或意见，建议您优先联系相关机构创作者处理。</p>
+<p>(2)&nbsp;&nbsp;当机构创作者签订和履行项目合作合同时，我们会收集机构创作者的联系人姓名、联系手机号、联系邮箱、<span style="text-decoration: underline;"><strong>联系地址</strong></span>，用于发送与合同相关的通知，从而保障合作正常进行和维护合同权益。如您作为机构创作者的联系人，或出现机构创作者基于其对您的个人信息的控制而向我们提供您的个人信息的其他情形，针对该等情形，我们已通过<strong>《<a href="https://v.qq.com/biu/agreement?type=platformServiceAgreement">腾讯视频创作平台服务协议</a>》</strong>等方式要求机构用户确保有权进行前述行为，在此基础上，我们将收集您的上述个人信息。如您对此有任何疑问或意见，建议您优先联系相关机构创作者处理。</p>
+<p>(3) &nbsp;当机构创作者使用创作服务市场的供应商服务时，我们会收集机构创作者相应订单中提供的订购人姓名、订购人手机号码、<span style="text-decoration: underline;"><strong>订购信息</strong></span>（服务名称、服务费用、服务商家）用于客服联系，并将订购人姓名、订购人手机号码共享给供应商用于服务沟通。如您作为机构创作者的订购人，或出现机构创作者基于其对您的个人信息的控制而向我们提供您的个人信息的其他情形，针对该等情形，我们已通过<strong>《<a href="https://v.qq.com/biu/agreement?type=platformServiceAgreement">腾讯视频创作平台服务协议</a>》</strong>等方式要求机构用户确保有权进行前述行为，在此基础上，我们将收集您的上述个人信息。如您对此有任何疑问或意见，建议您优先联系相关机构创作者处理。</p>
+<p>(4)&nbsp;&nbsp;一般情况下，您可随时浏览自己提交的信息，但出于安全性和身份识别的考虑，您可能无法修改注册时提供的初始信息及其他验证信息。</p>
+<p>(5)&nbsp;&nbsp;在实名认证的过程中，为实现身份认证的目的，我们的合作方可能需要使用您的<span style="text-decoration: underline;"><strong>身份认证信息（可能包括真实姓名、身份证相关信息、面部信息（静态或动态）</strong></span>、手机号码） 。其中，部分信息是个人敏感信息，如您拒绝将导致您无法完成身份认证，您将无法使用本服务，您将因此无法便捷地与我们进行授权合作，但您可以采用其他合作方式。这些信息仅供实名认证及法律法规所规定的用途，未经您的明示授权，不会用作其他目的。如存在其他共享或转让您的个人信息或您需要我们将您的个人信息共享或转让至第三方情形时，我们会直接或确认第三方征得您对上述行为的明示同意。未经您的同意，我们不会向腾讯以外的任何公司、组织和个人披露您的个人信息，但法律法规另有规定的除外。</p>
+<p class="ql-align-justify"><strong>1.16.6 小组件</strong></p>
+<p class="ql-align-justify">如您通过部分品牌安卓设备的小组件使用腾讯视频，为了实现小组件的添加、删除和更新，腾讯视频可能会在您退出应用后在后台存在短暂启动的行为。</p>
+<p><strong>1.16.7 </strong><strong>隔空手势</strong></p>
+<p>隔空手势需要请求您的相机权限。当您授权使用隔空手势功能时，在内容播放期间我们会在您的设备本地收集并处理您的相机拍摄的画面，实现您通过手势控制内容播放的相关操作。</p>
+<p><strong>1.16.8&nbsp;</strong><strong>灵芽社区</strong></p>
+<p>当您使用腾讯视频灵芽社区（简称“灵芽社区”）的服务时，需要同意《<a href="https://pre.lumio.qq.com/html-content/%E7%81%B5%E8%8A%BD%E5%B9%B3%E5%8F%B0%E6%9C%8D%E5%8A%A1%E5%8D%8F%E8%AE%AE.html">灵芽社区服务协议</a>》，在以下功能中，我们会收集您的如下个人信息并申请相关权限：</p>
+<p>(1)&nbsp;&nbsp;&nbsp;您可以通过QQ账号、微信账号、手机号码注册/登录灵芽社区。如果您已经拥有腾讯视频账号，我们会收集您的腾讯视频账号ID、头像、昵称，用于灵芽社区内展示。如果您通过灵芽社区注册/登录腾讯视频账号，我们会为您分配默认的头像、昵称。您可以在灵芽社区内修改您的头像、昵称，该修改后的头像/昵称仅在灵芽社区内展示，不影响腾讯视频账号在其他服务内展示的头像、昵称。</p>
+<p>(2)&nbsp;&nbsp;&nbsp;当您使用创作工具时，我们将收集您提供或授权我们获取的输入内容（作为提示词的文字，以及其他用于引导输出的文字、图片、音频、视频等内容）、输出成果（包括：输出文字、音频、图片、视听内容等成果）、应用内操作记录（填写/点击/选择等操作指令等），并根据您具体使用到的功能和服务类型请求您授权存储权限。如果您拒绝授权，您将无法使用导入素材、导出生成内容等功能，但不影响您使用灵芽社区的其他功能。</p>
+<p>(3)&nbsp;&nbsp;&nbsp;在您浏览灵芽社区内容的过程中，我们会记录您的使用情况。如果您未登录账号，我们会记录您的点击、浏览信息。如果您已登录账号，我们会通过您的灵芽社区账号记录您的点击、浏览、下载、分享、关注、点赞、评论等。</p>
+<p>(4)&nbsp;&nbsp;&nbsp;当您使用搜索功能时，我们会自动收集您输入的搜索内容（如搜索关键字信息）、搜索时间，以便于快速匹配搜索内容。</p>
+<p>(5)&nbsp;&nbsp;&nbsp;当您使用图片等内容的下载功能时，我们会请求访问您设备的存储权限，以便将这些内容保存在您的设备中。</p>
+<p>(6)&nbsp;&nbsp;&nbsp;当您使用作品、评论等信息内容上传、发布功能时，我们将收集您在灵芽社区的昵称、头像、您主动提供的相关图文/音视频内容，并且您发布的内容中会展示您在灵芽社区的昵称、头像等信息。在您使用前述信息上传发布功能时，我们会根据您使用的功能和服务类型请求访问您设备的存储权限。如果您拒绝授权，将无法使用相应发布功能，但不影响您使用灵芽社区的其他功能。如果您上传发布的信息中包含他人的个人信息，请您务必取得他人的合法授权，避免非法泄露他人的个人信息。</p>
+<p>(7)&nbsp;&nbsp;&nbsp;当您进行交流互动时，我们将收集您在在灵芽社区的昵称、头像，互动内容与记录（包括在用户交流互动过程中，您主动提供的文字、图片、视频等交流互动内容，评论/关注/收藏/点赞/分享等交流互动记录）、互动数据信息（如作品数据、粉丝数据等）应用内操作记录（包括点击等操作记录、操作日期与时间）</p>
+<p>(8)&nbsp;&nbsp;&nbsp;当您购买我们的产品及/或服务时，包括购买、使用积分等，我们需要根据服务类型收集如下部分或全部的个人信息：网络身份标识信息（腾讯视频账号ID、IP地址、网络类型、时区）、设备信息（浏览器userAgent、系统语言、gpu信息、操作系统信息、屏幕尺寸、色彩深度、支持的字体类型、cpu核数、内存容量）、交易和消费记录（交易的商品或服务信息、下单时间、订单编号、订单状态、积分使用情况）。在使用支付功能时，我们可能会请求访问您设备的存储权限，用于保存支付日志，从而令我们可以回溯异常支付过程、定位您在支付时遇到的问题，以便解决异常支付问题。</p>
+<p><strong>1.16.9 AI</strong><strong>功能</strong></p>
+<p>当您使用腾讯视频AI功能时，我们收集您的个人信息或申请相关权限的情况详见《<a href="https://rule.tencent.com/rule/202512190001">腾讯视频AI功能服务规则</a>》。</p>
+<p><strong>1.16.10&nbsp;</strong><strong>车机互联</strong>（仅安卓版）</p>
+<p>当您使用车机互联功能时，我们会申请访问您的精确位置权限和蓝牙连接及扫描权限（Android API 30以上）用于发现附近的设备并连接，但不会主动获取您的位置信息。</p>
+<p class="ql-align-justify"><strong>1.17 从第三方间接收集个人信息</strong></p>
+<p class="ql-align-justify">我们可能会从第三方间接收集（如共享等）您的个人信息，但这只发生在：我们确认该等第三方已经就将相关个人信息分享给我们获得您的同意，或者第三方依法被许可或被要求向我们披露您的个人信息。</p>
+<p class="ql-align-justify">我们会要求第三方对个人信息来源的合法性和合规性作出承诺，如第三方有违反行为的，我们会明确要求对方承担相应法律责任。</p>
+<p class="ql-align-justify">我们会了解第三方已获得的个人信息处理的同意范围，包括使用目的，个人信息主体是否同意转让、共享、公开披露、删除等内容。</p>
+<p class="ql-align-justify">这些从第三方获取的个人信息将用于为您提供服务，以及用于保证我们所掌握的您的相关记录的准确性。如果我们对这些个人信息的处理活动超出第三方已获得的同意范围，在获取个人信息的合理期限内或处理个人信息前，我们会直接或通过提供信息的第三方征得您的同意。</p>
+<p class="ql-align-justify"><strong>1.18 &nbsp;与运营商合作免流量功能</strong></p>
+<p class="ql-align-justify">当您使用腾讯视频与运营商合作的免流量功能（如：“免流量看视频”模块中的“腾讯王卡”业务）时，为准确识别免流量用户身份及更好地记录定向应用消耗的流量，我们需要收集您的手机号码、IP地址、手机型号、运营商信息。</p>
+<p class="ql-align-justify">需提示的是，当您领取免流量电话卡或开通免流量服务时，您可能需要进行实名认证，并需要提供姓名、<strong><u>身份证号</u></strong>、联系电话、<strong><u>收货地址</u></strong>、<span style="text-decoration: underline;"><strong>详细地址</strong></span>（以实际运营方页面展示为准），<strong>此时，腾讯视频不会收集您的这些信息。提示您仔细识别实际服务的提供方，并在使用任何第三方服务之前仔细查看相关隐私政策或个人信息处理规则。</strong></p>
+<p class="ql-align-justify"><strong>1.19 &nbsp;第三方调用权限</strong></p>
+<p class="ql-align-justify"><strong><span style="text-decoration: underline;">位置权限</span>、</strong>蓝牙权限可能会用于部分第三方应用（含H5页面、小程序等）服务，提供基于地理位置的服务或通过蓝牙提高位置准确性等，该等权限仅在您使用第三方应用特定功能时通过腾讯视频申请获取。您授权使用<strong><u>位置权限</u></strong><u>的</u>第三方应用还可能采集您的SSID。详情参见第三方应用的隐私政策。</p>
+<p><strong>1.20 &nbsp;传感器应用场景声明</strong></p>
+<div>
+<div>
+<table>
+<tbody>
+<tr>
+<td style="text-align: center;" colspan="1" rowspan="1" width="281">
+<p><strong>功能板块</strong></p>
+</td>
+<td style="text-align: center;" colspan="1" rowspan="1" width="470">
+<p><strong>传感器名称</strong></p>
+</td>
+<td style="text-align: center;" colspan="1" rowspan="1" width="497">
+<p><strong>适用场景</strong></p>
+</td>
+<td style="text-align: center;" colspan="1" rowspan="1" width="579">
+<p><strong>使用目的</strong></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="281">
+<p><span data-font-family="宋体">1.2&nbsp;</span><span data-font-family="宋体">账号资料维护</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">加速度传感器、</span><span data-font-family="宋体">重力传感器、陀螺仪传感器&nbsp;</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">用户个人中心背景图及“成就勋章”功能</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器检测设备状态，并随重力在功能板块中展示动态效果的背景图以及晃动成就勋章的虚拟图像</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="281">
+<p><span data-font-family="宋体">1.3&nbsp;</span><span data-font-family="宋体">实名认证</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">光线传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">用户开通腾讯视频创作号（仅在使用炫彩光线活体作为实人认证方式时适用）</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">引导用户在光线正常环境进行炫彩光线活体检测（即实人认证），在光线异常情况下提示用户</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="5" width="281">
+<p><span data-font-family="宋体">1.5&nbsp;</span><span data-font-family="宋体">内容浏览/播放/下载/订阅</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">加速度传感器、</span><span data-font-family="宋体">方向传感器、设备运动数据（仅iOS版，用于采集陀螺仪数据）</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">视频播放过程中设备横竖屏状态切换</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器信息检测屏幕方向，进行视频播放横竖屏切换</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">旋转矢量传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">播放VR视频片源</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">获取传感器信息并据此调整VR视频画面角度</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">陀螺仪传感器、</span><span data-font-family="宋体">加速度传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">内容浏览中涉及创新交互功能（如摇动、扭动、扭转设备）的活动</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">调用传感器识别判断用户设备状态，以判断用户是否参与活动</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">陀螺仪传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">用户在视频播放中拖拽播放进度条和上拉底部提示</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">在用户操作时通过调用传感器使设备震动，即时提示用户操作</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">陀螺仪传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">频道页推荐内容海报动态效果</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器检测用户设备状态，并展示动态效果的推荐内容海报</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="2" width="281">
+<p><span data-font-family="宋体">1.7&nbsp;</span><span data-font-family="宋体">信息上传或发布、交流互动</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">光线传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">视频剪辑和制作过程中检测光线</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器检测光线，以调整屏幕亮度</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">加速度传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">AR</span><span data-font-family="宋体">视频剪辑和制作过程中检测方向和角度</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器获取方向信息和角度信息，以调整AR素材画面角度</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="281">
+<p><span data-font-family="宋体">1.9 运营及产品安全需要</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">加速度传感器、重力传感器、陀螺仪传感器、旋转矢量传感器、光线传感器、线性加速器、磁场传感器、压力传感器、相对湿度传感器、环境温度传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">为提供安全、可信的产品与使用环境，提供优质而可靠的服务与信息，检测是否存在相关传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">如建立推送链接时识别设备场景中，防止黑产及外部恶意攻击。</span></p>
+<p>&nbsp;</p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="281">
+<p><span data-font-family="宋体">1.11 广告（含个性化广告）</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">陀螺仪传感器、加速度传感器、重力传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">创新广告交互功能（如摇动、扭动、扭转设备）</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">调用设备传感器识别判断设备状态，以判断用户是否参与交互广告</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="281">
+<p><span data-font-family="宋体">1.13&nbsp;</span><span data-font-family="宋体">直播服务</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">方向传感器、</span><span data-font-family="宋体">加速度传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">直播开播时设备横竖屏状态检测</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器检测设备横竖屏状态，如果横竖屏状态与直播方式不一致，提示用户；根据设备横竖屏状态，设置美颜场景的拍摄起始位置</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="281">
+<p><span data-font-family="宋体">1.15&nbsp;</span><span data-font-family="宋体">游戏</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">加速度传感器、</span><span data-font-family="宋体">磁场传感器、</span><span data-font-family="宋体">陀螺仪传感器、环境温度传感器、</span><span data-font-family="宋体">方向传感器</span></p>
+<p>&nbsp;</p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">腾讯视频爱玩游戏小游戏平台为开发者提供传感器能力。</span><span data-font-family="宋体">该等传感器信息仅在用户使用第三方游戏的特定功能时通过腾讯视频获取，腾讯视频不会收集该等传感器信息，但该等第三方可能自行收集相关传感器信息</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p>&nbsp;</p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="2" width="281">
+<p><span data-font-family="宋体">其他通用功能</span></p>
+</td>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">加速度传感器、</span><span data-font-family="宋体">磁场传感器、</span><span data-font-family="宋体">方向传感器、</span><span data-font-family="宋体">压力传感器、</span><span data-font-family="宋体">重力传感器、</span><span data-font-family="宋体">旋转矢量传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">应用内及小程序</span><span data-font-family="宋体">定位服务、室内定位场景</span><span data-font-family="宋体">。</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">经过用户授权后，辅助获得</span><span data-font-family="宋体">位置信息</span><span data-font-family="宋体">。单独的设备传感器数据不涉及任何个人位置信息且无法与其他信息结合用于识别特定自然人的身份。</span></p>
+</td>
+</tr>
+<tr>
+<td colspan="1" rowspan="1" width="470">
+<p><span data-font-family="宋体">光线传感器</span></p>
+</td>
+<td colspan="1" rowspan="1" width="497">
+<p><span data-font-family="宋体">扫描二维码功能</span></p>
+</td>
+<td colspan="1" rowspan="1" width="579">
+<p><span data-font-family="宋体">通过传感器检测光线，以调整屏幕亮度</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><strong>1.21 &nbsp;征得同意的例外情形</strong></p>
+<p class="ql-align-justify">根据法律法规的规定，我们在以下情况下收集和使用您的个人信息无需取得您的同意：</p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;为订立、履行您作为一方当事人的合同所必需，或者按照依法制定的劳动规章制度和依法签订的集体合同实施人力资源管理所必需；</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;为履行法定职责或者法定义务所必需；</p>
+<p class="ql-align-justify">(3)&nbsp;&nbsp;为应对突发公共卫生事件，或者紧急情况下为保护自然人的生命健康和财产安全所必需；</p>
+<p class="ql-align-justify">(4)&nbsp;&nbsp;为公共利益实施新闻报道、舆论监督等行为，在合理的范围内处理您的个人信息；</p>
+<p class="ql-align-justify">(5)&nbsp;&nbsp;依照《个人信息保护法》规定在合理范围内处理您自行公开或者其他已经合法公开的个人信息；</p>
+<p class="ql-align-justify">(6)&nbsp;&nbsp;法律、行政法规规定的其他情形。</p>
+<h3>&nbsp;</h3></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64190" name="content-item">2. Cookie等同类技术的使用</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">Cookie及同类技术是互联网中普遍使用的技术。当您使用我们的产品和/或服务时，我们可能会使用Cookie及同类技术收集您的登录信息、设备信息、<span style="text-decoration: underline;"><strong>个人上网记录</strong></span>等偏好数据，用于确保我们平台的正常运转、简化您重复操作的步骤（如注册、登录）、便于您查看使用历史（如视频观看历史）、向您提供更切合您个人需要或您更感兴趣的服务内容、保护您的信息和账号安全性、提升我们的产品和服务等。</p>
+<p class="ql-align-justify">我们不会将 Cookie 及同类技术用于本隐私保护指引所述目的之外的任何用途。如果您拒绝我们使用Cookie及同类技术收集和使用您的相关信息，您可在浏览器具备该功能的前提下，通过您的浏览器的设置以管理、部分/全部拒绝Cookie和/或同类技术；或删除已经储存在您的计算机、移动设备或其他装置内的Cookie和/或同类技术。您如需详细了解如何更改浏览器设置，请具体查看您使用的浏览器的相关设置页面。您理解并知悉：我们的某些产品/服务只能通过使用Cookie或同类技术才可得到实现，如您拒绝使用或删除的，您可能将无法正常使用我们的相关产品与/或服务或无法通过我们的产品与/或服务获得最佳的服务体验，同时也可能会对您的信息保护和账号安全性造成一定的影响。</p>
+<p class="ql-align-justify">更多有关我们使用Cookie和同类技术的情况，可点击查看查阅<strong>《<a href="https://privacy.qq.com/policy/cookie-privacypolicy">Cookie政策</a>》</strong>。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64191" name="content-item">3. 信息的存储</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify"><strong>3.1&nbsp;存储地点</strong></p><p class="ql-align-justify">我们在中华人民共和国境内运营中收集和产生的个人信息存储于中华人民共和国境内。目前我们暂时不存在向境外提供您的个人信息的场景。</p><p class="ql-align-justify">如我们因业务等需要，确需向中华人民共和国境外提供个人信息的，我们应具备法律规定的条件（通过国家网信部门组织的安全评估或按照国家网信部门制定的标准合同与境外接收方订立合同，约定双方的权利和义务等），并将向您告知境外接收方的名称或者姓名、联系方式、处理目的、处理方式、个人信息的种类以及您向境外接收方行使个人信息主体权利的方式和程序等事项，取得您的单独同意。我们将采取必要措施，保障境外接收方处理个人信息的活动达到中国法律规定的个人信息保护标准。</p><p class="ql-align-justify"><strong>3.2&nbsp;存储期限</strong></p><p class="ql-align-justify">我们将在实现您的个人信息处理目的所必要的最短时间内保存您的个人信息，但您行使删除权、注销账号或法律法规另有规定的除外（例如：《电子商务法》规定：商品和服务信息、交易信息保存时间自交易完成之日起不少于三年）。超出上述存储期限后，我们会对您的个人信息进行删除或匿名化处理。</p><p class="ql-align-justify">当我们的产品或服务停止运营时，我们将以推送通知、公告等形式通知您，并在合理期限内删除您的个人信息或进行匿名化处理，法律法规另有规定的除外。</p><p class="ql-align-justify"><br></p><p class="ql-align-justify"><br></p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64192" name="content-item">4. 信息安全</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify"><strong>4.1 安全保护措施</strong></p><p class="ql-align-justify">我们努力为您的个人信息安全提供保障，以防止个人信息的泄露、篡改、丢失、不当使用、未经授权的访问和披露等。我们采用多方位的安全保护措施，包括技术保护措施、管理制度控制、安全体系保障等方面，以确保您的个人信息保护处于合理的安全水平。</p><p class="ql-align-justify">(1)&nbsp;&nbsp;技术保护措施</p><p class="ql-align-justify">我们采用业界领先的技术保护措施保护您的个人信息，包括但不限于防火墙、加密（例如SSL）、去标识化或匿名化处理、访问控制措施等。此外，我们还会不断加强安装在您设备端的软件的安全能力。例如，我们会在您的设备本地完成部分信息加密工作，以巩固安全传输；我们会了解您设备安装的应用信息和运行的进程信息，以预防病毒、木马等恶意程序。</p><p class="ql-align-justify">(2)&nbsp;&nbsp;管理制度和操作规程</p><p class="ql-align-justify">我们建立了保障个人信息安全的内部管理制度和操作规程。对个人信息实行分类管理，合理确定个人信息处理的操作权限，并定期对从业人员进行安全教育和培训。</p><p class="ql-align-justify">(3)&nbsp;&nbsp;安全体系保障</p><p class="ql-align-justify">我们构建并完善包括安全体系认证、业务安全能力认证的个人信息安全管理体系。目前，我们的重要信息系统已经通过了国家网络安全等级保护（三级）的测评和备案。</p><p class="ql-align-justify"><strong>4.2&nbsp;安全事件处置措施</strong></p><p class="ql-align-justify">若发生或可能发生个人信息泄露、篡改、丢失等个人信息安全事件，我们会启动个人信息安全事件应急预案，阻止个人信息安全事件扩大。</p><p class="ql-align-justify">个人信息安全事件发生后，除非我们采取措施能够有效避免信息泄露、篡改、丢失造成危害的，我们将及时以推送通知、邮件等形式告知您个人信息安全事件的基本情况、我们即将或已经采取的处置措施和补救措施，以及我们对您的应对建议。如果难以实现逐一告知，我们将通过公告等方式发布警示。</p><p class="ql-align-justify"><br></p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64193" name="content-item">5. 信息共享</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify"><strong style="color: black;">5.1&nbsp;&nbsp;个人信息委托处理</strong></p>
+<p class="ql-align-justify">平台的部分功能可能由外部服务商提供，例如，我们可能会聘请专业数据处理服务机构来为我们的平台提供数据分析方面的技术支持。</p>
+<p class="ql-align-justify">对我们委托处理个人信息的公司、组织和个人，我们会与其签署协议，约定委托处理的目的、期限、处理方式、个人信息的种类、保护措施以及双方的权利和义务等，并对受托人的个人信息处理活动进行监督。</p>
+<p class="ql-align-justify"><strong style="color: black;">5.2&nbsp;&nbsp;与集团外第三方分享</strong></p>
+<p class="ql-align-justify">为向您提供完善的产品和服务，在某些情形下，我们需要与我们集团外的第三方公司、组织或个人共享您的个人信息。我们仅会出于合法、正当、最小必要且本指引所明确的目的与第三方分享您的个人信息，并且只会分享必要的个人信息。如果第三方改变或超越您原同意范围处理您的个人信息，我们会要求第三方再次征得您的同意。</p>
+<p class="ql-align-justify">对我们与之共享个人信息的公司、组织和个人，我们会要求其严格遵守我们关于数据隐私保护的措施和要求，包括但不限于根据数据保护协议、承诺书及相关数据处理政策进行个人信息的处理，避免识别出个人身份，保障隐私安全。</p>
+<p class="ql-align-justify">您可以点击查看<strong>《<a href="https://privacy.qq.com/document/preview/ba4294dc9d4a45a89f3d682eb07a489b">腾讯视频与第三方共享个人信息清单</a>》</strong>详细了解与第三方共享您个人信息的情况；此外，您可以直接点击查看<strong>《<a href="https://privacy.qq.com/document/priview/7900b34b6f8248e08313cf3f1899ea37">腾讯视频接入第三方SDK目录</a>》</strong>了解接入的第三方软件工具开发包（SDK）的具体信息。</p>
+<p class="ql-align-justify">与第三方共享的主要情形如下：</p>
+<p class="ql-align-justify"><strong>5.2.1&nbsp;为实现我们的功能/服务所必需进行的共享</strong></p>
+<p class="ql-align-justify">在某些情况下，我们必需共享您的个人信息，才能履行我们作为与您订立相关合同的一方当事人的义务或提供您需要的服务，具体第三方信息情况请点击查看<strong>《<a href="https://privacy.qq.com/document/preview/ba4294dc9d4a45a89f3d682eb07a489b">腾讯视频与第三方共享个人信息清单</a>》</strong>，主要包括以下情形：</p>
+<p class="ql-align-justify">(1) 支付服务：为帮助您完成款项支付，我们会将您的<strong><u>用户标识信息</u></strong>、<strong><u>网络IP地址</u></strong>、<strong><u>订单交易信息</u></strong>等信息（以实际共享的信息为准）提供给提供支付服务的合作方。</p>
+<p class="ql-align-justify">(2) 下单与交付：为实现购买商品/服务的需求（包括货物配送与交付等），我们会将您的<strong><u>订单相关信息</u></strong>、<strong><u>商品/服务信息</u></strong>、收货信息（如：<strong><u>收货人姓名</u></strong>、<strong><u>收货地址</u></strong>及<strong><u>联系电话</u></strong>）等信息（以实际共享的信息为准）提供给提供相关服务的合作方（如：供货等服务提供方）。</p>
+<p class="ql-align-justify">(3) 数字藏品服务：为实现您使用数字藏品服务，我们会将您的<span style="text-decoration: underline;"><strong>姓名</strong></span>、<span style="text-decoration: underline;"><strong>身份证号码</strong></span>、<span style="text-decoration: underline;"><strong>手机号码</strong></span>、个人拥有藏品数量和藏品列表提供给区块链技术服务的提供方。</p>
+<p class="ql-align-justify">(4) 联合会员：当您在腾讯视频内购买第三方产品/服务的会员权益时，为实现您的会员权益发放，我们可能会将您的<span style="text-decoration: underline;"><strong>订单消费信息</strong></span>（含消费明细、消费时间、消费金额、支付方式、开通会员天数）、账号信息、IP地址提供给第三方产品/服务的提供方。</p>
+<p class="ql-align-justify"><span style="color: #000000;">(5) 机构创作者供应商服务：</span><span style="color: #000000;">当机构创作者</span>使用创作服务市场的供应商服务时，我们会将机构创作者在相应订单中提供的订购人姓名、订购人手机号码提供给供应商用于服务沟通。</p>
+<p class="ql-align-justify">(6) 其他为实现我们的功能/服务所必须进行的共享。</p>
+<p class="ql-align-justify"><strong>5.2.2&nbsp;广告合作</strong></p>
+<p class="ql-align-justify">为了投放广告，评估、优化广告投放效果等目的，我们需要向广告主及其代理商等第三方合作伙伴共享您的部分数据，要求其严格遵守我们关于数据隐私保护的措施与要求，包括但不限于根据数据保护协议、承诺书及相关数据处理政策进行处理，避免识别出个人身份，保障隐私安全。</p>
+<p class="ql-align-justify"><strong>5.2.3&nbsp;第三方SDK类合作方</strong></p>
+<p class="ql-align-justify">我们可能会与第三方软件工具开发包（SDK）或其他类似的应用程序类服务商分享您的个人信息，以保障平台的稳定运行、功能实现，具体接入信息您可以点击查看<strong>《<a href="https://privacy.qq.com/document/priview/7900b34b6f8248e08313cf3f1899ea37">腾讯视频接入第三方SDK目录</a>》</strong>。我们会对该等获取个人信息的第三方软件工具开发包（SDK）、应用程序接口（API）进行严格的安全监测，令其按照本指引以及其他任何相关的保密和安全措施来处理个人信息，以保护数据安全。</p>
+<p class="ql-align-justify"><strong style="color: black;">5.3&nbsp;&nbsp;个人信息转移</strong></p>
+<p class="ql-align-justify">我们不会将您的个人信息转移给任何公司、组织和个人，但以下情形除外：</p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;在获得您的明确同意后，我们会向其他方转移您的个人信息；</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;因合并、分立、解散、被宣告破产等原因需要转移您的个人信息的，我们将向您告知接收方的名称或者姓名和联系方式，并会要求新的持有您个人信息的公司、组织继续受此政策的约束，否则我们将要求该公司、组织重新向您征求同意。</p>
+<p class="ql-align-justify"><strong>5.4&nbsp;&nbsp;公开披露</strong></p>
+<p class="ql-align-justify">我们不会对外公开披露所收集的个人信息，如必须公开披露时，我们会向您告知此次公开披露的目的、披露信息的类型及可能涉及的敏感信息，并征得您的单独同意。</p>
+<p class="ql-align-justify"><strong>5.5&nbsp;&nbsp;同意的例外情形</strong></p>
+<p class="ql-align-justify">根据《个人信息保护法》的规定，以下情形下，我们共享、转让、公开披露您的个人信息，无需事先取得您的同意：</p>
+<p class="ql-align-justify">(1)&nbsp;&nbsp;为订立、履行您作为一方当事人的合同所必需，或者按照依法制定的劳动规章制度和依法签订的集体合同实施人力资源管理所必需；</p>
+<p class="ql-align-justify">(2)&nbsp;&nbsp;为履行法定职责或者法定义务所必需；</p>
+<p class="ql-align-justify">(3)&nbsp;&nbsp;为应对突发公共卫生事件，或者紧急情况下为保护自然人的生命健康和财产安全所必需；</p>
+<p class="ql-align-justify">(4)&nbsp;&nbsp;为公共利益实施新闻报道、舆论监督等行为，在合理的范围内处理个人信息；</p>
+<p class="ql-align-justify">(5)&nbsp;&nbsp;依照《个人信息保护法》的规定在合理的范围内处理个人自行公开或者其他已经合法公开的个人信息；</p>
+<p class="ql-align-justify">(6)&nbsp;&nbsp;法律、行政法规规定的其他情形。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64194" name="content-item">6. 您的权利</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">在您使用腾讯视频期间，为了让您更便捷地查询、复制、更正、删除您的个人信息，同时保障您撤回个人信息处理的同意和注销账户的权利，我们在产品设计中为您提供了相应的操作设置，您可参考下面的指引进行操作。此外，我们还设置了投诉举报渠道，您的意见将会得到及时的处理。如果您无法通过上述途径和方式行使您的个人信息主体权利，您可以通过本隐私保护指引中提供的联系方式提出您的请求，我们会按照法律法规的规定予以反馈。</p>
+<p class="ql-align-justify"><strong style="color: black;">6.1&nbsp;&nbsp;查询个人信息</strong></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">1</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">账号信息管理”查询您的微信或</span><span style="font-family: 'Segoe UI', sans-serif;">QQ</span><span style="font-family: 宋体;">头像、昵称、手机号码；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">2</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">观看历史”查询您的<strong><u>视频播放记录、小说漫画观看记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">3</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">预约</span><span style="font-family: 'Segoe UI', sans-serif;">/</span><span style="font-family: 宋体;">加追”查询您的剧集及个人专辑<strong><u>加追记录、预约记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">4</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的下载”查询您的视频、小说、应用<strong><u>下载记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">5</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的片单”查询您的片单<strong><u>创建及收藏记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">6</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的收藏”查询您的剧集、片单、个人专辑及短视频<strong><u>收藏记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">7</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">个人信息概览”查询您的生日、手机号码、电子邮箱地址、收货地址、关联账号、共享设备；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">8</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">头像</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">修改资料”查询您的昵称、性别、生日星座、所在地；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">9</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">草场地商城</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的”查询您的<strong><u>订单信息</u></strong>及收货人名称、地址及电话；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">10</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">爱玩游戏</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的”查询您的下载应用记录、游戏信息授权情况、礼包福利记录、预约游戏记录；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">11</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的积分”查询您的积分明细、<strong><u>积分订单</u></strong>；“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的积分</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">积分捐助”查询您的公益项目、捐助积分、筹到善款以及<strong><u>详情记录</u></strong></span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">12</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的书架”查询您的<strong><u>我的书架（已收藏书籍）及阅读记录</u></strong>；“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">小说频道</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">账户</span><span style="font-family: 'Segoe UI', sans-serif;">/</span><span style="font-family: 宋体;">书架”查询您的<strong><u>消费记录、</u></strong>书券明细、<strong><u>已购书籍、我的书架（已收藏书籍）及阅读记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">13</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的鸡腿”查询您的鸡腿数量信息及<strong><u>使用记录（投喂记录、领取记录、兑换记录）</u></strong>。</span> </span></p>
+<p class="ql-align-justify"><strong style="color: black;">6.2&nbsp;&nbsp;个人信息副本获取</strong></p>
+<p class="ql-align-justify">如您需要您的个人信息的副本，您可以通过<span style="font-size: 14px;"><span style="font-family: 宋体;">路径：“</span><span style="font-family: 宋体;">个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">个人信息下载”进行申请；您也可以通过</span>本隐私保护指引文末提供的方式联系我们，在核实您的身份后，我们将向您提供您在我们的服务中的个人信息副本（包括基本资料、身份信息），但法律法规另有规定的或本隐私保护指引另有约定的除外。</span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;">在技术可行的前提下，符合国家网信部门规定条件的，我们还可按您的要求，将您的个人信息副本传输给您指定的第三方。</span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;"><strong style="color: black;">6.3&nbsp;&nbsp;更正、补充个人信息</strong></span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;">6.3.1&nbsp;当您发现我们处理的您的个人信息不准确或者不完整时，您有权要求我们作出更正或补充。您可以通过下列路径，自行对您的个人信息进行更正、补充：</span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">1</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">头像</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">修改资料”更正、补充您的昵称、性别、生日星座、所在地；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">2</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">个人信息概览”更正、补充您的生日、手机号码、电子邮箱地址、收货地址、主设备；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">3</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">视频</span><span style="font-family: 'Segoe UI', sans-serif;">VIP-</span><span style="font-family: 宋体;">会员帮助中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">更多</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">绑定手机</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">更绑手机”更换您绑定腾讯视频账号的手机号码；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">4</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">草场地商城</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">收货地址”更正、补充您的收货人名称、地址及电话。</span></span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;">6.3.2&nbsp;您也可以通过本隐私保护指引第10节提供的方式联系我们，我们对您的个人信息予以核实后，会及时更正、补充您的个人信息。</span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;"><strong style="color: black;">6.4&nbsp;&nbsp;删除个人信息</strong></span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;">6.4.1&nbsp;您可以通过以下路径自行删除您的个人信息：</span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">1</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">观看历史</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">编辑”删除您的视频、小说漫画<strong><u>观看记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">2</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">预约</span><span style="font-family: 'Segoe UI', sans-serif;">/</span><span style="font-family: 宋体;">加追</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">编辑”删除您的剧集及个人专辑<span style="text-decoration: underline;"><strong>加追记录</strong></span>、<span style="text-decoration: underline;"><strong>预约记录</strong></span>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">3</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的下载</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">编辑”删除您的视频、小说、应用<span style="text-decoration: underline;"><strong>下载记录</strong></span>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">4</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的片单</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">编辑”删除您的<span style="text-decoration: underline;"><strong>片单创建及收藏记录</strong></span>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">5</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的收藏</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">编辑”删除您的剧集、片单、个人专辑及短视频<span style="text-decoration: underline;"><strong>收藏记录</strong></span>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">6</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">小说频道</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">账户</span><span style="font-family: 'Segoe UI', sans-serif;">/</span><span style="font-family: 宋体;">书架”或“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的书架</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">编辑”删除您的已收藏书籍、<strong><u>阅读记录</u></strong>；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">7</span><span style="font-family: 宋体;">）您可以通过路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">草场地</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">我的</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">地址管理”删除您的收货人名称、地址及电话；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">8</span><span style="font-family: 宋体;">）</span>您可以进入腾讯视频后，通过访问您发表的帖子、评论、视频，删除您发表的帖子、评论、视频。</span></p>
+<p class="ql-align-justify"><span style="font-size: 14px;">6.4.2&nbsp;&nbsp;在以下情形中，您可以通过本隐私保护指引文末提供的方式联系我们，请求我们删除您的个人信息：</span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">1</span><span style="font-family: 宋体;">）如果我们处理个人信息的行为违反法律法规；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">2</span><span style="font-family: 宋体;">）如果我们收集、使用您的个人信息，却未征得您的同意；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">3</span><span style="font-family: 宋体;">）如果您同意我们收集、使用您的个人信息后又撤回同意；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">4</span><span style="font-family: 宋体;">）如果我们处理个人信息的行为违反了与您的约定；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">5</span><span style="font-family: 宋体;">）如果您不再使用我们的产品或服务，或您注销了账号；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">6</span><span style="font-family: 宋体;">）如果我们不再为您提供产品或服务；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">7</span><span style="font-family: 宋体;">）如果您个人信息的处理目的已实现、无法实现或者为实现处理目的不再必要；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">8</span><span style="font-family: 宋体;">）如果您个人信息的保存期限已经届满。</span></span></p>
+<p class="ql-align-justify"><strong style="color: black;">6.5&nbsp;&nbsp;撤回同意</strong></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">1</span><span style="font-family: 宋体;">）您可以通过对您的硬件设备进行修改或通过下列路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">系统权限设置”撤回位置、相机、相册（图片、照片、视频、音频文件）、日历以及麦克风权限的授权；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">2</span><span style="font-family: 宋体;">）您可以通过下列路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">个性化内容管理”撤回个性化内容推荐授权；</span></span></p>
+<p style="line-height: 19.5pt; margin: 0cm; text-align: justify; font-size: 10.5pt; font-family: DengXian;"><span style="font-size: 14px;"><span style="font-family: 宋体;">（</span><span style="font-family: 'Segoe UI', sans-serif;">3</span><span style="font-family: 宋体;">）您可以通过以下路径：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">个性化广告管理”撤回个性化广告推送授权。</span></span></p>
+<p class="ql-align-justify">请您理解，每项业务功能需要一些必要的信息才能得以完成，当您撤回同意或授权后，我们将无法继续为您提供撤回同意或授权所对应的服务，也不再处理您相应的个人信息。但您撤回同意或授权的决定，不会影响此前基于您的授权而开展的信息处理。</p>
+<p class="ql-align-justify"><strong style="color: black;">6.6&nbsp;&nbsp;注销账号</strong></p>
+<p class="ql-align-justify">您可以通过路径<span style="font-size: 14px;"><span style="font-family: 宋体;">：“个人中心</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">设置</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">隐私管理</span><span style="font-family: 'Segoe UI', sans-serif;">-</span><span style="font-family: 宋体;">注销账号”</span>&nbsp;</span>注销您的腾讯视频账号。</p>
+<p class="ql-align-justify">在您注销腾讯视频账号后，我们将停止为您提供腾讯视频的全部产品和/或服务，并依据法律法规相关要求通过匿名化等方式处理您的个人信息，或删除与您账号相关的个人信息，但法律法规或监管机构对用户信息存储时间另有规定的除外。有关注销账号的相关规则和流程，请参见<strong>《<a href="https://m.v.qq.com/app/restore/protocol.html">腾讯视频账号注销协议</a>》</strong>。</p>
+<p class="ql-align-justify"><strong style="color: black;">6.7&nbsp;&nbsp;获取本隐私保护指引的解释说明</strong></p>
+<p class="ql-align-justify">您可以通过本隐私保护指引第10节提供的方式联系我们，要求我们对本隐私保护指引进行解释说明。</p>
+<p class="ql-align-justify"><strong style="color: black;">6.8&nbsp;&nbsp;约束信息系统自动决策</strong></p>
+<p class="ql-align-justify">在某些业务功能中，我们可能仅依据信息系统、算法等在内的非人工自动决策机制作出决定。如果这些决定显著影响您的合法权益，您可以通过本隐私保护指引第10节提供的方式联系我们，要求我们予以说明，并拒绝我们仅通过自动化决策的方式作出决定。</p>
+<p class="ql-align-justify"><strong style="color: black;">6.9&nbsp;&nbsp;已故用户的个人信息保护</strong></p>
+<p class="ql-align-justify">用户不幸去世的，其近亲属为了自身的合法、正当利益，可以对已故用户的相关个人信息行使本隐私保护指引规定的查阅、复制、更正、删除等权利；已故用户生前另有安排的除外。</p>
+<p class="ql-align-justify"><strong style="color: black;">6.10 响应您的上述请求</strong></p>
+<p class="ql-align-justify">我们将尽快审核所涉问题，并在15日或法律法规规定的期限内予以反馈。如您不满意或有任何问题，您可以通过本隐私保护指引第10节提供的方式联系我们。</p>
+<p class="ql-align-justify">为保障安全，如您根据本隐私保护指引第6节向我们提出请求，我们将验证您的个人信息主体身份后处理您的请求。</p>
+<p class="ql-align-justify">对于您合理的请求，我们原则上不收取费用，但对多次重复、超出合理限度的请求，我们将视情况收取一定成本费用。对于那些技术上难以实现、根据法律、行政法规的规定无需响应的请求或响应您的请求将违反法律、行政法规时，我们可能会予以拒绝，并向您说明理由。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64195" name="content-item">7. 变更</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">我们可能会适时对本隐私保护指引进行修订。当本隐私保护指引的条款发生变更时，我们会在版本更新时向您提示变更后的隐私保护指引，并向您说明生效日期。当本隐私保护指引发生重大变更时，我们还会提供更为显著的通知，将变更部分告知您。</p><p class="ql-align-justify">上述“重大变更”包括：</p><p class="ql-align-justify">(1) 个人信息处理者的名称或者姓名和联系方式；</p><p class="ql-align-justify">(2) 个人信息的处理目的、处理方式，处理的个人信息种类、保存期限；</p><p class="ql-align-justify">(3) 个人行使本法规定权利的方式和程序；</p><p class="ql-align-justify">(4) 法律、行政法规规定应当告知的其他事项。</p><p class="ql-align-justify">请您仔细阅读变更后的隐私保护指引内容，您继续使用腾讯视频表示您同意我们按照更新后的隐私保护指引处理您的个人信息。如果个人信息的处理目的、处理方式和处理的个人信息种类发生变更的，我们将重新取得您的同意。</p><p><br></p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64196" name="content-item">8. 未成年人保护</span></div><div data-v-49c41d7e="" class="ql-editor"><p>我们非常重视对未成年人个人信息的保护。若您是18周岁以下的未成年人，在取得您或您的监护人同意之前，我们不会处理您的个人信息。若您是未成年人的监护人，当您对您所监护的未成年人的个人信息有相关疑问时，请通过“10. 联系我们”中的联系方式与我们联系。</p>
+<p><span style="color: #000000;">特别地，若您是14周岁以下的儿童，我们还专门为您制定了<strong>《<a href="https://privacy.qq.com/mb/policy/kids-privacypolicy">儿童隐私保护声明</a>》</strong>，儿童及其监护人在为14周岁以下的儿童使用腾讯视频服务前，还应仔细阅读<strong>《<a href="https://privacy.qq.com/mb/policy/kids-privacypolicy">儿童隐私保护声明</a>》</strong>。只有在取得监护人对<strong>《<a href="https://privacy.qq.com/mb/policy/kids-privacypolicy">儿童隐私保护声明</a>》</strong>的同意后，我们才会处理14周岁以下的<span style="text-decoration: underline;"><strong>儿童个人信息</strong></span>。</span></p>
+<p>&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64197" name="content-item">9. 其他</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">9.1《<a href="https://privacy.qq.com/policy/tencent-privacypolicy">腾讯隐私政策</a><strong>》</strong>是我们统一适用的一般性隐私条款，其中所规定的用户权利及信息安全保障措施均适用于腾讯视频用户。如<strong>《<a href="https://privacy.qq.com/policy/tencent-privacypolicy">腾讯隐私政策</a>》</strong>与本隐私保护指引存在不一致或矛盾之处，请以本隐私保护指引为准。</p>
+<p class="ql-align-justify"><span style="color: #000000;">9.2<strong>《<a href="https://privacy.qq.com/mb/policy/kids-privacypolicy">儿童隐私保护声明</a>》</strong>是适用于十四周岁以下的儿童用户的信息保护规则。在<strong>《<a href="https://privacy.qq.com/mb/policy/kids-privacypolicy">儿童隐私保护声明</a>》</strong>的适用范围内，如其与<strong>《<a href="https://privacy.qq.com/policy/tencent-privacypolicy">腾讯隐私政策</a>》</strong>、本指引存在不一致或矛盾之处，请以<strong>《<a href="https://privacy.qq.com/mb/policy/kids-privacypolicy">儿童隐私保护声明</a>》</strong>为准。</span></p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64198" name="content-item">10. 联系我们</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">我们设立了专门的个人信息保护团队和个人信息保护负责人，如果您对本隐私保护指引或个人信息保护相关事宜有任何疑问或投诉、建议时，您可以通过以下方式与我们联系：</p>
+<p class="ql-align-justify">(1) 您可以填写<a style="color: black;" href="https://privacy.qq.com/mb/questionnaire" target="_blank" rel="noopener noreferrer"><strong>个人信息保护和隐私问题反馈问卷</strong></a>与我们联系；</p>
+<p class="ql-align-justify">(2) 将问题发送至Dataprivacy@tencent.com；</p>
+<p class="ql-align-justify">(3) 通过 https://kf.qq.com/ 与我们联系；</p>
+<p class="ql-align-justify">(4) 将您的问题邮寄至下列地址：</p>
+<p class="ql-align-justify">中国广东省深圳市南山区海天二路33号腾讯滨海大厦 数据合规与隐私保护部（收）</p>
+<p class="ql-align-justify">邮编：518054</p>
+<p class="ql-align-justify">我们将尽快审核所涉问题，并在15日或法律法规规定的期限内予以反馈。</p>
+<p class="ql-align-justify">&nbsp;</p>
+<p style="text-align: right;">深圳市腾讯计算机系统有限公司</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="64199" name="content-item">附录：定义</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify"><strong>个人信息</strong>：指以电子或者其他方式记录的与已识别或者可识别的自然人有关的各种信息，不包括匿名化处理后的信息（出自《中华人民共和国个人信息保护法》第四条）。</p>
+<p class="ql-align-justify"><strong>敏感个人信息</strong>：一旦泄露或者非法使用，容易导致自然人的人格尊严受到侵害或者人身、财产安全受到危害的个人信息，包括生物识别、宗教信仰、特定身份、医疗健康、金融账户、行踪轨迹等信息，以及不满十四周岁未成年人的个人信息（出自《中华人民共和国个人信息保护法》第二十八条）。</p>
+<p class="ql-align-justify"><strong>匿名化</strong>：是指个人信息经过处理无法识别特定自然人且不能复原的过程（出自《中华人民共和国个人信息保护法》第七十三条）.</p>
+<p class="ql-align-justify"><strong>去标识化</strong>：是指个人信息经过处理，使其在不借助额外信息的情况下无法识别特定自然人的过程（出自《中华人民共和国个人信息保护法》第七十三条）.</p>
+<p class="ql-align-justify"><strong>关联公司</strong>：是指与我们间存在直接或间接控制关系或重大影响关系的公司。</p>
+<p class="ql-align-justify"><strong>儿童</strong>：指不满十四周岁的未成年人。</p>
+<p class="ql-align-justify"><strong>处理个人信息</strong>：指个人信息的收集、存储、使用、加工、传输、提供、公开、删除等。</p>
+<p class="ql-align-justify"><strong>自动化决策：</strong>指通过计算机程序自动分析、评估个人的行为习惯、兴趣爱好或者经济、健康、信用状况等，并进行决策的活动（出自《中华人民共和国个人信息保护法》第七十三条）.</p>
+<p class="ql-align-justify"><strong>Cookie：</strong>Cookie是包含字符串的小文件，在您登入和使用网站或其他网络内容时发送、存放在您的计算机、移动设备或其他装置内（通常经过加密）。Cookie同类技术是可用于与Cookie类似用途的其他技术，例如：Web Beacon、Proxy、嵌入式脚本、像素标签等。</p>
+<p class="ql-align-justify"><strong>SSL</strong>：SSL（Secure Socket Layer）又称为安全套接层，是在传输通信协议（TCP/IP）上实现的一种安全协议。SSL支持各种类型的网络，同时提供三种基本的安全服务，均通过使用公开密钥和对称密钥技术以达到信息保密的效果。</p>
+<p>&nbsp;</p></div></div><div data-v-49c41d7e=""><!----><!----></div></div></div></div></div><!----></div></div></div><script src="/document/static/js/chunk-elementUI.f6f70094.js"></script><script src="/document/static/js/chunk-jspdf.53ce4900.js"></script><script src="/document/static/js/chunk-html2canvas.59c4e88c.js"></script><script src="/document/static/js/chunk-libs.02352699.js"></script><script src="/document/static/js/index.c18257ce.js"></script></body><div id="codex-browser-sidebar-comments-root" style="position: fixed; inset: 0px; pointer-events: none; z-index: 2147483647;"></div></html>

@@ -1,0 +1,1082 @@
+<html lang="zh" xml:lang="zh"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="color-scheme" content="light dark"><link rel="icon" href="/document/favicon.ico"><link rel="stylesheet" href="//at.alicdn.com/t/font_2741193_ifyz0d9koce.css"><title>腾讯隐私保护平台</title><script src="https://cdn-go.cn/aegis/aegis-sdk/latest/aegis.min.js"></script><script>const whiteList = {
+        'privacy.qq.com': 'aTSihIrSbVFyNktJdS',
+        'privacy.tencent.com': 'aTSihIrSZDFvdcoHua'
+      }
+      const id = whiteList[location.host]
+      
+      if (id) {
+        const aegis = new Aegis({
+          id, // 项目ID，即上报id
+          uin: '', // 用户唯一 ID（可选）
+          reportApiSpeed: true, // 接口测速
+          reportAssetSpeed: true, // 静态资源测速
+          spa: true,
+          ext1: 1,
+          beforeRequest: function (data) {
+            let msg = '';
+            if (data.logs) msg = data.logs.msg;
+
+            const ifFilterLog =
+            data.logType === 'log' &&
+              (msg.includes('Script error') ||
+                msg.includes('Uncaught TypeError') ||
+                msg.includes('ReferenceError') ||
+                msg.includes("SyntaxError: Unexpected token '<'") ||
+                msg.includes('fetch req url: https://') && !msg.includes(location.host));
+
+            if (ifFilterLog) {
+              return false; //  手动过滤掉这几种错误
+            }
+          },
+        });
+      }</script><link href="/document/static/js/chunk-2d216214.8ece6c8e.js" rel="prefetch"><link href="/document/static/js/chunk-dc4aec5a.30ab81bc.js" rel="prefetch"><link href="/document/static/css/chunk-elementUI.af09357b.css" rel="preload" as="style"><link href="/document/static/css/chunk-libs.616508f1.css" rel="preload" as="style"><link href="/document/static/css/index.cea079bc.css" rel="preload" as="style"><link href="/document/static/js/chunk-elementUI.f6f70094.js" rel="preload" as="script"><link href="/document/static/js/chunk-html2canvas.59c4e88c.js" rel="preload" as="script"><link href="/document/static/js/chunk-jspdf.53ce4900.js" rel="preload" as="script"><link href="/document/static/js/chunk-libs.02352699.js" rel="preload" as="script"><link href="/document/static/js/index.c18257ce.js" rel="preload" as="script"><link href="/document/static/css/chunk-elementUI.af09357b.css" rel="stylesheet"><link href="/document/static/css/chunk-libs.616508f1.css" rel="stylesheet"><link href="/document/static/css/index.cea079bc.css" rel="stylesheet"></head><body><noscript><strong>We're sorry but 腾讯隐私保护平台 doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id="app"><div data-v-49c41d7e="" element-loading-text="下载中" element-loading-spinner="el-icon-loading" class="document-preview"><div data-v-49c41d7e="" class="el-container web-container"><div data-v-49c41d7e="" class="el-aside side-bar" style="width: 280px;"><div data-v-49c41d7e="" class="title" title="腾讯应用宝隐私保护指引
+"> 腾讯应用宝隐私保护指引
+ </div><div data-v-49c41d7e="" title="摘要" class="list-title active"> 摘要 </div><div data-v-49c41d7e="" title="阅读提示" class="list-title"> 阅读提示 </div><div data-v-49c41d7e="" title="导言" class="list-title"> 导言 </div><div data-v-49c41d7e="" title="1. 个人信息的收集和使用" class="list-title"> 1. 个人信息的收集和使用 </div><div data-v-49c41d7e="" title="2. Cookie等同类技术的使用" class="list-title"> 2. Cookie等同类技术的使用 </div><div data-v-49c41d7e="" title="3. 信息的存储" class="list-title"> 3. 信息的存储 </div><div data-v-49c41d7e="" title="4. 信息安全" class="list-title"> 4. 信息安全 </div><div data-v-49c41d7e="" title="5. 信息共享" class="list-title"> 5. 信息共享 </div><div data-v-49c41d7e="" title="6. 您的权利" class="list-title"> 6. 您的权利 </div><div data-v-49c41d7e="" title="7. 变更" class="list-title"> 7. 变更 </div><div data-v-49c41d7e="" title="8. 未成年人保护" class="list-title"> 8. 未成年人保护 </div><div data-v-49c41d7e="" title="9. 其他" class="list-title"> 9. 其他 </div><div data-v-49c41d7e="" title="10. 联系我们" class="list-title"> 10. 联系我们 </div><div data-v-49c41d7e="" title="附录：定义" class="list-title"> 附录：定义 </div><div data-v-49c41d7e="" title="历史隐私政策" class="list-title"> 历史隐私政策 </div><div data-v-49c41d7e="" title="历史版本" class="list-title"> 历史版本 </div></div><div data-v-49c41d7e="" class="el-container"><div data-v-49c41d7e="" class="el-main main"><div data-v-49c41d7e="" style="display: flex; font-weight: 600; font-size: 0.8rem;"><span data-v-49c41d7e="" style="margin-left: auto; margin-right: 0px;"> 更新日期：2025-05-20 </span><span data-v-49c41d7e="" style="margin-left: 2rem; margin-right: 0.5rem;"> 生效日期：2025-05-20 </span><span data-v-49c41d7e="" class="download-btn"><span data-v-49c41d7e="" class="iconfont privacy-xiazai"></span> 下载 </span></div><div data-v-49c41d7e="" class="header"></div><div data-v-49c41d7e="" id="pc-document-box" class="content-area"><div data-v-49c41d7e="" id="pc-document"><!----><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 摘要 </h1><div data-v-49c41d7e=""><h1 data-v-94b38a18="">摘要</h1>
+<div data-v-94b38a18="">
+<p>应用宝（“我们”）深知个人信息对您的重要性，我们将按照法律法规规定为您提供更加安全、可靠的服务。本摘要希望向您简洁介绍<a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13"><strong>《腾讯应用宝隐私保护指引》</strong></a>的核心内容，完整版正文请点击查看<a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13"><strong>《腾讯应用宝隐私保护指引》</strong></a>。</p>
+<p><strong>一、我们如何收集和使用您的个人信息</strong></p>
+<p>摘要如下，详情请查看<a href="https://privacy.qq.com/document/preview/391d74934b4f447487bc4fffbc3e5e5e"><strong>《收集个人信息明示清单》</strong></a>和<a href="https://privacy.qq.com/document/preview/79b16f51ffbb48a7b9ea67a818c5f6ab"><strong>《应用权限申请与使用情况说明》</strong></a>。</p>
+<table style="width: 82.542%; height: 704px;" border="1">
+<tbody>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; text-align: center; height: 19px;"><strong>序号</strong></td>
+<td style="width: 12.4486%; text-align: center; height: 19px;"><strong>信息类型</strong></td>
+<td style="width: 21.5433%; text-align: center; height: 19px;"><strong>信息名称</strong></td>
+<td style="width: 23.4191%; text-align: center; height: 19px;"><strong>使用目的</strong></td>
+<td style="width: 37.147%; text-align: center; height: 19px;"><strong>适用场景</strong></td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">1</td>
+<td style="width: 12.4486%; height: 76px;" rowspan="4">用户身份信息</td>
+<td style="width: 21.5433%; height: 19px;">昵称、头像</td>
+<td style="width: 23.4191%; height: 19px;">创建账号，完善网络资料、提供个性化体验</td>
+<td style="width: 37.147%; height: 19px;">使用微信或QQ登录应用宝</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">2</td>
+<td style="width: 21.5433%; height: 19px;">微信号、QQ号</td>
+<td style="width: 23.4191%; height: 19px;">创建账号，核实用户身份</td>
+<td style="width: 37.147%; height: 19px;">使用微信或QQ登录应用宝</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">3</td>
+<td style="width: 21.5433%; height: 19px;">性别、生日/年龄、身份证（或华侨护照、港澳台通行证、外国人永久居住身份证）</td>
+<td style="width: 23.4191%; height: 19px;">游戏实名认证</td>
+<td style="width: 37.147%; height: 19px;">使用云游戏功能</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">4</td>
+<td style="width: 21.5433%; height: 19px;">手机号码</td>
+<td style="width: 23.4191%; height: 19px;">识别用户联通大王卡或移动宝藏卡身份</td>
+<td style="width: 37.147%; height: 19px;">使用免流量服务</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">5</td>
+<td style="width: 12.4486%; height: 344px;" rowspan="13">设备属性信息</td>
+<td style="width: 21.5433%; height: 19px;">Android ID</td>
+<td style="width: 23.4191%; height: 19px;">提高服务安全性、防止恶意程序及反作弊、进行身份验证和识别</td>
+<td style="width: 37.147%; height: 19px;">账号安全保护、身份识别和个性化内容推荐</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">6</td>
+<td style="width: 21.5433%; height: 19px;">IP地址</td>
+<td style="width: 23.4191%; height: 19px;">根据IP地址判断位置分配就近服务器；通过网络状态判断用户的运营商，以及识别用户是否为运营商免流量用户</td>
+<td style="width: 37.147%; height: 19px;">提高用户整体使用和访问速度；针对已授权用户，在APP启动或切换至移动网络时进行信息传输并识别运营商免流量用户</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">7</td>
+<td style="width: 21.5433%; height: 19px;">CPU</td>
+<td style="width: 23.4191%; height: 19px;">检查CPU情况</td>
+<td style="width: 37.147%; height: 19px;">进行手机垃圾清理和加速</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">8</td>
+<td style="width: 21.5433%; height: 19px;">WIFI</td>
+<td style="width: 23.4191%; height: 19px;">检测WIFI网络状态，及时提醒告知用户</td>
+<td style="width: 37.147%; height: 19px;">使用云游戏功能、第三方微信小程序</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">9</td>
+<td style="width: 21.5433%; height: 19px;">附近的WIFI</td>
+<td style="width: 23.4191%; height: 19px;">用户在使用第三方微信小程序服务时，需要根据情况获取附近可连接的WIFI列表，使用前会征求用户同意</td>
+<td style="width: 37.147%; height: 19px;">使用第三方微信小程序时</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">10</td>
+<td style="width: 21.5433%; height: 19px;">运行内存</td>
+<td style="width: 23.4191%; height: 19px;">检查手机内存情况</td>
+<td style="width: 37.147%; height: 19px;">进行手机垃圾清理和加速、根据内存情况个性化内容推荐</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">11</td>
+<td style="width: 21.5433%; height: 19px;">SD卡数据</td>
+<td style="width: 23.4191%; height: 19px;">检查SD卡情况</td>
+<td style="width: 37.147%; height: 19px;">进行手机垃圾清理和加速</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">12</td>
+<td style="width: 21.5433%; height: 19px;">手机型号</td>
+<td style="width: 23.4191%; height: 19px;">提高服务安全性、防止恶意程序及反作弊、进行身份验证和识别</td>
+<td style="width: 37.147%; height: 19px;">账号安全保护、身份识别和个性化内容推荐</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">13</td>
+<td style="width: 21.5433%; height: 19px;">蓝牙名称、设备名称</td>
+<td style="width: 23.4191%; height: 19px;">提高服务安全性、防止恶意程序及反作弊、进行身份验证和识别</td>
+<td style="width: 37.147%; height: 19px;">账号安全保护、身份识别</td>
+</tr>
+<tr style="height: 39px;">
+<td style="width: 5.22277%; height: 39px;">14</td>
+<td style="width: 21.5433%; height: 39px;">开始获取位置、CellID、蓝牙MAC</td>
+<td style="width: 23.4191%; height: 39px;">用户在使用第三方微信小程序服务时，需要获取，使用前会征求用户同意</td>
+<td style="width: 37.147%; height: 39px;">使用第三方微信小程序时</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">15</td>
+<td style="width: 21.5433%; height: 19px;">BSSID</td>
+<td style="width: 23.4191%; height: 19px;">通过BSSID检测WIFI网络状态</td>
+<td style="width: 37.147%; height: 19px;">使用云游戏功能、第三方微信小程序</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">16</td>
+<td style="width: 21.5433%; height: 19px;">SSID</td>
+<td style="width: 23.4191%; height: 19px;">检查网络是否可用</td>
+<td style="width: 37.147%; height: 19px;">发起请求前，获取网络信息</td>
+</tr>
+<tr style="height: 39px;">
+<td style="width: 5.22277%; height: 39px;">17</td>
+<td style="width: 21.5433%; height: 39px;">精确位置</td>
+<td style="width: 23.4191%; height: 39px;">用户在使用第三方微信小程序服务时，需要使用该功能，使用前会征求用户同意</td>
+<td style="width: 37.147%; height: 39px;">使用第三方微信小程序时</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">18</td>
+<td style="width: 12.4486%; height: 152px;" rowspan="8">用户使用过程信息</td>
+<td style="width: 21.5433%; height: 19px;">应用使用时长</td>
+<td style="width: 23.4191%; height: 19px;">监控应用宝自身的运行异常情况</td>
+<td style="width: 37.147%; height: 19px;">应用宝错误异常监控和优化升级</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">19</td>
+<td style="width: 21.5433%; height: 19px;">云游戏记录和时长</td>
+<td style="width: 23.4191%; height: 19px;">展示玩过的云游戏，并用于活动、排行、社区</td>
+<td style="width: 37.147%; height: 19px;">使用云游戏功能</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">20</td>
+<td style="width: 21.5433%; height: 19px;">应用预约、下载、安装记录</td>
+<td style="width: 23.4191%; height: 19px;">展示应用的预约、下载、安装状态，并用于社区场景</td>
+<td style="width: 37.147%; height: 19px;">应用下载、应用预约、游戏社区</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">21</td>
+<td style="width: 21.5433%; height: 19px;">游戏充值、消费订单记录</td>
+<td style="width: 23.4191%; height: 19px;">判断福利领取条件，增加会员成长值</td>
+<td style="width: 37.147%; height: 19px;">应用宝会员升级、应用宝月卡购买、应用宝会员消费</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">22</td>
+<td style="width: 21.5433%; height: 19px;">视频内容观看记录和时长</td>
+<td style="width: 23.4191%; height: 19px;">辅助内容推荐</td>
+<td style="width: 37.147%; height: 19px;">游戏社区个性化内容推荐</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">23</td>
+<td style="width: 21.5433%; height: 19px;">搜索记录</td>
+<td style="width: 23.4191%; height: 19px;">检索用户所需内容</td>
+<td style="width: 37.147%; height: 19px;">应用下载、游戏社区及小说书城模块内容搜索、个性化内容推荐</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">24</td>
+<td style="width: 21.5433%; height: 19px;">文字信息</td>
+<td style="width: 23.4191%; height: 19px;">检索用户所需内容、记录需求并反馈</td>
+<td style="width: 37.147%; height: 19px;">应用下载、游戏社区及小说书城模块内容搜索、帮助与反馈功能</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">25</td>
+<td style="width: 21.5433%; height: 19px;">剪切板</td>
+<td style="width: 23.4191%; height: 19px;">获取从外部链接触发的下载任务、校验活动信息、复制文本内容</td>
+<td style="width: 37.147%; height: 19px;">外部链接下载、参与外部分享链接的活动、发布内容</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">26</td>
+<td style="width: 12.4486%; height: 56px;" rowspan="3">已安装应用软件情况</td>
+<td style="width: 21.5433%; height: 19px;">已安装应用列表（包含应用软件的名称、版本）</td>
+<td style="width: 23.4191%; height: 19px;">判断应用安装情况及对应版本号以实现相应功能</td>
+<td style="width: 37.147%; height: 19px;">优先推荐下载未安装应用、优先推荐已装应用内容、已装应用更新提醒、进行安装包清理、应用卸载、游戏社区</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 5.22277%; height: 18px;">27</td>
+<td style="width: 21.5433%; height: 18px;">&nbsp;应用软件运行时间</td>
+<td style="width: 23.4191%; height: 18px;">计算应用运行频率</td>
+<td style="width: 37.147%; height: 18px;">根据应用软件运行频率对已装应用排序，提供卸载建议</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">28</td>
+<td style="width: 21.5433%; height: 19px;">应用软件运行异常信息</td>
+<td style="width: 23.4191%; height: 19px;">监控应用宝自身的运行异常情况</td>
+<td style="width: 37.147%; height: 19px;">应用宝错误异常监控和优化升级</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">29</td>
+<td style="width: 12.4486%; height: 57px;" rowspan="3">虚拟财产</td>
+<td style="width: 21.5433%; height: 19px;">应用内积分/宝券/道具</td>
+<td style="width: 23.4191%; height: 19px;">完成福利兑换</td>
+<td style="width: 37.147%; height: 19px;">应用宝会员福利兑换</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">30</td>
+<td style="width: 21.5433%; height: 19px;">福利领取/兑换记录</td>
+<td style="width: 23.4191%; height: 19px;">展示用户领取福利或兑换福利的记录或状态</td>
+<td style="width: 37.147%; height: 19px;">应用宝会员、游戏社区</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">31</td>
+<td style="width: 21.5433%; height: 19px;">游戏类兑换码</td>
+<td style="width: 23.4191%; height: 19px;">完成福利兑换</td>
+<td style="width: 37.147%; height: 19px;">应用宝会员福利兑换</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p><strong>2. </strong><strong>敏感权限申请与使用</strong></p>
+<p>为实现特定功能，我们将在必要时申请访问您的系统权限（包括但不限于相机、麦克风、存储/相册），详情可查阅<a href="https://privacy.qq.com/document/preview/79b16f51ffbb48a7b9ea67a818c5f6ab"><strong>《应用权限申请与使用情况说明》</strong></a>。</p>
+<p><strong>二、您的个人信息共享情况</strong></p>
+<p>摘要如下，详情请查看<a href="https://privacy.qq.com/document/preview/e7e895203601428fadd149e0fae2e148"><strong>《第三方信息共享清单》</strong></a>详细了解与第三方共享您个人信息的情况。</p>
+<table border="1" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td width="94">
+<p align="center"><strong>第三方类型</strong></p>
+</td>
+<td width="454">
+<p align="center"><strong>共享情况概述</strong></p>
+</td>
+</tr>
+<tr>
+<td width="94">
+<p align="center">非SDK</p>
+</td>
+<td width="454">
+<p>用于文字阅读（阅文免费小说书城）、广告服务、网络服务（联通腾讯王卡用户身份识别）、微信小游戏/小程序、腾讯云COS云储存的信息共享</p>
+</td>
+</tr>
+<tr>
+<td width="94">
+<p align="center">SDK</p>
+</td>
+<td width="454">
+<p>通过接入SDK方式进行的共享，主要用于推送、分享内容、支付、广告监测目的</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>三、您如何管理自己的信息</strong></p>
+<p>您可以通过以下途径管理您的个人信息、实现您作为个人信息主体的权利：</p>
+<p><strong>1.&nbsp;</strong><strong>通过产品页面自主操作：</strong>您可以通过产品页面便捷地自主管理您的部分个人信息。针对个性化内容推荐/推送、个性化广告，我们在产品页面中设置了开关，路径为“应用宝-我的-设置-个性化推荐”。</p>
+<p><strong>2.&nbsp;</strong><strong>联系我们：</strong>如无法通过产品功能自主操作，您可以通过<a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13"><strong>《腾讯应用宝隐私保护指引》</strong></a>第10节所示的联系方式联系我们处理。</p>
+</div></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 阅读提示 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">请您在使用/继续使用腾讯应用宝的产品和/或服务前仔细阅读、充分理解《腾讯应用宝隐私保护指引》完整版全文，并在同意全部内容后使用/继续使用。除非另有说明，不同意《腾讯应用宝隐私保护指引》或其更新（我们将及时通知您此类更新）将会影响您正常使用或继续正常使用我们的产品和/或服务。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 导言 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">(1)&nbsp;腾讯应用宝是由<strong>深圳市腾讯计算机系统有限公司</strong>（以下简称为“我们”）提供的移动应用分发服务平台。我们通过安装在您的终端设备上的客户端，为您提供应用、照片的资源管理，应用、音乐、电子书、视频、壁纸的内容下载，以及文件管理备份还原的功能，详细功能介绍参见https://sj.qq.com/intro.html。我们的<strong>注册地为广东省深圳市南山区粤海街道麻岭社区科技中一路腾讯大厦35层</strong>。产品运营过程中我们也会与关联公司联合运营。如果您对《腾讯应用宝隐私保护指引》（以下简称为“本隐私保护指引”）或相关问题有任何疑问或顾虑，请通过本指引第10节“联系我们”中所提供的联系方式与我们联系。</p>
+<p class="ql-align-justify">(2) 本隐私保护指引适用于我们通过腾讯应用宝网站（https://sj.qq.com/）、腾讯应用宝PC端、App（Android版）、Ipad端的全部终端客户端（以下单称或统称为“平台”）向您提供的各项产品和服务。如某一客户端或某一应用软件版本有特殊功能或特殊个人信息处理活动的，我们会予以说明。如我们的客户端、产品和/或服务单独设置了隐私政策/隐私协议的，单独的隐私政策/隐私协议优先于本隐私保护指引适用；单独的隐私政策/隐私协议未提及的内容，适用本隐私保护指引。</p>
+<p class="ql-align-justify"><strong>请您注意，本隐私保护指引不适用于与我们的平台、产品和/或服务集成的任何第三方应用程序或软件，或者任何其他第三方产品、服务或业务（统称“第三方服务”）。</strong>&nbsp;第三方服务由第三方负责运营，您使用第三方服务应遵守第三方为此制定的隐私政策或其他个人信息处理规则，我们提示您仔细识别实际服务的提供方，并在使用任何第三方服务之前仔细查看相关规则。</p>
+<p class="ql-align-justify">(3)&nbsp;<strong>针对涉及与您的权益（包括存在重大关系的）的条款，我们在本隐私保护指引中将采用粗体或其他合理方式提示您重点阅读。</strong></p>
+<p class="ql-align-justify">(4)&nbsp;<strong>您同意本隐私保护指引表示您已经了解并同意在相关场景下，为实现功能运行，我们将对您的相关个人信息进行处理。但这并不代表只要您开始使用我们的产品与/或服务，我们将处理本隐私保护指引中涉及的全部个人信息。仅当您使用特定功能时，我们才会根据“最小必要”原则，为实现向您提供服务的目的，处理您的相关个人信息。</strong></p>
+<p class="ql-align-justify">(5) 除本隐私保护指引外，在特定场景下，我们将以及时告知的方式（包括但不限于更新本隐私保护指引、重新签署文件、页面提示、弹窗、站内信、邮件、网站公告或其他便于您获知的方式）另行向您详细说明对应信息的处理目的、方式、范围的规则，并在征得您的同意后处理。</p>
+<p class="ql-align-justify">本隐私保护指引将帮助您了解以下内容：</p>
+<p class="ql-align-justify">1.&nbsp;个人信息的收集和使用</p>
+<p class="ql-align-justify">2. Cookie等同类技术的使用</p>
+<p class="ql-align-justify">3.&nbsp;信息的存储</p>
+<p class="ql-align-justify">4.&nbsp;信息安全</p>
+<p class="ql-align-justify">5.&nbsp;信息共享</p>
+<p class="ql-align-justify">6.&nbsp;您的权利</p>
+<p class="ql-align-justify">7.&nbsp;变更</p>
+<p class="ql-align-justify">8.&nbsp;未成年人保护</p>
+<p class="ql-align-justify">9.&nbsp;其他</p>
+<p class="ql-align-justify">10.&nbsp;联系我们</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 1. 个人信息的收集和使用 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">为帮您快速了解我们关于您的个人信息收集、使用的主要情况，我们以清单的方式进行了说明，您可以点击查看<em>《</em><a style="color: #00b0f0;" href="https://privacy.qq.com/document/preview/391d74934b4f447487bc4fffbc3e5e5e" target="_blank" rel="noopener noreferrer"><strong><em>腾讯应用宝已收集个人信息清单</em></strong></a><em>》</em>。</p>
+<p class="ql-align-justify">【原则与途径】我们会遵循合法、正当、最小必要、公开透明的原则，收集和使用您在使用我们的产品和/或服务过程中主动提供或因使用我们的产品和/或服务而产生的个人信息。</p>
+<p class="ql-align-justify">【系统权限】相机、相册（存储）、麦克风系统权限，不会默认开启。只有在您触发相关业务功能时，我们才会向您申请相关权限，并获取相应信息。请您放心，我们申请访问的权限只限于实现特定的功能所必需，并且您可以随时撤回系统权限的授权。如您拒绝或撤回授权系统权限，会使您无法使用相应功能，但并不影响您正常使用产品与/或服务的其他功能。点击查看<a style="color: #00b0f0;" href="https://privacy.qq.com/document/preview/79b16f51ffbb48a7b9ea67a818c5f6ab" target="_blank" rel="noopener noreferrer"><strong><em>腾讯应用宝应用权限列表</em></strong></a>。</p>
+<p class="ql-align-justify">【业务功能】我们收集的您的个人信息类型会因产品/服务的内容不同而有所区别，具体以产品/服务实际提供为准。为提供完善的体验，我们会不断改进我们的产品和服务，因此需要收集新的个人信息或变更个人信息使用目的或方式。如果某一需要收集您的个人信息的功能或场景未能在本隐私保护指引中予以说明的，或者我们超出了与收集您的个人信息时所声称的目的及具有直接或合理关联范围的，我们会再次向您告知，并根据法律法规的相关要求征得您的同意。</p>
+<p class="ql-align-justify"><strong>通常情况下，我们会在以下场景中收集您的个人信息或申请相关权限：</strong></p>
+<p class="ql-align-justify"><strong>1.1&nbsp;账号登录和实名认证</strong></p>
+<p class="ql-align-justify">您可以通过QQ账号、微信账号登录腾讯应用宝。当您通过QQ账号或微信账号登录腾讯应用宝时，我们将收集您的QQ账号或微信账号、头像、昵称（过程中应用宝需要唤起QQ和微信），用于您登录账号时验证您的身份。</p>
+<p>在您使用云游戏功能时，为符合相关法律法规、监管要求以及腾讯未成年人健康上网保护计划，确保用户身份真实性、验证您的身份、保障您及其他用户的安全以及便于您参与专属优惠活动，我们将收集您的真实身份信息，包括您的<em><strong>姓名</strong>、<strong>身份证号码（或华侨护照、港澳台通行证、外国人永久居住身份证）、证件有效期、手机号码、</strong></em>学校（选填）（根据实际情况，不同场景下收集的真实身份信息不同）。</p>
+<p>为更好地保护未成年人身心健康，促使未成年人健康上网，我们可能在国家有关网络游戏防沉迷政策规定的基础上，实施更为严格的防沉迷措施。同时我们也不断研究与测试各种保护未成年人的新技术。如为了进一步提高实名认证的精准度，最大限度防止未成年人冒用他人身份信息，我们可能在部分游戏或针对部分用户(以具体游戏策略为准)启用人脸识别验证身份，启用人脸识别时，我们会使用腾讯健康系统提供的身份核验能力对您当前登录并使用的微信或QQ账号（视您登录的账号）进行核验，腾讯健康系统需要收集您的真实身份信息用于身份核验。在启用人脸识别功能时，腾讯健康系统会通过微信或QQ申请调用您的设备相机/摄像头权限，用于完成人脸识别。</p>
+<p><strong>需提示的是，第三方服务（指第三方运营的游戏、第三方电信运营商的免流量服务）需要您进行实名认证并收集您的信息，此时，腾讯应用宝不会收集您的这些信息。提示您仔细识别实际服务的提供方，并在使用任何第三方服务之前仔细查看相关隐私政策或个人信息处理规则。</strong></p>
+<p class="ql-align-justify"><strong>1.2&nbsp;内容搜索</strong></p>
+<p class="ql-align-justify">当您使用搜索功能时，我们会自动收集您输入的关键字信息和<em><strong>搜索记录</strong></em>。为了提供高效的搜索服务，部分前述信息会暂时存储在您的本地设备端，并可向您展示<em><strong>搜索历史记录</strong></em>。</p>
+<p class="ql-align-justify"><strong>1.3&nbsp;内容浏览/云游戏/预约/下载</strong></p>
+<p class="ql-align-justify">为了更好地为您提供内容推荐展示，对搜索结果进行优化，优化云游戏畅玩体验，了解产品对不同硬件设备适配性、确保操作环境安全、识别账号异常状态的用途，当您使用我们的小说阅读、站内视频播放、云游戏、预约、应用下载服务内容时，我们将收集您的日志信息。</p>
+<p class="ql-align-justify">日志信息包括：腾讯应用宝账号、软件版本型号、您的操作、行为日志信息（<strong><em>浏览记录</em></strong>、<em><strong>播放/阅读/云游戏/预约/下载记录</strong></em>、播放/阅读/试玩时长、访问日期和时间）。</p>
+<p class="ql-align-justify">当您使用我们的云游戏服务时，我们会调用设备的陀螺仪、加速度、重力传感器以识别判断您的设备状态。请您理解，单独的设备传感器数据不涉及任何个人位置信息且无法与其他信息结合用于识别特定自然人的身份。</p>
+<p class="ql-align-justify">当您有大包体游戏下载，或在排队进入云游戏时，我们会使用或申请您的<em><strong>悬浮窗权限</strong></em>，展示进度浮窗，方便你在等待下载完成或排队时可以边等边逛。为了确保即使您已经把应用宝退到后台，仍可在手机桌面正常展示进度浮窗，我们会在后台获取运行中的进程信息，判断应用宝当前是在前台还是后台运作。</p>
+<p class="ql-align-justify">当您在云游戏内玩游戏时，我们会使用或申请您的<em><strong>悬浮窗权限</strong></em>，为你展示云游戏助手操作面板，为您提供更多便捷操作和优惠活动。</p>
+<p class="ql-align-justify"><strong>1.4 应用管理</strong></p>
+<p class="ql-align-justify">当您使用腾讯应用宝下载、安装、更新、卸载应用时，为向您提供应用管理服务，我们将收集下列信息：</p>
+<p class="ql-align-justify">(1)&nbsp;为向您优先推荐下载未安装的应用、对您已安装应用软件进行更新提醒、清理安装包残留数据以及实现应用卸载功能，我们将在你启动应用宝时收集您终端设备的已安装应用列表信息（包括应用软件的名称、版本及运行信息）。</p>
+<p class="ql-align-justify">(2)&nbsp;为向您推荐适合您终端设备内存空间的应用，我们将收集您的终端设备的运行信息。</p>
+<p class="ql-align-justify">(3) 为按照应用软件运行频率对您已安装应用进行排序，从而为您提供应用卸载建议，我们将收集您所安装的应用软件运行时间，并计算该应用软件的运行频率。</p>
+<p class="ql-align-justify">请您注意，为了能及时对您已安装应用软件进行更新提醒，我们需要您授权腾讯应用宝自启动，使其保持后台运行以保证我们能及时提醒您应用软件更新相关事宜。&nbsp;</p>
+<p class="ql-align-justify"><strong>1.5 游戏服务</strong></p>
+<p class="ql-align-justify">（1）当您参与腾讯应用宝的游戏福利活动或使用游戏战报功能，且登录腾讯应用宝的QQ号或微信号与注册/登录该游戏的账号一致时，为了核实您是否满足领取奖励和/或参与活动的条件，腾讯应用宝需要对您在第三方游戏或应用宝会员中的信息进行核实，核实范围会因为不同活动而不完全一致，但会限定在您确认授权并且第三方游戏提供的游戏账号信息（账号ID、游戏角色以及角色自身的游戏属性、状态、对战数据、游戏录屏信息）以及<em><strong>游戏好友数据</strong></em>（游戏角色之间的关系以及基于关系的行为，包括但不限于<em><strong>游戏好友关系链</strong></em>、好友互动送心、<em><strong>好友聊天</strong></em>）范围内。具体信息将以授权页面为准，如您拒绝授权，将无法参与相关活动，但不影响腾讯应用宝其他主要功能的使用；当您拒绝授权后，重新参与活动或参与第三方游戏其他活动时，我们会另行向您申请使用相关信息。腾讯应用宝仅会核实活动涉及的信息，获取“是”/“否”（满足条件）的反馈，不会核实其他无关信息，也不会获取您在第三方游戏中的实际数据。当您参加了注册登录第三方游戏即可领取礼包的活动，则腾讯应用宝会与第三方游戏核实您是否注册登录该游戏，当收到反馈为“是”，您即可领取礼包。您可以在“管理-设置”中进行游戏信息授权管理，取消授权、修改可见范围和授权信息类型，或直接在相关游戏内取消授权。</p>
+<p class="ql-align-justify">(2）当您使用微信小游戏功能时，我们需要进行微信账号授权，获取您的微信头像、昵称，这些信息将用于微信游戏内的角色信息展示和好友排行，以提供您更好的游戏体验。另，微信小游戏将会获取您的个人信息，我们会在征得您的明示同意后，向开发者提供您的个人信息或可获取您个人信息的微信接口，具体提供范围以交互页面中你同意的为准。</p>
+<p class="ql-align-justify"><strong>1.6 第三方小程序</strong></p>
+<p class="ql-align-justify">第三方开发者会根据实际情况在登录风险识别、注册风险识别、营销风险识别、广告反作弊、虚假流量识别、游戏风险识别类的业务风险识别场景中，采集您的已安装应用列表信息（包括应用软件的名称、版本及运行信息），用于风险病毒、恶意工具检测，识别外部的恶意攻击行为和风险行为（包括外挂、群控、双开、代理工具）。</p>
+<p class="ql-align-justify">为及时释放长时间没有被使用的小程序进程，还在进程中的小程序第三方开发者会每20分钟获取1次运行中的进程信息，并自行关闭进程。</p>
+<p class="ql-align-justify"><strong>1.7 下单与支付</strong></p>
+<p class="ql-align-justify">当您购买我们的产品及/或服务时，包括在云游戏试玩时进行游戏内充值付费，在应用宝会员场景进行会员福利兑换以及在腾讯应用宝用户专享界面购买商品，在小游戏内进行充值付费 ，为便于协助您顺利完成交易、查询<em><strong>订单信息</strong></em>，以及向您提供客户服务和保障您的交易安全，我们需要根据商品或服务类型收集如下个人信息：应用宝游戏月卡<strong><em>购买记录</em></strong>、<strong><em>交易商品</em><em>或服务信息</em></strong>、收货信息（收货人姓名、<em><strong>收货地址</strong></em>及联系电话）、<strong><em>交易金额、下单时间</em></strong><em>、</em><strong><em>交易日期</em></strong><em>、</em><strong><em>订单商户</em></strong><em>、</em><strong><em>订单编号</em></strong><em>、</em><strong><em>订单状态、支付方式、支付账号</em></strong>、支付状态、<em><strong>虚拟商品及服务消费使用记录（包括积分、宝券、道具、游戏类兑换码、游戏月卡权益）</strong></em>。</p>
+<p class="ql-align-justify">为了查询您以上的个人信息，我们会使用您的获取App账号权限，用于查询您在应用宝上的账号信息，再匹配您的个人信息。</p>
+<p class="ql-align-justify">此外，为方便您查询货物的交付与配送状态，我们还会自物流相关服务主体处收集与您的货物交付进度相关的信息。</p>
+<p class="ql-align-justify"><strong>1.8 信息上传或发布、交流互动</strong></p>
+<p class="ql-align-justify">当您在平台内对应用发表评论、在腾讯应用宝社区内发布帖子或发表评论时，我们将收集您上传的多媒体文件包括图文/音视频内容、您的昵称、头像、发布的信息内容、腾讯应用宝账号ID以及您的互动信息，包括<em><strong>点赞/分享/评论/互动记录</strong></em>。</p>
+<p class="ql-align-justify">同时，为了获取您的多媒体文件包括图文/音视频内容，应用宝会存在调用系统相册的行为。</p>
+<p class="ql-align-justify"><strong>1.9 活动参与及消息通知</strong></p>
+<p class="ql-align-justify"><strong>1.9.1 活动参与</strong></p>
+<p class="ql-align-justify">当您参与我们的活动时，需要您主动提交有关个人信息。包括：</p>
+<p class="ql-align-justify">(1) 为便于您在游戏内领取福利、查询霸服经验值、参与活动，您可就特定游戏授权我们收集您的游戏信息，包括登录信息（非实时游戏登录状态）、游戏角色数据、游戏内行为数据以及<em><strong>游戏付费数据</strong></em>。您可随时撤回该等授权。</p>
+<p class="ql-align-justify">(2) 当您分享活动口令与链接时，我们将收集您的头像、昵称，并在您首次进入app或从后台切前台页面时，调用您的剪切板功能以判断是否有相关口令码信息，我们收集该信息在服务器做校验后向您反馈您所需的内容或绑定相关权益。我们不会存储您剪切板的其他信息。</p>
+<div>
+<div>
+<p>(3) 当您参与特定活动时，我们会根据实际情况请求您的<em><strong>麦克风权限</strong></em>，以实现您与其他用户语音实时交流的功能。</p>
+<p>(4) <em><strong>定位</strong></em>用于部分运营活动，仅在您参与新游预约、分赛区比赛活动时需要<em><strong>设备位置信息</strong></em>的运营活动时申请获取。拒绝授权将无法参与特定运营活动，但不会影响腾讯应用宝其他功能的正常使用。</p>
+</div>
+</div>
+<p class="ql-align-justify"><strong>1.9.2 消息通知</strong></p>
+<p class="ql-align-justify">(1) <em><strong>设备日历权限</strong></em>用于预约提醒功能，仅在您通过系统日历创建日程实现游戏上线提醒、预约运营活动通知提醒功能时申请获取。在您开启相关权限后，我们会访问您的日历，帮助您预约或调整已预约的游戏、活动的时间，以在您预约的时间通过日历功能提醒您。拒绝授权将无法使用预约服务，但不会影响腾讯应用宝其他功能的正常使用。</p>
+<p class="ql-align-justify">同时，为确保您及时收到消息通知Push，我们需要您授权腾讯应用宝自启动，使其保持后台运行。</p>
+<p class="ql-align-justify">(2) 您知悉并同意，对于您在使用过程中提供的您的一种或多种联系方式（包括手机号码），我们在运营中会向其中的一种或多种发送多类通知，用于用户消息告知、身份验证、安全验证、用户使用体验调研的用途。</p>
+<p class="ql-align-justify"><strong>1.10 运营及产品安全需要</strong></p>
+<p class="ql-align-justify">我们致力于为您提供安全、可信的产品与使用环境，提供优质而可靠的服务与信息。为了维护我们产品及服务的正常稳定运行，防止恶意程序及反作弊，进行身份验证和识别，保护您或其他用户或公众的安全及合法利益，我们会收集如下信息：</p>
+<p class="ql-align-justify">(1) 为检测腾讯应用宝版本是否有升级更新，我们将收集您的设备信息（GUID）。</p>
+<p class="ql-align-justify">(2)&nbsp;为就近分配服务器，提高用户整体使用和访问速度，我们将收集您的IP地址。</p>
+<p class="ql-align-justify">(3) 为识别您的设备ID并预防恶意程序及反作弊、提高服务安全性、保障运营质量及效率，我们会在应用宝前台和后台收集您的设备信息（包括Android ID、GUID、OAID）、您安装的应用信息或正在运行的应用的进程信息。</p>
+<p class="ql-align-justify">(4)&nbsp;为对腾讯应用宝错误异常进行监控，以及对平台进行优化升级，我们将收集应用软件运行异常信息。</p>
+<p class="ql-align-justify">(5) 为实现运行故障报错及分析和解决您在使用腾讯应用宝过程中所遇到的问题，我们将收集您的设备信息（GUID）、<em><strong>浏览和操作记录</strong></em>。</p>
+<p class="ql-align-justify">(6)&nbsp;为了在支付过程中防止欺诈及保护您的交易安全，我们将收集您的<em><strong>设备位置信息</strong></em>。</p>
+<p class="ql-align-justify">(7) 为了修复已知问题，我们会在后台保持获取运行中的进程信息，判断应用宝当前是否在后台运行，并确保在后台运行时进行补丁下发和修复。</p>
+<p class="ql-align-justify">(8）技术处理说明:采取安全加密、去标识化、匿名化等安全技术措施，并在无法重新识别个人身份的前提下，我们可能将所收集的数据进行算法优化、统计分析或其他必要的数据分析处理，用于研发、提供、运营我们或关联公司的各类产品和服务，例如商业决策分析、个性化服务、风险识别等。</p>
+<p class="ql-align-justify"><strong>1.11 个性化内容推荐</strong></p>
+<p class="ql-align-justify">我们会基于收集的信息，包括您的设备信息（包括Android_ID、GUID、设备型号、系统版本）、日志信息（<strong><em>购买记录</em>、<em>点击</em>、<em>收藏</em>、<em>浏览</em>、下载记录、<em>点赞/分享/评论/互动的对象</em>、<em>搜索的字词</em>、<em>云游戏记录、小游戏付费记录</em>）</strong>、<em><strong>设备位置信息</strong></em>，通过自动化决策的方式对您的偏好、习惯作特征分析，以便为您提供符合您兴趣的定制化服务，或向您展现或推荐相关程度更高（而非普遍推送）的应用、游戏、小说的服务内容。自动化决策是指通过计算机程序自动分析、评估个人的行为习惯、兴趣爱好，并进行决策的活动。我们将通过应用宝自建通知的形式向您推送上述信息。如您不希望接收到我们为您推荐的上述内容，您可以随时在我们的自建通知弹窗里进行关闭，或通过“腾讯应用宝-管理-设置-通知管理”里选择您不希望接受的内容。</p>
+<p class="ql-align-justify">另需提示，在更快地为您提供感兴趣内容的同时，个性化内容推荐会导致您所看到的内容越来越趋于同质化。如您不希望接收到我们为您推荐的个性化内容，您可以随时使用我们的产品和/或服务的相关功能设置页面开启/关闭个性化推荐。腾讯应用宝App的个性化推荐设置路径为：“腾讯应用宝-管理-设置-个性化推荐”。<strong>&nbsp;若您选择关闭，我们不会基于个性化内容推送的目的处理您的个人信息，您看到的内容将可能与您的偏好相关度降低。</strong>当您更新腾讯应用宝App版本后，未经您的同意，我们不会更改您之前设置的权限状态。</p>
+<p class="ql-align-justify"><strong>1.12 广告（含个性化广告）</strong></p>
+<p class="ql-align-justify">我们会使用您的设备标识符包括IDFA、OAID、设备型号，广告数据（曝光、点击数据），设备信息包括但不限于系统语言、屏幕高宽、屏幕方向信息，在腾讯应用宝中向您提供您感兴趣的广告，评估、改善我们的广告投放和其他促销及推广活动、商业分析的效果。</p>
+<p class="ql-align-justify">为提高你浏览广告内容的体验，我们会进行设备风险和虚假流量识别、营销风险识别、广告反作弊处理。为此，我们仍会在应用宝后台收集您的OAID和正在运行的应用的进程信息。</p>
+<p class="ql-align-justify">若您不想接受个性化广告服务，您可以在我们的产品和/或服务的相关功能设置页面开启/关闭个性化广告。腾讯应用宝App的个性化广告设置路径为：“腾讯应用宝-管理-设置-个性化推荐”。<strong>若您选择关闭，您看到的广告数量不会减少，但本产品将不再向您展示个性化广告，您看到的广告将会与您的偏好相关度降低。</strong></p>
+<p class="ql-align-justify"><strong>1.13 AIGC创作</strong></p>
+<p class="ql-align-justify">当您使用AIGC功能时，为获取您的人脸特征，我们将申请您的<strong><em>相机权限，</em></strong>并在您授权开启相机/摄像头权限后通过相机/摄像头<em><strong>采集包含面部识别信息的图片或视频</strong></em>，并通过算法对上述图片或视频做特征分析，再结合AIGC玩法生成新的图片或视频。</p>
+<p class="ql-align-justify"><strong>1.14 客户服务</strong></p>
+<p class="ql-align-justify">当您联系我们的客服时，为了您的账号与系统安全，我们将收集您的微信号、QQ号及账号资料，并与您之前的个人信息相匹配以验证您的用户身份。同时，为了调查事实与帮助您解决问题，我们还会根据实际情况收集<em><strong>您与我们的沟通记录</strong></em>。</p>
+<p class="ql-align-justify">当您使用帮助与反馈功能时，为便于您反馈在使用腾讯应用宝中所遇到的问题，我们将收集您当前终端设备的基础信息（包括手机型号、系统版本、App版本、BSSID、SSID）、腾讯应用宝账号、网络情况、访问页面、支付单号。</p>
+<p class="ql-align-justify"><strong>1.15 其他自行收集信息场景</strong></p>
+<p class="ql-align-justify"><strong>1.15.1 </strong><strong>垃圾清理与运行加速</strong></p>
+<p class="ql-align-justify">为实现垃圾清理与运行加速功能，我们将收集您终端设备的相关硬件信息，包括已安装应用列表、CPU、运行内存、SD卡数据、使用情况权限状态（但不会请求你的使用情况权限），以计算你的手机状态分数。并请求您的<strong><em>存储权限</em></strong>，用以检查手机CPU、内存和SD卡情况。同时，我们需要您授权腾讯应用宝自启动，使其保持后台运行以保证我们能及时监控手机状态，并在后台获取运行中的进程信息（判断应用宝当前是在前台还是后台运作），并通过桌面弹窗的方式提醒您清理手机内存、提高运行速度。</p>
+<p class="ql-align-justify"><strong>1.15.2 扫描二维码</strong></p>
+<p class="ql-align-justify">当您使用扫描二维码功能时，我们将申请您的<strong><em>相机权限</em></strong>。</p>
+<p><strong>1.15.3 小组件和桌面快捷方式</strong></p>
+<p>若您通过部分品牌安卓设备的小组件（同widget）或桌面快捷方式使用应用宝，为了实现小组件和桌面快捷方式的添加、删除和更新，应用宝会在您退出应用后在后台存在自启动的行为。</p>
+<p><strong>1.15.4 获取授权</strong></p>
+<p>当您使用APP管理（下载、安装、更新、卸载）、清理工具（垃圾清理、微信清理、QQ清理、视频清理、大文件清理、安装包清理）、游戏服务、活动、消息通知，需要授权系统权限的服务时，我们会根据实际情况帮您调起系统授权页面。此时我们需要获取您当前是否已安装能打开该系统页面的应用（即系统设置），但不会获取您的完整已安装应用列表。</p>
+<p class="ql-align-justify"><strong>1.16 从第三方间接收集个人信息</strong></p>
+<p class="ql-align-justify">我们会从第三方间接收集（或共享）您的个人信息，但这只发生在：我们确认该第三方已经就将相关个人信息分享给我们获得您的同意，或者第三方依法被许可或被要求向我们披露您的个人信息。</p>
+<p class="ql-align-justify">我们会要求第三方对个人信息来源的合法性和合规性作出承诺，如第三方有违反行为的，我们会明确要求对方承担相应法律责任。</p>
+<p class="ql-align-justify">我们会了解第三方已获得的个人信息处理的同意范围，包括使用目的，个人信息主体是否同意转让、共享、公开披露、删除的内容。</p>
+<p class="ql-align-justify">这些从第三方获取的个人信息将用于为您提供服务，以及用于保证我们所掌握的您的相关记录的准确性。若我们对这些个人信息的处理活动超出第三方已获得的同意范围，在获取个人信息的合理期限内或处理个人信息前，我们会直接或通过提供信息的第三方征得您的同意。</p>
+<p class="ql-align-justify"><strong>1.17 与运营商合作免流量功能</strong></p>
+<p class="ql-align-justify">当您使用腾讯应用宝与运营商合作的免流量功能（包括“管理”模块中的“王卡免流量”业务）时，为准确识别免流量用户身份及更好地记录定向应用消耗的流量，我们需要收集您的设备信息（IP地址、手机型号）、运营商信息；</p>
+<p class="ql-align-justify">需提示的是，当您领取免流量电话卡或开通免流量服务时，您需要进行实名认证，并需要提供姓名、<strong><em>身份证号码</em></strong>、联系电话、<em><strong>收货地址</strong></em>、详细地址（以实际运营方页面展示为准），<strong>此时，腾讯应用宝不会收集您的这些信息。请您仔细识别实际服务的提供方，并在使用任何第三方服务之前仔细查看相关隐私政策或个人信息处理规则。</strong></p>
+<p class="ql-align-justify"><strong>1.18 征得同意的例外情形</strong></p>
+<p class="ql-align-justify">根据法律法规的规定，我们在以下情况下收集和使用您的个人信息无需取得您的同意：</p>
+<p class="ql-align-justify">(1)&nbsp;为订立、履行您作为一方当事人的合同所必需，或者按照依法制定的劳动规章制度和依法签订的集体合同实施人力资源管理所必需；</p>
+<p class="ql-align-justify">(2)&nbsp;为履行法定职责或者法定义务所必需；</p>
+<p class="ql-align-justify">(3)&nbsp;为应对突发公共卫生事件，或者紧急情况下为保护自然人的生命健康和财产安全所必需；</p>
+<p class="ql-align-justify">(4) 为公共利益实施新闻报道、舆论监督的行为，在合理的范围内处理您的个人信息；</p>
+<p class="ql-align-justify">(5)&nbsp;依照《个人信息保护法》规定在合理范围内处理您自行公开或者其他已经合法公开的个人信息；</p>
+<p class="ql-align-justify">(6)&nbsp;法律、行政法规规定的其他情形。</p>
+<p class="ql-align-justify"><strong>1.19 特别说明</strong></p>
+<p class="ql-align-justify">(1) 为了手机清理和应用更新功能，腾讯应用宝会在您退出应用后在后台存在短暂启动的行为；</p>
+<p class="ql-align-justify">(2) 为了及时提供更优质的服务和最新功能，应用宝版本更新时，我们会在wifi环境下自动下载最新版本的应用宝安装包并更新。若您不希望应用宝进行新版本自动更新，可在“管理-设置-关于”中关闭版本自动更新开关。</p>
+<p class="ql-align-justify"><strong>1.20&nbsp; 传感器应用场景声明</strong></p>
+<table style="width: 100%;" border="1">
+<tbody>
+<tr>
+<td style="width: 10.0323%; background-color: #ecf0f1;">功能板块</td>
+<td style="width: 22.3006%; background-color: #ecf0f1;">传感器名称</td>
+<td style="width: 22.9452%; background-color: #ecf0f1;">适用场景</td>
+<td style="width: 44.4802%; background-color: #ecf0f1;">使用目的</td>
+</tr>
+<tr>
+<td style="width: 10.0323%;">营销内容和广告</td>
+<td style="width: 22.3006%;">加速度传感器</td>
+<td style="width: 22.9452%;">创新广告交互功能（摇一摇）</td>
+<td style="width: 44.4802%;">调用设备传感器识别判断设备状态，以判断用户是否参与交互</td>
+</tr>
+<tr>
+<td style="width: 10.0323%;">秒玩云游戏及小游戏</td>
+<td style="width: 22.3006%;">加速度传感器、陀螺仪传感器、重力传感器、磁场传感器</td>
+<td style="width: 22.9452%;">玩云游戏及小游戏</td>
+<td style="width: 44.4802%;">
+<p>传感器是否使用、使用传感器字段、使用场景因具体云游戏而异。举例如下：</p>
+<p>小游戏使用传感器信息，检测反馈用户设备屏幕方向及方位。跑酷类游戏根据手机旋转来反馈游戏内角色前进方向。</p>
+</td>
+</tr>
+<tr>
+<td style="width: 10.0323%;">运营及产品安全需要</td>
+<td style="width: 22.3006%;">加速度传感器、重力传感器、陀螺仪传感器、光线传感器</td>
+<td style="width: 22.9452%;">为提供安全、可信的产品与使用环境，提供优质而可靠的服务与信息，检测是否存在相关传感器</td>
+<td style="width: 44.4802%;">
+<p>建立推送链接时识别设备场景中，防止黑产及外部恶意攻击。</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="ql-align-justify"><strong>1.21 基础服务功能</strong></p>
+<p>为向用户提供注册/登录、预约下载、信息发布、交流互动、个性推荐、参与活动丰富多样的服务，我们会根据用户使用服务时收到的告知或作出的授权、用户协议及隐私政策约定、法律法规的相关规定收集并使用用户的个人信息。如果您仅希望使用应用宝为您提供的基本功能服务模式，包括App搜索和下载功能，可选择进入基本功能服务模式。在基本功能服务模式下，应用宝仅为保障软件及服务的安全运行，依据法律法规的相关规定收集（不存储）您的基础设备信息和应用安装列表，不收集您的其他个人信息。为保证最小必要地收集您的个人信息，您仅能在未登录状态下使用基本功能服务模式，且在使用基本功能服务模式时，您不能使用注册/登录、预约、信息发布、交流互动、个性推荐、参与活动丰富多样的服务。开启基本功能服务模式，将会退出登录或维持未登录状态，届时需要重启应用后基本功能服务模式方可生效。您可以通过点击<a style="color: #00b0f0;" href="tmast://konwbasic" target="_blank" rel="noopener"><strong><em>了解基本功能模式</em></strong></a>页面开启/关闭基本功能服务模式。</p>
+<p align="left"><strong>1</strong><strong>.22 WiFi</strong><strong>功能</strong></p>
+<p>我们向您提供免费WiFi功能，为了让您能够查找到附近可连接的WiFi，获取WiFi列表，需要声明精准和粗略位置的权限，并在实际使用该功能时向您动态申请权限。</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 2. Cookie等同类技术的使用 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">Cookie及同类技术是互联网中普遍使用的技术。当您使用我们的产品和/或服务时，我们会根据实际情况使用Cookie及同类技术收集您的登录信息、设备信息、<em><strong>个人上网记录</strong></em>偏好数据，用于确保我们平台的正常运转、简化您重复操作的步骤（包括登录）、便于您查看使用历史（包括小说阅读历史）、向您提供更切合您个人需要或您更感兴趣的服务内容、保护您的信息和账号安全性、提升我们的产品和服务。</p>
+<p class="ql-align-justify">我们不会将 Cookie 及同类技术用于本隐私保护指引所述目的之外的任何用途。如果您拒绝我们使用Cookie及同类技术收集和使用您的相关信息，您可在浏览器具备该功能的前提下，通过您的浏览器的设置以管理、部分/全部拒绝Cookie和/或同类技术；或删除已经储存在您的计算机、移动设备或其他装置内的Cookie和/或同类技术。您如需详细了解如何更改浏览器设置，请具体查看您使用的浏览器的相关设置页面。您理解并知悉：我们的某些产品/服务只能通过使用Cookie或同类技术才可得到实现，若您拒绝使用或删除的，您将无法正常使用我们的相关产品与/或服务或无法通过我们的产品与/或服务获得最佳的服务体验，同时也会对您的信息保护和账号安全性造成一定的影响。</p>
+<p class="ql-align-justify">更多有关我们使用Cookie和同类技术的情况，可点击查看查阅<a style="color: #175ceb;" href="https://privacy.qq.com/policy/cookie-privacypolicy" target="_blank" rel="noopener noreferrer">《Cookie政策》</a>。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 3. 信息的存储 </h1><div data-v-49c41d7e=""><p class="ql-align-justify"><strong>3.1&nbsp;存储地点</strong></p>
+<p class="ql-align-justify">我们在中华人民共和国境内运营中收集和产生的个人信息存储于中华人民共和国境内。目前我们暂时不存在向境外提供您的个人信息的场景。</p>
+<p class="ql-align-justify">如我们因业务需要，确需向中华人民共和国境外提供个人信息的，我们应具备法律规定的条件（通过国家网信部门组织的安全评估或按照国家网信部门制定的标准合同与境外接收方订立合同，约定双方的权利和义务），并将向您告知境外接收方的名称或者姓名、联系方式、处理目的、处理方式、个人信息的种类以及您向境外接收方行使个人信息主体权利的方式和程序的事项，取得您的单独同意。我们将采取必要措施，保障境外接收方处理个人信息的活动达到中国法律规定的个人信息保护标准。</p>
+<p class="ql-align-justify"><strong>3.2&nbsp;存储期限</strong></p>
+<p class="ql-align-justify">我们将在实现您的个人信息处理目的所必要的最短时间内保存您的个人信息，但您行使删除权、注销账号或法律法规另有规定的除外（包括：《电子商务法》规定：商品和服务信息、交易信息保存时间自交易完成之日起不少于三年）。超出上述存储期限后，我们会对您的个人信息进行删除或匿名化处理。</p>
+<p class="ql-align-justify">当我们的产品或服务停止运营时，我们将以推送通知、公告的形式通知您，并在合理期限内删除您的个人信息或进行匿名化处理，法律法规另有规定的除外。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 4. 信息安全 </h1><div data-v-49c41d7e=""><p class="ql-align-justify"><strong>4.1&nbsp;安全保护措施</strong></p>
+<p class="ql-align-justify">我们努力为您的个人信息安全提供保障，以防止个人信息的泄露、篡改、丢失、不当使用、未经授权的访问和披露。我们采用多方位的安全保护措施，包括技术保护措施、管理制度控制、安全体系保障的方面，以确保您的个人信息保护处于合理的安全水平。</p>
+<p class="ql-align-justify">(1)&nbsp;技术保护措施</p>
+<p class="ql-align-justify">我们采用业界领先的技术保护措施保护您的个人信息，包括但不限于防火墙、加密（包括SSL）、去标识化或匿名化处理、访问控制措施。此外，我们还会不断加强安装在您设备端的软件的安全能力。我们会在您的设备本地完成部分信息加密工作，以巩固安全传输；我们会了解您设备安装的应用信息和运行的进程信息，以预防病毒、木马的恶意程序。</p>
+<p class="ql-align-justify">(2)&nbsp;管理制度和操作规程</p>
+<p class="ql-align-justify">我们建立了保障个人信息安全的内部管理制度和操作规程。对个人信息实行分类管理，合理确定个人信息处理的操作权限，并定期对从业人员进行安全教育和培训。</p>
+<p class="ql-align-justify">(3)&nbsp;安全体系保障</p>
+<p class="ql-align-justify">我们构建并完善包括安全体系认证、业务安全能力认证的个人信息安全管理体系。目前，我们的重要信息系统已经通过了国家网络安全等级保护（三级）的测评和备案。</p>
+<p class="ql-align-justify"><strong>4.2&nbsp;安全事件处置措施</strong></p>
+<p class="ql-align-justify">若发生或可能发生个人信息泄露、篡改、丢失的个人信息安全事件，我们会启动个人信息安全事件应急预案，阻止个人信息安全事件扩大。</p>
+<p class="ql-align-justify">个人信息安全事件发生后，除非我们采取措施能够有效避免信息泄露、篡改、丢失造成危害的，我们将及时以推送通知、邮件的形式告知您个人信息安全事件的基本情况、我们即将或已经采取的处置措施和补救措施，以及我们对您的应对建议。如果难以实现逐一告知，我们将通过公告的方式发布警示。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 5. 信息共享 </h1><div data-v-49c41d7e=""><p class="ql-align-justify"><strong>5.1&nbsp;个人信息委托处理</strong></p>
+<p class="ql-align-justify">平台的部分功能会由外部服务商提供，我们会聘请专业数据处理服务机构来为我们的平台提供数据分析方面的技术支持。</p>
+<p class="ql-align-justify">对我们委托处理个人信息的公司、组织和个人，我们会与其签署协议，约定委托处理的目的、期限、处理方式、个人信息的种类、保护措施以及双方的权利和义务，并对受托人的个人信息处理活动进行监督。</p>
+<p><strong>5.2&nbsp;集团内共享</strong></p>
+<p class="ql-align-justify">为了使您在我们与我们关联公司产品和/或服务中获得一致性和个性化的服务体验，我们会把您的个人信息分享给我们的关联公司。我们只会分享必要的个人信息，且受本隐私保护指引中所声明目的的约束。关联公司如要改变个人信息的处理目的或处理方式，我们将再次征求您的同意。</p>
+<p class="ql-align-justify"><strong>5.3&nbsp;与集团外第三方分享</strong></p>
+<p class="ql-align-justify">为向您提供完善的产品和服务，在某些情形下，我们需要与我们集团外的第三方公司、组织或个人共享您的个人信息。我们仅会出于合法、正当、最小必要且本指引所明确的目的与第三方分享您的个人信息，并且只会分享必要的个人信息。如果第三方改变或超越您原同意范围处理您的个人信息，我们会要求第三方再次征得您的同意。</p>
+<p class="ql-align-justify">对我们与之共享个人信息的公司、组织和个人，我们会要求其严格遵守我们关于数据隐私保护的措施和要求，包括但不限于根据数据保护协议、承诺书及相关数据处理政策进行个人信息的处理，避免识别出个人身份，保障隐私安全。</p>
+<p class="ql-align-justify">您可以点击查看<em>《</em><a style="color: #00b0f0;" href="https://privacy.qq.com/document/preview/e7e895203601428fadd149e0fae2e148" target="_blank" rel="noopener noreferrer"><strong><em>腾讯应用宝与第三方共享个人信息清单</em></strong></a><em>》</em>详细了解与第三方共享您个人信息的情况；此外，您可以直接点击查看<em>《</em><a style="color: #00b0f0;" href="https://privacy.qq.com/document/priview/f3e45a48e74848f29c5691cef032a447" target="_blank" rel="noopener noreferrer"><strong><em>应用宝接入第三方SDK目录</em></strong></a><em>》</em>了解接入的第三方软件工具开发包（SDK）的具体信息。</p>
+<p class="ql-align-justify">与第三方共享的主要情形如下：</p>
+<p class="ql-align-justify"><strong>5.3.1&nbsp;为实现我们的功能/服务所必需进行的共享</strong></p>
+<p class="ql-align-justify">在某些情况下，我们必需共享您的个人信息，才能履行我们作为与您订立相关合同的一方当事人的义务或提供您需要的服务，具体第三方信息情况请点击查看<em>《</em><a style="color: #00b0f0;" href="https://privacy.qq.com/document/preview/e7e895203601428fadd149e0fae2e148" target="_blank" rel="noopener noreferrer"><strong><em>腾讯应用宝与第三方共享个人信息清单</em></strong></a><em>》</em>，主要包括以下情形：</p>
+<p class="ql-align-justify">(1)&nbsp;支付服务：为帮助您完成款项支付，我们会将您的用户标识信息、网络IP地址、<strong><em>订单交易信息的</em></strong>信息（以实际共享的信息为准）提供给提供支付服务的合作方。</p>
+<p class="ql-align-justify">(2) 王卡用户身份识别：为通过监测应用的网络状态判断用户的换卡行为，进而便于运营商过滤无效请求，以及识别用户是否为王卡用户，我们会将您的网络状态、IP地址提供给提供相关服务的合作方；</p>
+<p class="ql-align-justify">(3) 下单与交付：为实现购买商品/服务的需求（包括货物配送与交付），相关服务的合作方（包括供货的服务提供方）需要收集您的订单相关信息、商品/服务信息、收货信息（包括收货人姓名、收货地址及联系电话）的信息（以实际共享的信息为准），具体合作方的隐私保护制度请以实际操作页面中第三方的隐私协议为准，您可在填写个人信息和提交前留意关注。</p>
+<p class="ql-align-justify">(4)&nbsp;其他为实现我们的功能/服务所必须进行的共享。</p>
+<p class="ql-align-justify"><strong>5.3.2 广告服务</strong></p>
+<p class="ql-align-justify">第三方主体： 广告主和/或其委托的代理商、第三方广告监测服务商<br>共享的信息： 如IDFA、OAID等设备标识符；如硬件型号、操作系统等设备信息；姓名、电话等用户在广告落地页主动填写的信息<br>使用场景： 广告投放过程中<br>使用目的： 程序化广告推荐、广告归因、广告落地页信息收集、广告监测<br>共享方式： 后台接口传输/表单传输/终端发起传输<br>第三方个人信息处理规则： 可通过《<a href="https://privacy.qq.com/document/preview/7c8439a1d632427180da2a497f05dba1">广告服务第三方信息共享清单</a>》查看</p>
+<p class="ql-align-justify">关闭路径：您可以通过下列路径：“腾讯应用宝-我的-设置-个性化推荐”撤回个性化推荐授权及个性化广告服务；</p>
+<p class="ql-align-justify"><strong>5.3.3&nbsp;第三方SDK类合作方</strong></p>
+<p class="ql-align-justify">我们会与第三方软件工具开发包（SDK）或其他类似的应用程序类服务商分享您的个人信息，以保障平台的稳定运行、功能实现，具体接入信息您可以点击查看<em>《</em><a style="color: #00b0f0;" href="https://privacy.qq.com/document/priview/f3e45a48e74848f29c5691cef032a447" target="_blank" rel="noopener noreferrer"><strong><em>应用宝接入第三方SDK目录</em></strong></a><em>》</em>。我们会对该获取个人信息的第三方软件工具开发包（SDK）、应用程序接口（API）进行严格的安全监测，令其按照本隐私保护指引以及其他任何相关的保密和安全措施来处理个人信息，以保护数据安全。</p>
+<p class="ql-align-justify"><strong>5.4&nbsp;个人信息转移</strong></p>
+<p class="ql-align-justify">我们不会将您的个人信息转移给任何公司、组织和个人，但以下情形除外：</p>
+<p class="ql-align-justify">(1)&nbsp;在获得您的明确同意后，我们会向其他方转移您的个人信息；</p>
+<p class="ql-align-justify">(2) 因合并、分立、解散、被宣告破产的原因需要转移您的个人信息的，我们将向您告知接收方的名称或者姓名和联系方式，并会要求新的持有您个人信息的公司、组织继续受此隐私保护指引的约束，否则我们将要求该公司、组织重新向您征求同意。</p>
+<p class="ql-align-justify"><strong>5.5&nbsp;公开披露</strong></p>
+<p class="ql-align-justify">我们不会对外公开披露所收集的个人信息，必须公开披露时，我们会向您告知此次公开披露的目的、披露信息的类型及根据实际情况涉及的敏感信息，并征得您的单独同意。</p>
+<p class="ql-align-justify"><strong>5.6 同意的例外情形</strong></p>
+<p class="ql-align-justify">根据《个人信息保护法》的规定，以下情形下，我们共享、转让、公开披露您的个人信息，无需事先取得您的同意：</p>
+<p class="ql-align-justify">(1)&nbsp;为订立、履行您作为一方当事人的合同所必需，或者按照依法制定的劳动规章制度和依法签订的集体合同实施人力资源管理所必需；</p>
+<p class="ql-align-justify">(2)&nbsp;为履行法定职责或者法定义务所必需；</p>
+<p class="ql-align-justify">(3)&nbsp;为应对突发公共卫生事件，或者紧急情况下为保护自然人的生命健康和财产安全所必需；</p>
+<p class="ql-align-justify">(4) 为公共利益实施新闻报道、舆论监督的行为，在合理的范围内处理个人信息；</p>
+<p class="ql-align-justify">(5)&nbsp;依照《个人信息保护法》的规定在合理的范围内处理个人自行公开或者其他已经合法公开的个人信息；</p>
+<p class="ql-align-justify">(6)&nbsp;法律、行政法规规定的其他情形。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 6. 您的权利 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">在您使用腾讯应用宝期间，为了让您更便捷地查询、复制、更正、删除您的个人信息，同时保障您撤回个人信息处理的同意和注销账户的权利，我们在产品设计中为您提供了相应的操作设置，您可参考下面的指引进行操作。此外，我们还设置了投诉举报渠道，您的意见将会得到及时的处理。如果您无法通过上述途径和方式行使您的个人信息主体权利，您可以通过本隐私保护指引中提供的联系方式提出您的请求，我们会按照法律法规的规定予以反馈。</p>
+<p class="ql-align-justify"><strong>6.1&nbsp;查询个人信息</strong></p>
+<p class="ql-align-justify">(1)&nbsp;您可以通过路径“腾讯应用宝-管理-设置-隐私设置-个人信息查阅与管理-账号信息”查询您的微信或QQ头像、昵称；</p>
+<p class="ql-align-justify">(2) 您可以通过路径：“腾讯应用宝-我的-设置-隐私设置-个人信息查阅与管理-我的在装应用”查询您的已安装应用列表；</p>
+<p class="ql-align-justify">(3) 您可以通过路径：“腾讯应用宝-我的-我的游戏-我的预约”或“腾讯应用宝-我的-设置-隐私设置-个人信息查询与管理-游戏预约历史”查询您的游戏预约记录；</p>
+<p class="ql-align-justify">(4) 您可以通过路径：“腾讯应用宝-我的-我的游戏-秒玩记录”或“腾讯应用宝-我的-设置-隐私设置-个人信息查询与管理-云游戏历史”查询您的云游戏试玩记录；</p>
+<p class="ql-align-justify">(5) 您可以通过路径：“腾讯应用宝-我的-我的游戏-已领福利”或“腾讯应用宝-我的-设置-隐私设置-个人信息查询与管理-我的游戏福利”查询您的宝券和道具礼包；</p>
+<p class="ql-align-justify">(6) 您可以通过路径：“腾讯应用宝-我的-更多功能-免费小说-个人”查询您的小说阅读历史；</p>
+<p class="ql-align-justify">(7) 您可以通过路径：“腾讯应用宝-我的-我的消息”查询您在平台内的互动记录。</p>
+<p class="ql-align-justify"><strong>6.2&nbsp;个人信息副本获取</strong></p>
+<p class="ql-align-justify">如您需要您的个人信息的副本，您可以通过本隐私保护指引文末提供的方式或通过路径：“腾讯应用宝-我的-设置-个人信息下载”中提供的方式联系我们，在核实您的身份后，我们将向您提供您在我们的服务中的个人信息副本，但法律法规另有规定的或本隐私保护指引另有约定的除外。</p>
+<p class="ql-align-justify">在技术可行的前提下，符合国家网信部门规定条件的，我们还可按您的要求，将您的个人信息副本传输给您指定的第三方。</p>
+<p class="ql-align-justify"><strong>6.3&nbsp;更正、补充个人信息</strong></p>
+<p class="ql-align-justify">6.3.1&nbsp;您可以在腾讯应用宝用户专享界面更正、补充您的收货信息（收货人姓名、收货地址及联系电话）。</p>
+<p class="ql-align-justify">6.3.2&nbsp;您也可以通过本隐私保护指引第10节提供的方式联系我们，我们对您的个人信息予以核实后，会及时更正、补充您的个人信息。</p>
+<p class="ql-align-justify"><strong>6.4&nbsp;删除个人信息</strong></p>
+<p class="ql-align-justify">6.4.1&nbsp;您可以通过以下路径自行删除您的个人信息：</p>
+<p class="ql-align-justify">(1) 您可以通过路径：“腾讯应用宝-我的-更多功能-免费小说-个人-阅读历史-管理”删除您的小说阅读历史；</p>
+<p class="ql-align-justify">(2) 您可以通过路径：“腾讯应用宝-我的-我的消息”删除您在平台内的互动记录；</p>
+<p class="ql-align-justify">6.4.2&nbsp;在以下情形中，您可以通过本隐私保护指引文末提供的方式联系我们，请求我们删除您的个人信息：</p>
+<p class="ql-align-justify">(1)&nbsp;如果我们处理个人信息的行为违反法律法规；</p>
+<p class="ql-align-justify">(2)&nbsp;如果我们收集、使用您的个人信息，却未征得您的同意；</p>
+<p class="ql-align-justify">(3)&nbsp;如果您同意我们收集、使用您的个人信息后又撤回同意；</p>
+<p class="ql-align-justify">(4)&nbsp;如果我们处理个人信息的行为违反了与您的约定；</p>
+<p class="ql-align-justify">(5)&nbsp;如果您不再使用我们的产品或服务，或您注销了账号；</p>
+<p class="ql-align-justify">(6)&nbsp;如果我们不再为您提供产品或服务；</p>
+<p class="ql-align-justify">(7)&nbsp;如果您个人信息的处理目的已实现、无法实现或者为实现处理目的不再必要；</p>
+<p class="ql-align-justify">(8)&nbsp;如果您个人信息的保存期限已经届满。</p>
+<p class="ql-align-justify"><strong>6.5&nbsp;撤回同意</strong></p>
+<p class="ql-align-justify">(1) 您可以通过对您的硬件设备进行修改或通过下列路径：“腾讯应用宝-我的-权限中心”撤回通知、悬浮窗权限的授权；</p>
+<p class="ql-align-justify">(2) 您可以通过下列路径：<a href="tmast://personalswitch">“腾讯应用宝-我的-设置-个性化推荐”撤回个性化推荐授权及个性化广告服务；</a></p>
+<p class="ql-align-justify">(3)&nbsp;您可以通过以下路径撤回游戏信息使用授权：针对一次性的游戏信息使用授权，我们仅会在当次活动中使用授权信息；针对非一次性的游戏信息使用授权，您可以回到权限授权所在的活动界面，通过页面底部的“游戏信息授权管理”撤回相应的游戏信息使用授权。</p>
+<p class="ql-align-justify">请您理解，每项业务功能需要一些必要的信息才能得以完成，当您撤回同意或授权后，我们将无法继续为您提供撤回同意或授权所对应的服务，也不再处理您相应的个人信息。但您撤回同意或授权的决定，不会影响此前基于您的授权而开展的信息处理。</p>
+<p class="ql-align-justify"><strong>6.6&nbsp;注销账号</strong></p>
+<p class="ql-align-justify">您可以通过路径：“腾讯应用宝-我的-设置-账号注销”注销您的腾讯应用宝账号。</p>
+<p class="ql-align-justify">在您注销腾讯应用宝账号后，我们将停止为您提供腾讯应用宝的全部产品和/或服务，并依据法律法规相关要求通过匿名化的方式处理您的个人信息，或删除与您账号相关的个人信息，但法律法规或监管机构对用户信息存储时间另有规定的除外。</p>
+<p class="ql-align-justify"><strong>6.7&nbsp;获取本隐私保护指引的解释说明</strong></p>
+<p class="ql-align-justify">您可以通过本隐私保护指引第10节提供的方式联系我们，要求我们对本隐私保护指引进行解释说明。</p>
+<p class="ql-align-justify"><strong>6.8&nbsp;约束信息系统自动决策</strong></p>
+<p class="ql-align-justify">在某些业务功能中，我们仅依据信息系统、算法在内的非人工自动决策机制作出决定。如果这些决定显著影响您的合法权益，您可以通过本隐私保护指引第10节提供的方式联系我们，要求我们予以说明，并拒绝我们仅通过自动化决策的方式作出决定。</p>
+<p class="ql-align-justify"><strong>6.9&nbsp;已故用户的个人信息保护</strong></p>
+<p class="ql-align-justify">用户不幸去世的，其近亲属为了自身的合法、正当利益，可以对已故用户的相关个人信息行使本隐私保护指引规定的查阅、复制、更正、删除的权利；已故用户生前另有安排的除外。</p>
+<p class="ql-align-justify"><strong>6.10&nbsp;响应您的上述请求</strong></p>
+<p class="ql-align-justify">为保障安全，如您根据本隐私保护指引第6节向我们提出请求，我们将先验证您的个人信息主体身份，然后再处理您的请求。</p>
+<p class="ql-align-justify">我们将在十五（15）个工作日或法律法规规定的期限内予以反馈。如您不满意或有任何问题，您可以通过本隐私保护指引第10节提供的方式联系我们。</p>
+<p class="ql-align-justify">对于您合理的请求，我们原则上不收取费用，但对多次重复、超出合理限度的请求，我们将视情况收取一定成本费用。对于那些技术上难以实现、根据法律、行政法规的规定无需响应的请求或响应您的请求将违反法律、行政法规时，我们会予以拒绝，并向您说明理由。</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 7. 变更 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">我们会适时对本隐私保护指引进行修订。当本隐私保护指引的条款发生变更时，我们会在版本更新时向您提示变更后的隐私保护指引，并向您说明生效日期。当本隐私保护指引发生重大变更时，我们还会提供更为显著的通知，将变更部分告知您。</p>
+<p class="ql-align-justify">上述“重大变更”包括：</p>
+<p class="ql-align-justify">(1)&nbsp;个人信息处理者的名称或者姓名和联系方式；</p>
+<p class="ql-align-justify">(2)&nbsp;个人信息的处理目的、处理方式，处理的个人信息种类、保存期限；</p>
+<p class="ql-align-justify">(3)&nbsp;个人行使本法规定权利的方式和程序；</p>
+<p class="ql-align-justify">(4)&nbsp;法律、行政法规规定应当告知的其他事项。</p>
+<p class="ql-align-justify">请您仔细阅读变更后的隐私保护指引内容，您继续使用腾讯应用宝表示您同意我们按照更新后的隐私保护指引处理您的个人信息。如果个人信息的处理目的、处理方式和处理的个人信息种类发生变更的，我们将重新取得您的同意。</p>
+<p>&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 8. 未成年人保护 </h1><div data-v-49c41d7e=""><p class="ql-align-justify">我们非常重视对未成年人个人信息的保护。若您是18周岁以下的未成年人，在取得您或您的监护人同意之前，我们不会处理您的个人信息。若您是未成年人的监护人，当您对您所监护的未成年人的个人信息有相关疑问时，请通过第10节中的联系方式与我们联系。</p><p class="ql-align-justify">特别地，若您是14周岁以下的儿童，我们还专门为您制定了<strong>《</strong><a href="https://privacy.qq.com/mb/policy/kids-privacypolicy" rel="noopener noreferrer" target="_blank" style="color: rgb(23, 92, 235);">儿童隐私保护声明</a><strong>》</strong>，儿童及其监护人在为14周岁以下的儿童使用腾讯应用宝服务前，还应仔细阅读<strong>《</strong><a href="https://privacy.qq.com/mb/policy/kids-privacypolicy" rel="noopener noreferrer" target="_blank" style="color: rgb(23, 92, 235);">儿童隐私保护声明</a><strong>》</strong>。只有在取得监护人对<strong>《</strong><a href="https://privacy.qq.com/mb/policy/kids-privacypolicy" rel="noopener noreferrer" target="_blank" style="color: rgb(23, 92, 235);">儿童隐私保护声明</a><strong>》</strong>的同意后，我们才会处理14周岁以下的<strong><em>儿童个人信息</em></strong>。</p><p><br></p><p class="ql-align-justify"><br></p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 9. 其他 </h1><div data-v-49c41d7e=""><p class="ql-align-justify"><strong>《</strong><a href="https://privacy.qq.com/policy/tencent-privacypolicy" rel="noopener noreferrer" target="_blank" style="color: rgb(0, 176, 240);"><strong><em>腾讯隐私政策</em></strong></a><strong>》</strong>是我们统一适用的一般性隐私条款，其中所规定的用户权利及信息安全保障措施均适用于腾讯应用宝用户。如<strong>《</strong><a href="https://privacy.qq.com/policy/tencent-privacypolicy" rel="noopener noreferrer" target="_blank" style="color: rgb(0, 176, 240);"><strong><em>腾讯隐私政策</em></strong></a><strong>》</strong>与本隐私保护指引存在不一致或矛盾之处，请以本隐私保护指引为准。</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 10. 联系我们 </h1><div data-v-49c41d7e=""><p>我们设立了专门的个人信息保护团队和个人信息保护负责人，如果您对本隐私保护指引或个人信息保护相关事宜有任何疑问或投诉、建议时，您可以通过以下方式与我们及我们的个人信息保护负责人联系：</p><p>1. 您可以填写&nbsp;<a href="https://privacy.qq.com/questionnaire" rel="noopener noreferrer" target="_blank" style="color: rgb(20, 147, 214);">个人信息保护和隐私问题反馈问卷&nbsp;</a>与我们联系；</p><p>2. 将问题发送至Dataprivacy@tencent.com；</p><p>3. 通过<a href="https://kf.qq.com/" rel="noopener noreferrer" target="_blank" style="color: rgb(20, 147, 214);">https://kf.qq.com/</a>与我们联系；</p><p>4. 将您的问题邮寄至下列地址：</p><p>中国广东省深圳市南山区海天二路33号腾讯滨海大厦 数据合规与隐私保护部（收）</p><p>邮编：518054</p><p class="ql-align-justify">我们将尽快审核所涉问题，并在收到疑问或投诉、建议之日起15个工作日或法律法规规定的期限内予以反馈。</p><p class="ql-align-right"><strong>深圳市腾讯计算机系统有限公司</strong></p><p><br></p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 附录：定义 </h1><div data-v-49c41d7e=""><p class="ql-align-justify"><strong>个人信息</strong>：指以电子或者其他方式记录的与已识别或者可识别的自然人有关的各种信息，不包括匿名化处理后的信息（出自《中华人民共和国个人信息保护法》第四条）。</p>
+<p class="ql-align-justify"><strong>敏感个人信息</strong>：一旦泄露或者非法使用，容易导致自然人的人格尊严受到侵害或者人身、财产安全受到危害的个人信息，包括生物识别、宗教信仰、特定身份、医疗健康、金融账户、行踪轨迹等信息，以及不满十四周岁未成年人的个人信息（出自《中华人民共和国个人信息保护法》第二十八条）。</p>
+<p class="ql-align-justify"><strong>匿名化</strong>：是指个人信息经过处理无法识别特定自然人且不能复原的过程（出自《中华人民共和国个人信息保护法》第七十三条）。</p>
+<p class="ql-align-justify"><strong>去标识化</strong>：是指个人信息经过处理，使其在不借助额外信息的情况下无法识别特定自然人的过程（出自《中华人民共和国个人信息保护法》第七十三条）。</p>
+<p class="ql-align-justify"><strong>关联公司</strong>：是指与我们间存在直接或间接控制关系或重大影响关系的公司。</p>
+<p class="ql-align-justify"><strong>儿童</strong>：指不满十四周岁的未成年人。</p>
+<p class="ql-align-justify"><strong>处理个人信息</strong>：指个人信息的收集、存储、使用、加工、传输、提供、公开、删除。</p>
+<p class="ql-align-justify"><strong>自动化决策：</strong>指通过计算机程序自动分析、评估个人的行为习惯、兴趣爱好或者经济、健康、信用状况，并进行决策的活动（出自《中华人民共和国个人信息保护法》第七十三条）。</p>
+<p class="ql-align-justify"><strong>Cookie：</strong>Cookie是包含字符串的小文件，在您登入和使用网站或其他网络内容时发送、存放在您的计算机、移动设备或其他装置内（通常经过加密）。Cookie同类技术是可用于与Cookie类似用途的其他技术，例如：Web Beacon、Proxy、嵌入式脚本、像素标签。</p>
+<p class="ql-align-justify"><strong>SSL</strong>：SSL（Secure Socket Layer）又称为安全套接层，是在传输通信协议（TCP/IP）上实现的一种安全协议。SSL支持各种类型的网络，同时提供三种基本的安全服务，均通过使用公开密钥和对称密钥技术以达到信息保密的效果。</p>
+<p>&nbsp;</p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold;"> 历史隐私政策 </h1><div data-v-49c41d7e=""><p>如您想查看历史隐私政策，请点击这里：</p>
+<p>发布日期： &nbsp;<a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13/v_20230508113802">2023年5月8日</a>；</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13/v_20230428171843">2023年4月28日</a>；</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13/v_20230316110952">2023年3月16日</a>；</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13/v_20230223140533">&nbsp;2023年2月23日</a></p></div></div><div data-v-49c41d7e="" class="ql-editor content-display"><h1 data-v-49c41d7e="" style="margin-bottom: 20px; font-weight: bold; margin-top: 50px;"> 历史版本 </h1><div data-v-5927abc0="" data-v-49c41d7e="" list="[object Object],[object Object],[object Object],[object Object]"><div data-v-5927abc0="" class="history-item"><div data-v-5927abc0="" class="item-wrapper"><div data-v-5927abc0="" style="margin-right: 5px;">腾讯应用宝隐私保护指引
+</div><div data-v-5927abc0="" class="time">2023-05-08</div></div><a data-v-5927abc0="" href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13/v_20230508113802">查看</a></div><div data-v-5927abc0="" class="history-item"><div data-v-5927abc0="" class="item-wrapper"><div data-v-5927abc0="" style="margin-right: 5px;">腾讯应用宝隐私保护指引
+</div><div data-v-5927abc0="" class="time">2023-04-28</div></div><a data-v-5927abc0="" href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13/v_20230428171843">查看</a></div><div data-v-5927abc0="" class="history-item"><div data-v-5927abc0="" class="item-wrapper"><div data-v-5927abc0="" style="margin-right: 5px;">腾讯应用宝隐私保护指引
+</div><div data-v-5927abc0="" class="time">2023-03-16</div></div><a data-v-5927abc0="" href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13/v_20230316110952">查看</a></div><div data-v-5927abc0="" class="history-item"><div data-v-5927abc0="" class="item-wrapper"><div data-v-5927abc0="" style="margin-right: 5px;">腾讯应用宝隐私保护指引
+</div><div data-v-5927abc0="" class="time">2023-02-23</div></div><a data-v-5927abc0="" href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13/v_20230223140533">查看</a></div></div></div></div></div></div></div></div><div data-v-49c41d7e="" class="app-container scroll-wrapper"><div data-v-49c41d7e="" class="app-header"><div data-v-49c41d7e="" aria-label="展开菜单" class="drawer-button"><img data-v-49c41d7e="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAJnElEQVR4nO3d4XGT5xKG4X0riE4FiAoiKkBUgKgAuQJMBZErwFSAXUFMBdgVWFSAqCByBTr3N8KTTM5hsWFf2dLc18wz+0+zX2afWDb2qIWk77IgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlHqQgm81mHBFPyE1rbcmUHqWdFIRCjBgvyexb/m1JziLivLW2Zj64bzv/TvR47Px/qN0LwqG9ZiwiYhw/tibH/Ec4Z+4cu44j4g8yjbvtq4dxMWQXd9JINxzcB8Y87u+Mhz9i7gR7jhjvyDy0T1YR8ZZbuWB20UgXHN0nxjR+3iUP/oLZFXtOGB/IMLWfjrmV98xyjZTj6IaDm8eve8+DHzO7YM8R45qMQ/vuLbdyyizVSCmObhoRn0iVF621y+iAXYc9p6FD8aIV30qPgnxhjKNOl7da7Dlj/El0OMpvpZEyHY/uGQ++ZJZh12vGhOiwvOJWLpglqgtyFhGvSbW3PPQpswR7jiPiC9HhOW+tzaNIdUH+YoxItavW2jSKsOcx4x3R4VlzK/9hlqguyIbRw1WrLcgitv8gqAPErZTdddkLDTi8DaMLnrlsV9ZchAU5WJxK2a2UvdCAw9swerhqfgXRHXErZXdd9kIDDm8V29/SrXbVagsyj+2/nuvwfG2tjaNII2U4vLPwp1h6WO+5lWNmieqCTKP2X9FvPW2traIQu15GxHOiw/KMW1kyS5QWZNDh8M5b4c+1b7HnNPqUWQ/nI7cyY5bpUZAJ45pUuCETHnoVHbDrKeMN0f7rcivlBRlwePOo+Sb4qLV2Fh2x61n0+b5JuzOUY8qtLJmluhRkwOHN49dKctQ6l+MWu54y/Eqyn76SGbeyZJZrpBsOb8Y4i4jfyF0N/zeY88AXzJ1h12ls/zT4OdHjN9zJ6RBuZc3somtBBhzeiHH8LT8qynuy6PnAP8K+E8Y0+L8S0eOzJJdBdnEn3QvyTxzfjDEh0/jb8lsudvHA0n3stCDSvrEgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiU2FlBNpvNS8bsW0bk1ppcxvYTps6ZD45dxxHxhEzIiOhxWJI1d3LF3IlGuuLYZox3ZBw/tortZxSeM3eOXV8zjsmE6PFakwty0oo/F/3fGumGg/vAmMf9nfHgR8ydYM8JY9h1mNovC27lhNlFI+U4uBHjE5mQn7XkwZ8xu2LXYcdh1xHRfjrjVo6Y5Ropx9F9YMzj13V78AF7ThifyIhov3W5lUZKcXTz2L5dqfKitXYZHbDrF8Y4dChecSsXzDKNlOHgRoxrMo46Xd5qsesx4x3R4VhxK0+ZZRopw9HNo/arx61nPPiSWYZdvzDGoUNz1Fo7iyKNlOHoLhgvSbX3PPQxswR7ThjXRIfnI7cyY5aoLsiG0cNVa20aRVhzERF/EB0gbqXsrsteaMDhbRg9lH4fwpqLsCAHi1spu+uyFxpweBtGDzc884hZgjUXYUEOFrdSdtdlLzTg8DaMHq6ab7F0R9xK2V2XvdCAw1vF9pf8qn3kmWfMEuw5jz4/bdPD+8ytTJglqgtyynhDqh21wh/dseeI8RfR4XnPrRwzS1QXZMK4JpVuyJiHXjPLsOtZRLwmOixPW+Fv+JYWZNDh8E5aa4soxp7jiPhCdDjOW2vzKNSjIOPgx7LkN/Krunz1uMWui/Cb9UPR5VbKCzLg8CaMa/Irhgee8sBLZjfseha1X/G0e91upUtBBhzejHEWP/eVZHjgOQ98weyOXU8Zb4j2z1cy41aWzHKNdMPhTRin5Dm5q89kKMeSuTPsOo1toZ8Q7YcTcsqtrJldNNIdxzeP7d96/06+ZyjG8LBn8YDYdcaYxvavIcdhYR6TK7ImF+SSW1lFZ43sDMc3ju3xjeNvq9jRw0r31Yik77AgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIldl6QzfZD/P/5SVNfmx+eo0dqJwWhFOPYfkjmjIzjf61i+7Fa7x9DWdj3JWNCRmRC9PDWZEnW5OOu7qSRrji2PxjHZETu4pSctI4fzPj/sOeIcburHr8lecudXEZH3Qry7eA+kQm5ryV50XZUEnadMT6QEdF+uSBHrdOtdCkIBzdiXJNx/LxVRDzr9eC32HUe23Jofy3Ji9bhVhopx9EN5ZiQX7XkoZ8xu2DPGeNPov03fFLyC2apRkpxdIvYvpevctQ6fHY6e44YX8gwdRhOWmuLKFRaEI5uHNu3VpVHt+KhnzJLsesiaoush7cmT1vhW61GynB0x4x3pNorHvqCWYZd/2KMiA7LW27llFmiuiCXEfGcVDtvrc2jCHvOGH8SHZ6r1to0ilQXZMPo4aoVPjRrLsK3VweLWym767IXGnB4G0YPK575KbMEay7CghwsbqUxSpS90IDD2zB6+NpaG0cR1lyEBTlY3EpjlCh7oQGHt2H0cNV8i6U74lbK7rrshQYc3pLxO6l23vwmXXfzmVuZMEtUF+SY8Y5Ue8VDXzDLsOua8RvRYXnLrZwyS1QXZBzbf52udMMDj5il2PWU8YbocNyQCfeyiiKlBRl0OLyTVvzrAwP2HDFW4VeRQ3LSim+lR0EqD+8zDzxhdsGu8/A3eQ/FZzLlXtbMMuUFGXB4E8Zl/FpJbsjwwEtmN+x6zHhHtL8+k+FW1sxSXQoy4PCmsf1jlt/Ifd2Q4YGXzO7YdR7bv2T8mV31sK7IjFtZM8s10g2HN2Gcxf1+9PuVDA+8ZO4Mu44jYhERr4kev+FOFtzJWXTUSHcc3zx4mIh4Qr7nKznlgU+ZD4ZdR4wZGQdfxUKPySq2ueBOlszuGtkZjm/CmJERmZAlWZOdPbB0HzstiLRvLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSAkLIiUsiJSwIFLCgkgJCyIlLIiUsCBSwoJICQsiJSyIlLAgUsKCSIn/AsNn3+fk0R0/AAAAAElFTkSuQmCC" alt="展开菜单" width="24"></div><div data-v-49c41d7e="" class="title-text">腾讯应用宝隐私保护指引
+</div></div><!----><div data-v-49c41d7e="" class="time-wrapper" style="padding-top: 6px;"><div data-v-49c41d7e="" class="time-container"><span data-v-49c41d7e="" class="updata-time" style="margin-right: 0px;"> 更新日期：2025-05-20 </span><span data-v-49c41d7e="" class="effect-time" style="margin-right: 20px;"> 生效日期：2025-05-20 </span></div><div data-v-49c41d7e="" style="padding-right: 20px;"><span data-v-49c41d7e="" class="app-download-btn"><span data-v-49c41d7e="" class="iconfont privacy-xiazai"></span> 下载 </span></div></div><div data-v-49c41d7e="" class="el-container app-container scroll-main" style="overflow: auto;"><div data-v-49c41d7e="" class="el-aside side-bar"><div data-v-49c41d7e="" tabindex="-1" class="el-drawer__wrapper" style="display: none;"><div role="document" tabindex="-1" class="el-drawer__container"><div aria-modal="true" aria-labelledby="el-drawer__title" aria-label="腾讯应用宝隐私保护指引
+" role="dialog" tabindex="-1" class="el-drawer ltr" style="width: 30%;"><!----><!----></div></div></div></div><div data-v-49c41d7e="" class="el-container"><div data-v-49c41d7e="" class="el-main main"><div data-v-49c41d7e="" id="app-document" style="padding-bottom: 40px;"><!----><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52738" name="content-item">摘要</span></div><div data-v-49c41d7e="" class="ql-editor"><h1 data-v-94b38a18="">摘要</h1>
+<div data-v-94b38a18="">
+<p>应用宝（“我们”）深知个人信息对您的重要性，我们将按照法律法规规定为您提供更加安全、可靠的服务。本摘要希望向您简洁介绍<a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13"><strong>《腾讯应用宝隐私保护指引》</strong></a>的核心内容，完整版正文请点击查看<a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13"><strong>《腾讯应用宝隐私保护指引》</strong></a>。</p>
+<p><strong>一、我们如何收集和使用您的个人信息</strong></p>
+<p>摘要如下，详情请查看<a href="https://privacy.qq.com/document/preview/391d74934b4f447487bc4fffbc3e5e5e"><strong>《收集个人信息明示清单》</strong></a>和<a href="https://privacy.qq.com/document/preview/79b16f51ffbb48a7b9ea67a818c5f6ab"><strong>《应用权限申请与使用情况说明》</strong></a>。</p>
+<table style="width: 82.542%; height: 704px;" border="1">
+<tbody>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; text-align: center; height: 19px;"><strong>序号</strong></td>
+<td style="width: 12.4486%; text-align: center; height: 19px;"><strong>信息类型</strong></td>
+<td style="width: 21.5433%; text-align: center; height: 19px;"><strong>信息名称</strong></td>
+<td style="width: 23.4191%; text-align: center; height: 19px;"><strong>使用目的</strong></td>
+<td style="width: 37.147%; text-align: center; height: 19px;"><strong>适用场景</strong></td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">1</td>
+<td style="width: 12.4486%; height: 76px;" rowspan="4">用户身份信息</td>
+<td style="width: 21.5433%; height: 19px;">昵称、头像</td>
+<td style="width: 23.4191%; height: 19px;">创建账号，完善网络资料、提供个性化体验</td>
+<td style="width: 37.147%; height: 19px;">使用微信或QQ登录应用宝</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">2</td>
+<td style="width: 21.5433%; height: 19px;">微信号、QQ号</td>
+<td style="width: 23.4191%; height: 19px;">创建账号，核实用户身份</td>
+<td style="width: 37.147%; height: 19px;">使用微信或QQ登录应用宝</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">3</td>
+<td style="width: 21.5433%; height: 19px;">性别、生日/年龄、身份证（或华侨护照、港澳台通行证、外国人永久居住身份证）</td>
+<td style="width: 23.4191%; height: 19px;">游戏实名认证</td>
+<td style="width: 37.147%; height: 19px;">使用云游戏功能</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">4</td>
+<td style="width: 21.5433%; height: 19px;">手机号码</td>
+<td style="width: 23.4191%; height: 19px;">识别用户联通大王卡或移动宝藏卡身份</td>
+<td style="width: 37.147%; height: 19px;">使用免流量服务</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">5</td>
+<td style="width: 12.4486%; height: 344px;" rowspan="13">设备属性信息</td>
+<td style="width: 21.5433%; height: 19px;">Android ID</td>
+<td style="width: 23.4191%; height: 19px;">提高服务安全性、防止恶意程序及反作弊、进行身份验证和识别</td>
+<td style="width: 37.147%; height: 19px;">账号安全保护、身份识别和个性化内容推荐</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">6</td>
+<td style="width: 21.5433%; height: 19px;">IP地址</td>
+<td style="width: 23.4191%; height: 19px;">根据IP地址判断位置分配就近服务器；通过网络状态判断用户的运营商，以及识别用户是否为运营商免流量用户</td>
+<td style="width: 37.147%; height: 19px;">提高用户整体使用和访问速度；针对已授权用户，在APP启动或切换至移动网络时进行信息传输并识别运营商免流量用户</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">7</td>
+<td style="width: 21.5433%; height: 19px;">CPU</td>
+<td style="width: 23.4191%; height: 19px;">检查CPU情况</td>
+<td style="width: 37.147%; height: 19px;">进行手机垃圾清理和加速</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">8</td>
+<td style="width: 21.5433%; height: 19px;">WIFI</td>
+<td style="width: 23.4191%; height: 19px;">检测WIFI网络状态，及时提醒告知用户</td>
+<td style="width: 37.147%; height: 19px;">使用云游戏功能、第三方微信小程序</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">9</td>
+<td style="width: 21.5433%; height: 19px;">附近的WIFI</td>
+<td style="width: 23.4191%; height: 19px;">用户在使用第三方微信小程序服务时，需要根据情况获取附近可连接的WIFI列表，使用前会征求用户同意</td>
+<td style="width: 37.147%; height: 19px;">使用第三方微信小程序时</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">10</td>
+<td style="width: 21.5433%; height: 19px;">运行内存</td>
+<td style="width: 23.4191%; height: 19px;">检查手机内存情况</td>
+<td style="width: 37.147%; height: 19px;">进行手机垃圾清理和加速、根据内存情况个性化内容推荐</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">11</td>
+<td style="width: 21.5433%; height: 19px;">SD卡数据</td>
+<td style="width: 23.4191%; height: 19px;">检查SD卡情况</td>
+<td style="width: 37.147%; height: 19px;">进行手机垃圾清理和加速</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">12</td>
+<td style="width: 21.5433%; height: 19px;">手机型号</td>
+<td style="width: 23.4191%; height: 19px;">提高服务安全性、防止恶意程序及反作弊、进行身份验证和识别</td>
+<td style="width: 37.147%; height: 19px;">账号安全保护、身份识别和个性化内容推荐</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">13</td>
+<td style="width: 21.5433%; height: 19px;">蓝牙名称、设备名称</td>
+<td style="width: 23.4191%; height: 19px;">提高服务安全性、防止恶意程序及反作弊、进行身份验证和识别</td>
+<td style="width: 37.147%; height: 19px;">账号安全保护、身份识别</td>
+</tr>
+<tr style="height: 39px;">
+<td style="width: 5.22277%; height: 39px;">14</td>
+<td style="width: 21.5433%; height: 39px;">开始获取位置、CellID、蓝牙MAC</td>
+<td style="width: 23.4191%; height: 39px;">用户在使用第三方微信小程序服务时，需要获取，使用前会征求用户同意</td>
+<td style="width: 37.147%; height: 39px;">使用第三方微信小程序时</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">15</td>
+<td style="width: 21.5433%; height: 19px;">BSSID</td>
+<td style="width: 23.4191%; height: 19px;">通过BSSID检测WIFI网络状态</td>
+<td style="width: 37.147%; height: 19px;">使用云游戏功能、第三方微信小程序</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">16</td>
+<td style="width: 21.5433%; height: 19px;">SSID</td>
+<td style="width: 23.4191%; height: 19px;">检查网络是否可用</td>
+<td style="width: 37.147%; height: 19px;">发起请求前，获取网络信息</td>
+</tr>
+<tr style="height: 39px;">
+<td style="width: 5.22277%; height: 39px;">17</td>
+<td style="width: 21.5433%; height: 39px;">精确位置</td>
+<td style="width: 23.4191%; height: 39px;">用户在使用第三方微信小程序服务时，需要使用该功能，使用前会征求用户同意</td>
+<td style="width: 37.147%; height: 39px;">使用第三方微信小程序时</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">18</td>
+<td style="width: 12.4486%; height: 152px;" rowspan="8">用户使用过程信息</td>
+<td style="width: 21.5433%; height: 19px;">应用使用时长</td>
+<td style="width: 23.4191%; height: 19px;">监控应用宝自身的运行异常情况</td>
+<td style="width: 37.147%; height: 19px;">应用宝错误异常监控和优化升级</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">19</td>
+<td style="width: 21.5433%; height: 19px;">云游戏记录和时长</td>
+<td style="width: 23.4191%; height: 19px;">展示玩过的云游戏，并用于活动、排行、社区</td>
+<td style="width: 37.147%; height: 19px;">使用云游戏功能</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">20</td>
+<td style="width: 21.5433%; height: 19px;">应用预约、下载、安装记录</td>
+<td style="width: 23.4191%; height: 19px;">展示应用的预约、下载、安装状态，并用于社区场景</td>
+<td style="width: 37.147%; height: 19px;">应用下载、应用预约、游戏社区</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">21</td>
+<td style="width: 21.5433%; height: 19px;">游戏充值、消费订单记录</td>
+<td style="width: 23.4191%; height: 19px;">判断福利领取条件，增加会员成长值</td>
+<td style="width: 37.147%; height: 19px;">应用宝会员升级、应用宝月卡购买、应用宝会员消费</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">22</td>
+<td style="width: 21.5433%; height: 19px;">视频内容观看记录和时长</td>
+<td style="width: 23.4191%; height: 19px;">辅助内容推荐</td>
+<td style="width: 37.147%; height: 19px;">游戏社区个性化内容推荐</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">23</td>
+<td style="width: 21.5433%; height: 19px;">搜索记录</td>
+<td style="width: 23.4191%; height: 19px;">检索用户所需内容</td>
+<td style="width: 37.147%; height: 19px;">应用下载、游戏社区及小说书城模块内容搜索、个性化内容推荐</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">24</td>
+<td style="width: 21.5433%; height: 19px;">文字信息</td>
+<td style="width: 23.4191%; height: 19px;">检索用户所需内容、记录需求并反馈</td>
+<td style="width: 37.147%; height: 19px;">应用下载、游戏社区及小说书城模块内容搜索、帮助与反馈功能</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">25</td>
+<td style="width: 21.5433%; height: 19px;">剪切板</td>
+<td style="width: 23.4191%; height: 19px;">获取从外部链接触发的下载任务、校验活动信息、复制文本内容</td>
+<td style="width: 37.147%; height: 19px;">外部链接下载、参与外部分享链接的活动、发布内容</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">26</td>
+<td style="width: 12.4486%; height: 56px;" rowspan="3">已安装应用软件情况</td>
+<td style="width: 21.5433%; height: 19px;">已安装应用列表（包含应用软件的名称、版本）</td>
+<td style="width: 23.4191%; height: 19px;">判断应用安装情况及对应版本号以实现相应功能</td>
+<td style="width: 37.147%; height: 19px;">优先推荐下载未安装应用、优先推荐已装应用内容、已装应用更新提醒、进行安装包清理、应用卸载、游戏社区</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 5.22277%; height: 18px;">27</td>
+<td style="width: 21.5433%; height: 18px;">&nbsp;应用软件运行时间</td>
+<td style="width: 23.4191%; height: 18px;">计算应用运行频率</td>
+<td style="width: 37.147%; height: 18px;">根据应用软件运行频率对已装应用排序，提供卸载建议</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">28</td>
+<td style="width: 21.5433%; height: 19px;">应用软件运行异常信息</td>
+<td style="width: 23.4191%; height: 19px;">监控应用宝自身的运行异常情况</td>
+<td style="width: 37.147%; height: 19px;">应用宝错误异常监控和优化升级</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">29</td>
+<td style="width: 12.4486%; height: 57px;" rowspan="3">虚拟财产</td>
+<td style="width: 21.5433%; height: 19px;">应用内积分/宝券/道具</td>
+<td style="width: 23.4191%; height: 19px;">完成福利兑换</td>
+<td style="width: 37.147%; height: 19px;">应用宝会员福利兑换</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">30</td>
+<td style="width: 21.5433%; height: 19px;">福利领取/兑换记录</td>
+<td style="width: 23.4191%; height: 19px;">展示用户领取福利或兑换福利的记录或状态</td>
+<td style="width: 37.147%; height: 19px;">应用宝会员、游戏社区</td>
+</tr>
+<tr style="height: 19px;">
+<td style="width: 5.22277%; height: 19px;">31</td>
+<td style="width: 21.5433%; height: 19px;">游戏类兑换码</td>
+<td style="width: 23.4191%; height: 19px;">完成福利兑换</td>
+<td style="width: 37.147%; height: 19px;">应用宝会员福利兑换</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p><strong>2. </strong><strong>敏感权限申请与使用</strong></p>
+<p>为实现特定功能，我们将在必要时申请访问您的系统权限（包括但不限于相机、麦克风、存储/相册），详情可查阅<a href="https://privacy.qq.com/document/preview/79b16f51ffbb48a7b9ea67a818c5f6ab"><strong>《应用权限申请与使用情况说明》</strong></a>。</p>
+<p><strong>二、您的个人信息共享情况</strong></p>
+<p>摘要如下，详情请查看<a href="https://privacy.qq.com/document/preview/e7e895203601428fadd149e0fae2e148"><strong>《第三方信息共享清单》</strong></a>详细了解与第三方共享您个人信息的情况。</p>
+<table border="1" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td width="94">
+<p align="center"><strong>第三方类型</strong></p>
+</td>
+<td width="454">
+<p align="center"><strong>共享情况概述</strong></p>
+</td>
+</tr>
+<tr>
+<td width="94">
+<p align="center">非SDK</p>
+</td>
+<td width="454">
+<p>用于文字阅读（阅文免费小说书城）、广告服务、网络服务（联通腾讯王卡用户身份识别）、微信小游戏/小程序、腾讯云COS云储存的信息共享</p>
+</td>
+</tr>
+<tr>
+<td width="94">
+<p align="center">SDK</p>
+</td>
+<td width="454">
+<p>通过接入SDK方式进行的共享，主要用于推送、分享内容、支付、广告监测目的</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>三、您如何管理自己的信息</strong></p>
+<p>您可以通过以下途径管理您的个人信息、实现您作为个人信息主体的权利：</p>
+<p><strong>1.&nbsp;</strong><strong>通过产品页面自主操作：</strong>您可以通过产品页面便捷地自主管理您的部分个人信息。针对个性化内容推荐/推送、个性化广告，我们在产品页面中设置了开关，路径为“应用宝-我的-设置-个性化推荐”。</p>
+<p><strong>2.&nbsp;</strong><strong>联系我们：</strong>如无法通过产品功能自主操作，您可以通过<a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13"><strong>《腾讯应用宝隐私保护指引》</strong></a>第10节所示的联系方式联系我们处理。</p>
+</div></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52739" name="content-item">阅读提示</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">请您在使用/继续使用腾讯应用宝的产品和/或服务前仔细阅读、充分理解《腾讯应用宝隐私保护指引》完整版全文，并在同意全部内容后使用/继续使用。除非另有说明，不同意《腾讯应用宝隐私保护指引》或其更新（我们将及时通知您此类更新）将会影响您正常使用或继续正常使用我们的产品和/或服务。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52740" name="content-item">导言</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">(1)&nbsp;腾讯应用宝是由<strong>深圳市腾讯计算机系统有限公司</strong>（以下简称为“我们”）提供的移动应用分发服务平台。我们通过安装在您的终端设备上的客户端，为您提供应用、照片的资源管理，应用、音乐、电子书、视频、壁纸的内容下载，以及文件管理备份还原的功能，详细功能介绍参见https://sj.qq.com/intro.html。我们的<strong>注册地为广东省深圳市南山区粤海街道麻岭社区科技中一路腾讯大厦35层</strong>。产品运营过程中我们也会与关联公司联合运营。如果您对《腾讯应用宝隐私保护指引》（以下简称为“本隐私保护指引”）或相关问题有任何疑问或顾虑，请通过本指引第10节“联系我们”中所提供的联系方式与我们联系。</p>
+<p class="ql-align-justify">(2) 本隐私保护指引适用于我们通过腾讯应用宝网站（https://sj.qq.com/）、腾讯应用宝PC端、App（Android版）、Ipad端的全部终端客户端（以下单称或统称为“平台”）向您提供的各项产品和服务。如某一客户端或某一应用软件版本有特殊功能或特殊个人信息处理活动的，我们会予以说明。如我们的客户端、产品和/或服务单独设置了隐私政策/隐私协议的，单独的隐私政策/隐私协议优先于本隐私保护指引适用；单独的隐私政策/隐私协议未提及的内容，适用本隐私保护指引。</p>
+<p class="ql-align-justify"><strong>请您注意，本隐私保护指引不适用于与我们的平台、产品和/或服务集成的任何第三方应用程序或软件，或者任何其他第三方产品、服务或业务（统称“第三方服务”）。</strong>&nbsp;第三方服务由第三方负责运营，您使用第三方服务应遵守第三方为此制定的隐私政策或其他个人信息处理规则，我们提示您仔细识别实际服务的提供方，并在使用任何第三方服务之前仔细查看相关规则。</p>
+<p class="ql-align-justify">(3)&nbsp;<strong>针对涉及与您的权益（包括存在重大关系的）的条款，我们在本隐私保护指引中将采用粗体或其他合理方式提示您重点阅读。</strong></p>
+<p class="ql-align-justify">(4)&nbsp;<strong>您同意本隐私保护指引表示您已经了解并同意在相关场景下，为实现功能运行，我们将对您的相关个人信息进行处理。但这并不代表只要您开始使用我们的产品与/或服务，我们将处理本隐私保护指引中涉及的全部个人信息。仅当您使用特定功能时，我们才会根据“最小必要”原则，为实现向您提供服务的目的，处理您的相关个人信息。</strong></p>
+<p class="ql-align-justify">(5) 除本隐私保护指引外，在特定场景下，我们将以及时告知的方式（包括但不限于更新本隐私保护指引、重新签署文件、页面提示、弹窗、站内信、邮件、网站公告或其他便于您获知的方式）另行向您详细说明对应信息的处理目的、方式、范围的规则，并在征得您的同意后处理。</p>
+<p class="ql-align-justify">本隐私保护指引将帮助您了解以下内容：</p>
+<p class="ql-align-justify">1.&nbsp;个人信息的收集和使用</p>
+<p class="ql-align-justify">2. Cookie等同类技术的使用</p>
+<p class="ql-align-justify">3.&nbsp;信息的存储</p>
+<p class="ql-align-justify">4.&nbsp;信息安全</p>
+<p class="ql-align-justify">5.&nbsp;信息共享</p>
+<p class="ql-align-justify">6.&nbsp;您的权利</p>
+<p class="ql-align-justify">7.&nbsp;变更</p>
+<p class="ql-align-justify">8.&nbsp;未成年人保护</p>
+<p class="ql-align-justify">9.&nbsp;其他</p>
+<p class="ql-align-justify">10.&nbsp;联系我们</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52741" name="content-item">1. 个人信息的收集和使用</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">为帮您快速了解我们关于您的个人信息收集、使用的主要情况，我们以清单的方式进行了说明，您可以点击查看<em>《</em><a style="color: #00b0f0;" href="https://privacy.qq.com/document/preview/391d74934b4f447487bc4fffbc3e5e5e" target="_blank" rel="noopener noreferrer"><strong><em>腾讯应用宝已收集个人信息清单</em></strong></a><em>》</em>。</p>
+<p class="ql-align-justify">【原则与途径】我们会遵循合法、正当、最小必要、公开透明的原则，收集和使用您在使用我们的产品和/或服务过程中主动提供或因使用我们的产品和/或服务而产生的个人信息。</p>
+<p class="ql-align-justify">【系统权限】相机、相册（存储）、麦克风系统权限，不会默认开启。只有在您触发相关业务功能时，我们才会向您申请相关权限，并获取相应信息。请您放心，我们申请访问的权限只限于实现特定的功能所必需，并且您可以随时撤回系统权限的授权。如您拒绝或撤回授权系统权限，会使您无法使用相应功能，但并不影响您正常使用产品与/或服务的其他功能。点击查看<a style="color: #00b0f0;" href="https://privacy.qq.com/document/preview/79b16f51ffbb48a7b9ea67a818c5f6ab" target="_blank" rel="noopener noreferrer"><strong><em>腾讯应用宝应用权限列表</em></strong></a>。</p>
+<p class="ql-align-justify">【业务功能】我们收集的您的个人信息类型会因产品/服务的内容不同而有所区别，具体以产品/服务实际提供为准。为提供完善的体验，我们会不断改进我们的产品和服务，因此需要收集新的个人信息或变更个人信息使用目的或方式。如果某一需要收集您的个人信息的功能或场景未能在本隐私保护指引中予以说明的，或者我们超出了与收集您的个人信息时所声称的目的及具有直接或合理关联范围的，我们会再次向您告知，并根据法律法规的相关要求征得您的同意。</p>
+<p class="ql-align-justify"><strong>通常情况下，我们会在以下场景中收集您的个人信息或申请相关权限：</strong></p>
+<p class="ql-align-justify"><strong>1.1&nbsp;账号登录和实名认证</strong></p>
+<p class="ql-align-justify">您可以通过QQ账号、微信账号登录腾讯应用宝。当您通过QQ账号或微信账号登录腾讯应用宝时，我们将收集您的QQ账号或微信账号、头像、昵称（过程中应用宝需要唤起QQ和微信），用于您登录账号时验证您的身份。</p>
+<p>在您使用云游戏功能时，为符合相关法律法规、监管要求以及腾讯未成年人健康上网保护计划，确保用户身份真实性、验证您的身份、保障您及其他用户的安全以及便于您参与专属优惠活动，我们将收集您的真实身份信息，包括您的<em><strong>姓名</strong>、<strong>身份证号码（或华侨护照、港澳台通行证、外国人永久居住身份证）、证件有效期、手机号码、</strong></em>学校（选填）（根据实际情况，不同场景下收集的真实身份信息不同）。</p>
+<p>为更好地保护未成年人身心健康，促使未成年人健康上网，我们可能在国家有关网络游戏防沉迷政策规定的基础上，实施更为严格的防沉迷措施。同时我们也不断研究与测试各种保护未成年人的新技术。如为了进一步提高实名认证的精准度，最大限度防止未成年人冒用他人身份信息，我们可能在部分游戏或针对部分用户(以具体游戏策略为准)启用人脸识别验证身份，启用人脸识别时，我们会使用腾讯健康系统提供的身份核验能力对您当前登录并使用的微信或QQ账号（视您登录的账号）进行核验，腾讯健康系统需要收集您的真实身份信息用于身份核验。在启用人脸识别功能时，腾讯健康系统会通过微信或QQ申请调用您的设备相机/摄像头权限，用于完成人脸识别。</p>
+<p><strong>需提示的是，第三方服务（指第三方运营的游戏、第三方电信运营商的免流量服务）需要您进行实名认证并收集您的信息，此时，腾讯应用宝不会收集您的这些信息。提示您仔细识别实际服务的提供方，并在使用任何第三方服务之前仔细查看相关隐私政策或个人信息处理规则。</strong></p>
+<p class="ql-align-justify"><strong>1.2&nbsp;内容搜索</strong></p>
+<p class="ql-align-justify">当您使用搜索功能时，我们会自动收集您输入的关键字信息和<em><strong>搜索记录</strong></em>。为了提供高效的搜索服务，部分前述信息会暂时存储在您的本地设备端，并可向您展示<em><strong>搜索历史记录</strong></em>。</p>
+<p class="ql-align-justify"><strong>1.3&nbsp;内容浏览/云游戏/预约/下载</strong></p>
+<p class="ql-align-justify">为了更好地为您提供内容推荐展示，对搜索结果进行优化，优化云游戏畅玩体验，了解产品对不同硬件设备适配性、确保操作环境安全、识别账号异常状态的用途，当您使用我们的小说阅读、站内视频播放、云游戏、预约、应用下载服务内容时，我们将收集您的日志信息。</p>
+<p class="ql-align-justify">日志信息包括：腾讯应用宝账号、软件版本型号、您的操作、行为日志信息（<strong><em>浏览记录</em></strong>、<em><strong>播放/阅读/云游戏/预约/下载记录</strong></em>、播放/阅读/试玩时长、访问日期和时间）。</p>
+<p class="ql-align-justify">当您使用我们的云游戏服务时，我们会调用设备的陀螺仪、加速度、重力传感器以识别判断您的设备状态。请您理解，单独的设备传感器数据不涉及任何个人位置信息且无法与其他信息结合用于识别特定自然人的身份。</p>
+<p class="ql-align-justify">当您有大包体游戏下载，或在排队进入云游戏时，我们会使用或申请您的<em><strong>悬浮窗权限</strong></em>，展示进度浮窗，方便你在等待下载完成或排队时可以边等边逛。为了确保即使您已经把应用宝退到后台，仍可在手机桌面正常展示进度浮窗，我们会在后台获取运行中的进程信息，判断应用宝当前是在前台还是后台运作。</p>
+<p class="ql-align-justify">当您在云游戏内玩游戏时，我们会使用或申请您的<em><strong>悬浮窗权限</strong></em>，为你展示云游戏助手操作面板，为您提供更多便捷操作和优惠活动。</p>
+<p class="ql-align-justify"><strong>1.4 应用管理</strong></p>
+<p class="ql-align-justify">当您使用腾讯应用宝下载、安装、更新、卸载应用时，为向您提供应用管理服务，我们将收集下列信息：</p>
+<p class="ql-align-justify">(1)&nbsp;为向您优先推荐下载未安装的应用、对您已安装应用软件进行更新提醒、清理安装包残留数据以及实现应用卸载功能，我们将在你启动应用宝时收集您终端设备的已安装应用列表信息（包括应用软件的名称、版本及运行信息）。</p>
+<p class="ql-align-justify">(2)&nbsp;为向您推荐适合您终端设备内存空间的应用，我们将收集您的终端设备的运行信息。</p>
+<p class="ql-align-justify">(3) 为按照应用软件运行频率对您已安装应用进行排序，从而为您提供应用卸载建议，我们将收集您所安装的应用软件运行时间，并计算该应用软件的运行频率。</p>
+<p class="ql-align-justify">请您注意，为了能及时对您已安装应用软件进行更新提醒，我们需要您授权腾讯应用宝自启动，使其保持后台运行以保证我们能及时提醒您应用软件更新相关事宜。&nbsp;</p>
+<p class="ql-align-justify"><strong>1.5 游戏服务</strong></p>
+<p class="ql-align-justify">（1）当您参与腾讯应用宝的游戏福利活动或使用游戏战报功能，且登录腾讯应用宝的QQ号或微信号与注册/登录该游戏的账号一致时，为了核实您是否满足领取奖励和/或参与活动的条件，腾讯应用宝需要对您在第三方游戏或应用宝会员中的信息进行核实，核实范围会因为不同活动而不完全一致，但会限定在您确认授权并且第三方游戏提供的游戏账号信息（账号ID、游戏角色以及角色自身的游戏属性、状态、对战数据、游戏录屏信息）以及<em><strong>游戏好友数据</strong></em>（游戏角色之间的关系以及基于关系的行为，包括但不限于<em><strong>游戏好友关系链</strong></em>、好友互动送心、<em><strong>好友聊天</strong></em>）范围内。具体信息将以授权页面为准，如您拒绝授权，将无法参与相关活动，但不影响腾讯应用宝其他主要功能的使用；当您拒绝授权后，重新参与活动或参与第三方游戏其他活动时，我们会另行向您申请使用相关信息。腾讯应用宝仅会核实活动涉及的信息，获取“是”/“否”（满足条件）的反馈，不会核实其他无关信息，也不会获取您在第三方游戏中的实际数据。当您参加了注册登录第三方游戏即可领取礼包的活动，则腾讯应用宝会与第三方游戏核实您是否注册登录该游戏，当收到反馈为“是”，您即可领取礼包。您可以在“管理-设置”中进行游戏信息授权管理，取消授权、修改可见范围和授权信息类型，或直接在相关游戏内取消授权。</p>
+<p class="ql-align-justify">(2）当您使用微信小游戏功能时，我们需要进行微信账号授权，获取您的微信头像、昵称，这些信息将用于微信游戏内的角色信息展示和好友排行，以提供您更好的游戏体验。另，微信小游戏将会获取您的个人信息，我们会在征得您的明示同意后，向开发者提供您的个人信息或可获取您个人信息的微信接口，具体提供范围以交互页面中你同意的为准。</p>
+<p class="ql-align-justify"><strong>1.6 第三方小程序</strong></p>
+<p class="ql-align-justify">第三方开发者会根据实际情况在登录风险识别、注册风险识别、营销风险识别、广告反作弊、虚假流量识别、游戏风险识别类的业务风险识别场景中，采集您的已安装应用列表信息（包括应用软件的名称、版本及运行信息），用于风险病毒、恶意工具检测，识别外部的恶意攻击行为和风险行为（包括外挂、群控、双开、代理工具）。</p>
+<p class="ql-align-justify">为及时释放长时间没有被使用的小程序进程，还在进程中的小程序第三方开发者会每20分钟获取1次运行中的进程信息，并自行关闭进程。</p>
+<p class="ql-align-justify"><strong>1.7 下单与支付</strong></p>
+<p class="ql-align-justify">当您购买我们的产品及/或服务时，包括在云游戏试玩时进行游戏内充值付费，在应用宝会员场景进行会员福利兑换以及在腾讯应用宝用户专享界面购买商品，在小游戏内进行充值付费 ，为便于协助您顺利完成交易、查询<em><strong>订单信息</strong></em>，以及向您提供客户服务和保障您的交易安全，我们需要根据商品或服务类型收集如下个人信息：应用宝游戏月卡<strong><em>购买记录</em></strong>、<strong><em>交易商品</em><em>或服务信息</em></strong>、收货信息（收货人姓名、<em><strong>收货地址</strong></em>及联系电话）、<strong><em>交易金额、下单时间</em></strong><em>、</em><strong><em>交易日期</em></strong><em>、</em><strong><em>订单商户</em></strong><em>、</em><strong><em>订单编号</em></strong><em>、</em><strong><em>订单状态、支付方式、支付账号</em></strong>、支付状态、<em><strong>虚拟商品及服务消费使用记录（包括积分、宝券、道具、游戏类兑换码、游戏月卡权益）</strong></em>。</p>
+<p class="ql-align-justify">为了查询您以上的个人信息，我们会使用您的获取App账号权限，用于查询您在应用宝上的账号信息，再匹配您的个人信息。</p>
+<p class="ql-align-justify">此外，为方便您查询货物的交付与配送状态，我们还会自物流相关服务主体处收集与您的货物交付进度相关的信息。</p>
+<p class="ql-align-justify"><strong>1.8 信息上传或发布、交流互动</strong></p>
+<p class="ql-align-justify">当您在平台内对应用发表评论、在腾讯应用宝社区内发布帖子或发表评论时，我们将收集您上传的多媒体文件包括图文/音视频内容、您的昵称、头像、发布的信息内容、腾讯应用宝账号ID以及您的互动信息，包括<em><strong>点赞/分享/评论/互动记录</strong></em>。</p>
+<p class="ql-align-justify">同时，为了获取您的多媒体文件包括图文/音视频内容，应用宝会存在调用系统相册的行为。</p>
+<p class="ql-align-justify"><strong>1.9 活动参与及消息通知</strong></p>
+<p class="ql-align-justify"><strong>1.9.1 活动参与</strong></p>
+<p class="ql-align-justify">当您参与我们的活动时，需要您主动提交有关个人信息。包括：</p>
+<p class="ql-align-justify">(1) 为便于您在游戏内领取福利、查询霸服经验值、参与活动，您可就特定游戏授权我们收集您的游戏信息，包括登录信息（非实时游戏登录状态）、游戏角色数据、游戏内行为数据以及<em><strong>游戏付费数据</strong></em>。您可随时撤回该等授权。</p>
+<p class="ql-align-justify">(2) 当您分享活动口令与链接时，我们将收集您的头像、昵称，并在您首次进入app或从后台切前台页面时，调用您的剪切板功能以判断是否有相关口令码信息，我们收集该信息在服务器做校验后向您反馈您所需的内容或绑定相关权益。我们不会存储您剪切板的其他信息。</p>
+<div>
+<div>
+<p>(3) 当您参与特定活动时，我们会根据实际情况请求您的<em><strong>麦克风权限</strong></em>，以实现您与其他用户语音实时交流的功能。</p>
+<p>(4) <em><strong>定位</strong></em>用于部分运营活动，仅在您参与新游预约、分赛区比赛活动时需要<em><strong>设备位置信息</strong></em>的运营活动时申请获取。拒绝授权将无法参与特定运营活动，但不会影响腾讯应用宝其他功能的正常使用。</p>
+</div>
+</div>
+<p class="ql-align-justify"><strong>1.9.2 消息通知</strong></p>
+<p class="ql-align-justify">(1) <em><strong>设备日历权限</strong></em>用于预约提醒功能，仅在您通过系统日历创建日程实现游戏上线提醒、预约运营活动通知提醒功能时申请获取。在您开启相关权限后，我们会访问您的日历，帮助您预约或调整已预约的游戏、活动的时间，以在您预约的时间通过日历功能提醒您。拒绝授权将无法使用预约服务，但不会影响腾讯应用宝其他功能的正常使用。</p>
+<p class="ql-align-justify">同时，为确保您及时收到消息通知Push，我们需要您授权腾讯应用宝自启动，使其保持后台运行。</p>
+<p class="ql-align-justify">(2) 您知悉并同意，对于您在使用过程中提供的您的一种或多种联系方式（包括手机号码），我们在运营中会向其中的一种或多种发送多类通知，用于用户消息告知、身份验证、安全验证、用户使用体验调研的用途。</p>
+<p class="ql-align-justify"><strong>1.10 运营及产品安全需要</strong></p>
+<p class="ql-align-justify">我们致力于为您提供安全、可信的产品与使用环境，提供优质而可靠的服务与信息。为了维护我们产品及服务的正常稳定运行，防止恶意程序及反作弊，进行身份验证和识别，保护您或其他用户或公众的安全及合法利益，我们会收集如下信息：</p>
+<p class="ql-align-justify">(1) 为检测腾讯应用宝版本是否有升级更新，我们将收集您的设备信息（GUID）。</p>
+<p class="ql-align-justify">(2)&nbsp;为就近分配服务器，提高用户整体使用和访问速度，我们将收集您的IP地址。</p>
+<p class="ql-align-justify">(3) 为识别您的设备ID并预防恶意程序及反作弊、提高服务安全性、保障运营质量及效率，我们会在应用宝前台和后台收集您的设备信息（包括Android ID、GUID、OAID）、您安装的应用信息或正在运行的应用的进程信息。</p>
+<p class="ql-align-justify">(4)&nbsp;为对腾讯应用宝错误异常进行监控，以及对平台进行优化升级，我们将收集应用软件运行异常信息。</p>
+<p class="ql-align-justify">(5) 为实现运行故障报错及分析和解决您在使用腾讯应用宝过程中所遇到的问题，我们将收集您的设备信息（GUID）、<em><strong>浏览和操作记录</strong></em>。</p>
+<p class="ql-align-justify">(6)&nbsp;为了在支付过程中防止欺诈及保护您的交易安全，我们将收集您的<em><strong>设备位置信息</strong></em>。</p>
+<p class="ql-align-justify">(7) 为了修复已知问题，我们会在后台保持获取运行中的进程信息，判断应用宝当前是否在后台运行，并确保在后台运行时进行补丁下发和修复。</p>
+<p class="ql-align-justify">(8）技术处理说明:采取安全加密、去标识化、匿名化等安全技术措施，并在无法重新识别个人身份的前提下，我们可能将所收集的数据进行算法优化、统计分析或其他必要的数据分析处理，用于研发、提供、运营我们或关联公司的各类产品和服务，例如商业决策分析、个性化服务、风险识别等。</p>
+<p class="ql-align-justify"><strong>1.11 个性化内容推荐</strong></p>
+<p class="ql-align-justify">我们会基于收集的信息，包括您的设备信息（包括Android_ID、GUID、设备型号、系统版本）、日志信息（<strong><em>购买记录</em>、<em>点击</em>、<em>收藏</em>、<em>浏览</em>、下载记录、<em>点赞/分享/评论/互动的对象</em>、<em>搜索的字词</em>、<em>云游戏记录、小游戏付费记录</em>）</strong>、<em><strong>设备位置信息</strong></em>，通过自动化决策的方式对您的偏好、习惯作特征分析，以便为您提供符合您兴趣的定制化服务，或向您展现或推荐相关程度更高（而非普遍推送）的应用、游戏、小说的服务内容。自动化决策是指通过计算机程序自动分析、评估个人的行为习惯、兴趣爱好，并进行决策的活动。我们将通过应用宝自建通知的形式向您推送上述信息。如您不希望接收到我们为您推荐的上述内容，您可以随时在我们的自建通知弹窗里进行关闭，或通过“腾讯应用宝-管理-设置-通知管理”里选择您不希望接受的内容。</p>
+<p class="ql-align-justify">另需提示，在更快地为您提供感兴趣内容的同时，个性化内容推荐会导致您所看到的内容越来越趋于同质化。如您不希望接收到我们为您推荐的个性化内容，您可以随时使用我们的产品和/或服务的相关功能设置页面开启/关闭个性化推荐。腾讯应用宝App的个性化推荐设置路径为：“腾讯应用宝-管理-设置-个性化推荐”。<strong>&nbsp;若您选择关闭，我们不会基于个性化内容推送的目的处理您的个人信息，您看到的内容将可能与您的偏好相关度降低。</strong>当您更新腾讯应用宝App版本后，未经您的同意，我们不会更改您之前设置的权限状态。</p>
+<p class="ql-align-justify"><strong>1.12 广告（含个性化广告）</strong></p>
+<p class="ql-align-justify">我们会使用您的设备标识符包括IDFA、OAID、设备型号，广告数据（曝光、点击数据），设备信息包括但不限于系统语言、屏幕高宽、屏幕方向信息，在腾讯应用宝中向您提供您感兴趣的广告，评估、改善我们的广告投放和其他促销及推广活动、商业分析的效果。</p>
+<p class="ql-align-justify">为提高你浏览广告内容的体验，我们会进行设备风险和虚假流量识别、营销风险识别、广告反作弊处理。为此，我们仍会在应用宝后台收集您的OAID和正在运行的应用的进程信息。</p>
+<p class="ql-align-justify">若您不想接受个性化广告服务，您可以在我们的产品和/或服务的相关功能设置页面开启/关闭个性化广告。腾讯应用宝App的个性化广告设置路径为：“腾讯应用宝-管理-设置-个性化推荐”。<strong>若您选择关闭，您看到的广告数量不会减少，但本产品将不再向您展示个性化广告，您看到的广告将会与您的偏好相关度降低。</strong></p>
+<p class="ql-align-justify"><strong>1.13 AIGC创作</strong></p>
+<p class="ql-align-justify">当您使用AIGC功能时，为获取您的人脸特征，我们将申请您的<strong><em>相机权限，</em></strong>并在您授权开启相机/摄像头权限后通过相机/摄像头<em><strong>采集包含面部识别信息的图片或视频</strong></em>，并通过算法对上述图片或视频做特征分析，再结合AIGC玩法生成新的图片或视频。</p>
+<p class="ql-align-justify"><strong>1.14 客户服务</strong></p>
+<p class="ql-align-justify">当您联系我们的客服时，为了您的账号与系统安全，我们将收集您的微信号、QQ号及账号资料，并与您之前的个人信息相匹配以验证您的用户身份。同时，为了调查事实与帮助您解决问题，我们还会根据实际情况收集<em><strong>您与我们的沟通记录</strong></em>。</p>
+<p class="ql-align-justify">当您使用帮助与反馈功能时，为便于您反馈在使用腾讯应用宝中所遇到的问题，我们将收集您当前终端设备的基础信息（包括手机型号、系统版本、App版本、BSSID、SSID）、腾讯应用宝账号、网络情况、访问页面、支付单号。</p>
+<p class="ql-align-justify"><strong>1.15 其他自行收集信息场景</strong></p>
+<p class="ql-align-justify"><strong>1.15.1 </strong><strong>垃圾清理与运行加速</strong></p>
+<p class="ql-align-justify">为实现垃圾清理与运行加速功能，我们将收集您终端设备的相关硬件信息，包括已安装应用列表、CPU、运行内存、SD卡数据、使用情况权限状态（但不会请求你的使用情况权限），以计算你的手机状态分数。并请求您的<strong><em>存储权限</em></strong>，用以检查手机CPU、内存和SD卡情况。同时，我们需要您授权腾讯应用宝自启动，使其保持后台运行以保证我们能及时监控手机状态，并在后台获取运行中的进程信息（判断应用宝当前是在前台还是后台运作），并通过桌面弹窗的方式提醒您清理手机内存、提高运行速度。</p>
+<p class="ql-align-justify"><strong>1.15.2 扫描二维码</strong></p>
+<p class="ql-align-justify">当您使用扫描二维码功能时，我们将申请您的<strong><em>相机权限</em></strong>。</p>
+<p><strong>1.15.3 小组件和桌面快捷方式</strong></p>
+<p>若您通过部分品牌安卓设备的小组件（同widget）或桌面快捷方式使用应用宝，为了实现小组件和桌面快捷方式的添加、删除和更新，应用宝会在您退出应用后在后台存在自启动的行为。</p>
+<p><strong>1.15.4 获取授权</strong></p>
+<p>当您使用APP管理（下载、安装、更新、卸载）、清理工具（垃圾清理、微信清理、QQ清理、视频清理、大文件清理、安装包清理）、游戏服务、活动、消息通知，需要授权系统权限的服务时，我们会根据实际情况帮您调起系统授权页面。此时我们需要获取您当前是否已安装能打开该系统页面的应用（即系统设置），但不会获取您的完整已安装应用列表。</p>
+<p class="ql-align-justify"><strong>1.16 从第三方间接收集个人信息</strong></p>
+<p class="ql-align-justify">我们会从第三方间接收集（或共享）您的个人信息，但这只发生在：我们确认该第三方已经就将相关个人信息分享给我们获得您的同意，或者第三方依法被许可或被要求向我们披露您的个人信息。</p>
+<p class="ql-align-justify">我们会要求第三方对个人信息来源的合法性和合规性作出承诺，如第三方有违反行为的，我们会明确要求对方承担相应法律责任。</p>
+<p class="ql-align-justify">我们会了解第三方已获得的个人信息处理的同意范围，包括使用目的，个人信息主体是否同意转让、共享、公开披露、删除的内容。</p>
+<p class="ql-align-justify">这些从第三方获取的个人信息将用于为您提供服务，以及用于保证我们所掌握的您的相关记录的准确性。若我们对这些个人信息的处理活动超出第三方已获得的同意范围，在获取个人信息的合理期限内或处理个人信息前，我们会直接或通过提供信息的第三方征得您的同意。</p>
+<p class="ql-align-justify"><strong>1.17 与运营商合作免流量功能</strong></p>
+<p class="ql-align-justify">当您使用腾讯应用宝与运营商合作的免流量功能（包括“管理”模块中的“王卡免流量”业务）时，为准确识别免流量用户身份及更好地记录定向应用消耗的流量，我们需要收集您的设备信息（IP地址、手机型号）、运营商信息；</p>
+<p class="ql-align-justify">需提示的是，当您领取免流量电话卡或开通免流量服务时，您需要进行实名认证，并需要提供姓名、<strong><em>身份证号码</em></strong>、联系电话、<em><strong>收货地址</strong></em>、详细地址（以实际运营方页面展示为准），<strong>此时，腾讯应用宝不会收集您的这些信息。请您仔细识别实际服务的提供方，并在使用任何第三方服务之前仔细查看相关隐私政策或个人信息处理规则。</strong></p>
+<p class="ql-align-justify"><strong>1.18 征得同意的例外情形</strong></p>
+<p class="ql-align-justify">根据法律法规的规定，我们在以下情况下收集和使用您的个人信息无需取得您的同意：</p>
+<p class="ql-align-justify">(1)&nbsp;为订立、履行您作为一方当事人的合同所必需，或者按照依法制定的劳动规章制度和依法签订的集体合同实施人力资源管理所必需；</p>
+<p class="ql-align-justify">(2)&nbsp;为履行法定职责或者法定义务所必需；</p>
+<p class="ql-align-justify">(3)&nbsp;为应对突发公共卫生事件，或者紧急情况下为保护自然人的生命健康和财产安全所必需；</p>
+<p class="ql-align-justify">(4) 为公共利益实施新闻报道、舆论监督的行为，在合理的范围内处理您的个人信息；</p>
+<p class="ql-align-justify">(5)&nbsp;依照《个人信息保护法》规定在合理范围内处理您自行公开或者其他已经合法公开的个人信息；</p>
+<p class="ql-align-justify">(6)&nbsp;法律、行政法规规定的其他情形。</p>
+<p class="ql-align-justify"><strong>1.19 特别说明</strong></p>
+<p class="ql-align-justify">(1) 为了手机清理和应用更新功能，腾讯应用宝会在您退出应用后在后台存在短暂启动的行为；</p>
+<p class="ql-align-justify">(2) 为了及时提供更优质的服务和最新功能，应用宝版本更新时，我们会在wifi环境下自动下载最新版本的应用宝安装包并更新。若您不希望应用宝进行新版本自动更新，可在“管理-设置-关于”中关闭版本自动更新开关。</p>
+<p class="ql-align-justify"><strong>1.20&nbsp; 传感器应用场景声明</strong></p>
+<table style="width: 100%;" border="1">
+<tbody>
+<tr>
+<td style="width: 10.0323%; background-color: #ecf0f1;">功能板块</td>
+<td style="width: 22.3006%; background-color: #ecf0f1;">传感器名称</td>
+<td style="width: 22.9452%; background-color: #ecf0f1;">适用场景</td>
+<td style="width: 44.4802%; background-color: #ecf0f1;">使用目的</td>
+</tr>
+<tr>
+<td style="width: 10.0323%;">营销内容和广告</td>
+<td style="width: 22.3006%;">加速度传感器</td>
+<td style="width: 22.9452%;">创新广告交互功能（摇一摇）</td>
+<td style="width: 44.4802%;">调用设备传感器识别判断设备状态，以判断用户是否参与交互</td>
+</tr>
+<tr>
+<td style="width: 10.0323%;">秒玩云游戏及小游戏</td>
+<td style="width: 22.3006%;">加速度传感器、陀螺仪传感器、重力传感器、磁场传感器</td>
+<td style="width: 22.9452%;">玩云游戏及小游戏</td>
+<td style="width: 44.4802%;">
+<p>传感器是否使用、使用传感器字段、使用场景因具体云游戏而异。举例如下：</p>
+<p>小游戏使用传感器信息，检测反馈用户设备屏幕方向及方位。跑酷类游戏根据手机旋转来反馈游戏内角色前进方向。</p>
+</td>
+</tr>
+<tr>
+<td style="width: 10.0323%;">运营及产品安全需要</td>
+<td style="width: 22.3006%;">加速度传感器、重力传感器、陀螺仪传感器、光线传感器</td>
+<td style="width: 22.9452%;">为提供安全、可信的产品与使用环境，提供优质而可靠的服务与信息，检测是否存在相关传感器</td>
+<td style="width: 44.4802%;">
+<p>建立推送链接时识别设备场景中，防止黑产及外部恶意攻击。</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="ql-align-justify"><strong>1.21 基础服务功能</strong></p>
+<p>为向用户提供注册/登录、预约下载、信息发布、交流互动、个性推荐、参与活动丰富多样的服务，我们会根据用户使用服务时收到的告知或作出的授权、用户协议及隐私政策约定、法律法规的相关规定收集并使用用户的个人信息。如果您仅希望使用应用宝为您提供的基本功能服务模式，包括App搜索和下载功能，可选择进入基本功能服务模式。在基本功能服务模式下，应用宝仅为保障软件及服务的安全运行，依据法律法规的相关规定收集（不存储）您的基础设备信息和应用安装列表，不收集您的其他个人信息。为保证最小必要地收集您的个人信息，您仅能在未登录状态下使用基本功能服务模式，且在使用基本功能服务模式时，您不能使用注册/登录、预约、信息发布、交流互动、个性推荐、参与活动丰富多样的服务。开启基本功能服务模式，将会退出登录或维持未登录状态，届时需要重启应用后基本功能服务模式方可生效。您可以通过点击<a style="color: #00b0f0;" href="tmast://konwbasic" target="_blank" rel="noopener"><strong><em>了解基本功能模式</em></strong></a>页面开启/关闭基本功能服务模式。</p>
+<p align="left"><strong>1</strong><strong>.22 WiFi</strong><strong>功能</strong></p>
+<p>我们向您提供免费WiFi功能，为了让您能够查找到附近可连接的WiFi，获取WiFi列表，需要声明精准和粗略位置的权限，并在实际使用该功能时向您动态申请权限。</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52742" name="content-item">2. Cookie等同类技术的使用</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">Cookie及同类技术是互联网中普遍使用的技术。当您使用我们的产品和/或服务时，我们会根据实际情况使用Cookie及同类技术收集您的登录信息、设备信息、<em><strong>个人上网记录</strong></em>偏好数据，用于确保我们平台的正常运转、简化您重复操作的步骤（包括登录）、便于您查看使用历史（包括小说阅读历史）、向您提供更切合您个人需要或您更感兴趣的服务内容、保护您的信息和账号安全性、提升我们的产品和服务。</p>
+<p class="ql-align-justify">我们不会将 Cookie 及同类技术用于本隐私保护指引所述目的之外的任何用途。如果您拒绝我们使用Cookie及同类技术收集和使用您的相关信息，您可在浏览器具备该功能的前提下，通过您的浏览器的设置以管理、部分/全部拒绝Cookie和/或同类技术；或删除已经储存在您的计算机、移动设备或其他装置内的Cookie和/或同类技术。您如需详细了解如何更改浏览器设置，请具体查看您使用的浏览器的相关设置页面。您理解并知悉：我们的某些产品/服务只能通过使用Cookie或同类技术才可得到实现，若您拒绝使用或删除的，您将无法正常使用我们的相关产品与/或服务或无法通过我们的产品与/或服务获得最佳的服务体验，同时也会对您的信息保护和账号安全性造成一定的影响。</p>
+<p class="ql-align-justify">更多有关我们使用Cookie和同类技术的情况，可点击查看查阅<a style="color: #175ceb;" href="https://privacy.qq.com/policy/cookie-privacypolicy" target="_blank" rel="noopener noreferrer">《Cookie政策》</a>。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52743" name="content-item">3. 信息的存储</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify"><strong>3.1&nbsp;存储地点</strong></p>
+<p class="ql-align-justify">我们在中华人民共和国境内运营中收集和产生的个人信息存储于中华人民共和国境内。目前我们暂时不存在向境外提供您的个人信息的场景。</p>
+<p class="ql-align-justify">如我们因业务需要，确需向中华人民共和国境外提供个人信息的，我们应具备法律规定的条件（通过国家网信部门组织的安全评估或按照国家网信部门制定的标准合同与境外接收方订立合同，约定双方的权利和义务），并将向您告知境外接收方的名称或者姓名、联系方式、处理目的、处理方式、个人信息的种类以及您向境外接收方行使个人信息主体权利的方式和程序的事项，取得您的单独同意。我们将采取必要措施，保障境外接收方处理个人信息的活动达到中国法律规定的个人信息保护标准。</p>
+<p class="ql-align-justify"><strong>3.2&nbsp;存储期限</strong></p>
+<p class="ql-align-justify">我们将在实现您的个人信息处理目的所必要的最短时间内保存您的个人信息，但您行使删除权、注销账号或法律法规另有规定的除外（包括：《电子商务法》规定：商品和服务信息、交易信息保存时间自交易完成之日起不少于三年）。超出上述存储期限后，我们会对您的个人信息进行删除或匿名化处理。</p>
+<p class="ql-align-justify">当我们的产品或服务停止运营时，我们将以推送通知、公告的形式通知您，并在合理期限内删除您的个人信息或进行匿名化处理，法律法规另有规定的除外。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52744" name="content-item">4. 信息安全</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify"><strong>4.1&nbsp;安全保护措施</strong></p>
+<p class="ql-align-justify">我们努力为您的个人信息安全提供保障，以防止个人信息的泄露、篡改、丢失、不当使用、未经授权的访问和披露。我们采用多方位的安全保护措施，包括技术保护措施、管理制度控制、安全体系保障的方面，以确保您的个人信息保护处于合理的安全水平。</p>
+<p class="ql-align-justify">(1)&nbsp;技术保护措施</p>
+<p class="ql-align-justify">我们采用业界领先的技术保护措施保护您的个人信息，包括但不限于防火墙、加密（包括SSL）、去标识化或匿名化处理、访问控制措施。此外，我们还会不断加强安装在您设备端的软件的安全能力。我们会在您的设备本地完成部分信息加密工作，以巩固安全传输；我们会了解您设备安装的应用信息和运行的进程信息，以预防病毒、木马的恶意程序。</p>
+<p class="ql-align-justify">(2)&nbsp;管理制度和操作规程</p>
+<p class="ql-align-justify">我们建立了保障个人信息安全的内部管理制度和操作规程。对个人信息实行分类管理，合理确定个人信息处理的操作权限，并定期对从业人员进行安全教育和培训。</p>
+<p class="ql-align-justify">(3)&nbsp;安全体系保障</p>
+<p class="ql-align-justify">我们构建并完善包括安全体系认证、业务安全能力认证的个人信息安全管理体系。目前，我们的重要信息系统已经通过了国家网络安全等级保护（三级）的测评和备案。</p>
+<p class="ql-align-justify"><strong>4.2&nbsp;安全事件处置措施</strong></p>
+<p class="ql-align-justify">若发生或可能发生个人信息泄露、篡改、丢失的个人信息安全事件，我们会启动个人信息安全事件应急预案，阻止个人信息安全事件扩大。</p>
+<p class="ql-align-justify">个人信息安全事件发生后，除非我们采取措施能够有效避免信息泄露、篡改、丢失造成危害的，我们将及时以推送通知、邮件的形式告知您个人信息安全事件的基本情况、我们即将或已经采取的处置措施和补救措施，以及我们对您的应对建议。如果难以实现逐一告知，我们将通过公告的方式发布警示。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52745" name="content-item">5. 信息共享</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify"><strong>5.1&nbsp;个人信息委托处理</strong></p>
+<p class="ql-align-justify">平台的部分功能会由外部服务商提供，我们会聘请专业数据处理服务机构来为我们的平台提供数据分析方面的技术支持。</p>
+<p class="ql-align-justify">对我们委托处理个人信息的公司、组织和个人，我们会与其签署协议，约定委托处理的目的、期限、处理方式、个人信息的种类、保护措施以及双方的权利和义务，并对受托人的个人信息处理活动进行监督。</p>
+<p><strong>5.2&nbsp;集团内共享</strong></p>
+<p class="ql-align-justify">为了使您在我们与我们关联公司产品和/或服务中获得一致性和个性化的服务体验，我们会把您的个人信息分享给我们的关联公司。我们只会分享必要的个人信息，且受本隐私保护指引中所声明目的的约束。关联公司如要改变个人信息的处理目的或处理方式，我们将再次征求您的同意。</p>
+<p class="ql-align-justify"><strong>5.3&nbsp;与集团外第三方分享</strong></p>
+<p class="ql-align-justify">为向您提供完善的产品和服务，在某些情形下，我们需要与我们集团外的第三方公司、组织或个人共享您的个人信息。我们仅会出于合法、正当、最小必要且本指引所明确的目的与第三方分享您的个人信息，并且只会分享必要的个人信息。如果第三方改变或超越您原同意范围处理您的个人信息，我们会要求第三方再次征得您的同意。</p>
+<p class="ql-align-justify">对我们与之共享个人信息的公司、组织和个人，我们会要求其严格遵守我们关于数据隐私保护的措施和要求，包括但不限于根据数据保护协议、承诺书及相关数据处理政策进行个人信息的处理，避免识别出个人身份，保障隐私安全。</p>
+<p class="ql-align-justify">您可以点击查看<em>《</em><a style="color: #00b0f0;" href="https://privacy.qq.com/document/preview/e7e895203601428fadd149e0fae2e148" target="_blank" rel="noopener noreferrer"><strong><em>腾讯应用宝与第三方共享个人信息清单</em></strong></a><em>》</em>详细了解与第三方共享您个人信息的情况；此外，您可以直接点击查看<em>《</em><a style="color: #00b0f0;" href="https://privacy.qq.com/document/priview/f3e45a48e74848f29c5691cef032a447" target="_blank" rel="noopener noreferrer"><strong><em>应用宝接入第三方SDK目录</em></strong></a><em>》</em>了解接入的第三方软件工具开发包（SDK）的具体信息。</p>
+<p class="ql-align-justify">与第三方共享的主要情形如下：</p>
+<p class="ql-align-justify"><strong>5.3.1&nbsp;为实现我们的功能/服务所必需进行的共享</strong></p>
+<p class="ql-align-justify">在某些情况下，我们必需共享您的个人信息，才能履行我们作为与您订立相关合同的一方当事人的义务或提供您需要的服务，具体第三方信息情况请点击查看<em>《</em><a style="color: #00b0f0;" href="https://privacy.qq.com/document/preview/e7e895203601428fadd149e0fae2e148" target="_blank" rel="noopener noreferrer"><strong><em>腾讯应用宝与第三方共享个人信息清单</em></strong></a><em>》</em>，主要包括以下情形：</p>
+<p class="ql-align-justify">(1)&nbsp;支付服务：为帮助您完成款项支付，我们会将您的用户标识信息、网络IP地址、<strong><em>订单交易信息的</em></strong>信息（以实际共享的信息为准）提供给提供支付服务的合作方。</p>
+<p class="ql-align-justify">(2) 王卡用户身份识别：为通过监测应用的网络状态判断用户的换卡行为，进而便于运营商过滤无效请求，以及识别用户是否为王卡用户，我们会将您的网络状态、IP地址提供给提供相关服务的合作方；</p>
+<p class="ql-align-justify">(3) 下单与交付：为实现购买商品/服务的需求（包括货物配送与交付），相关服务的合作方（包括供货的服务提供方）需要收集您的订单相关信息、商品/服务信息、收货信息（包括收货人姓名、收货地址及联系电话）的信息（以实际共享的信息为准），具体合作方的隐私保护制度请以实际操作页面中第三方的隐私协议为准，您可在填写个人信息和提交前留意关注。</p>
+<p class="ql-align-justify">(4)&nbsp;其他为实现我们的功能/服务所必须进行的共享。</p>
+<p class="ql-align-justify"><strong>5.3.2 广告服务</strong></p>
+<p class="ql-align-justify">第三方主体： 广告主和/或其委托的代理商、第三方广告监测服务商<br>共享的信息： 如IDFA、OAID等设备标识符；如硬件型号、操作系统等设备信息；姓名、电话等用户在广告落地页主动填写的信息<br>使用场景： 广告投放过程中<br>使用目的： 程序化广告推荐、广告归因、广告落地页信息收集、广告监测<br>共享方式： 后台接口传输/表单传输/终端发起传输<br>第三方个人信息处理规则： 可通过《<a href="https://privacy.qq.com/document/preview/7c8439a1d632427180da2a497f05dba1">广告服务第三方信息共享清单</a>》查看</p>
+<p class="ql-align-justify">关闭路径：您可以通过下列路径：“腾讯应用宝-我的-设置-个性化推荐”撤回个性化推荐授权及个性化广告服务；</p>
+<p class="ql-align-justify"><strong>5.3.3&nbsp;第三方SDK类合作方</strong></p>
+<p class="ql-align-justify">我们会与第三方软件工具开发包（SDK）或其他类似的应用程序类服务商分享您的个人信息，以保障平台的稳定运行、功能实现，具体接入信息您可以点击查看<em>《</em><a style="color: #00b0f0;" href="https://privacy.qq.com/document/priview/f3e45a48e74848f29c5691cef032a447" target="_blank" rel="noopener noreferrer"><strong><em>应用宝接入第三方SDK目录</em></strong></a><em>》</em>。我们会对该获取个人信息的第三方软件工具开发包（SDK）、应用程序接口（API）进行严格的安全监测，令其按照本隐私保护指引以及其他任何相关的保密和安全措施来处理个人信息，以保护数据安全。</p>
+<p class="ql-align-justify"><strong>5.4&nbsp;个人信息转移</strong></p>
+<p class="ql-align-justify">我们不会将您的个人信息转移给任何公司、组织和个人，但以下情形除外：</p>
+<p class="ql-align-justify">(1)&nbsp;在获得您的明确同意后，我们会向其他方转移您的个人信息；</p>
+<p class="ql-align-justify">(2) 因合并、分立、解散、被宣告破产的原因需要转移您的个人信息的，我们将向您告知接收方的名称或者姓名和联系方式，并会要求新的持有您个人信息的公司、组织继续受此隐私保护指引的约束，否则我们将要求该公司、组织重新向您征求同意。</p>
+<p class="ql-align-justify"><strong>5.5&nbsp;公开披露</strong></p>
+<p class="ql-align-justify">我们不会对外公开披露所收集的个人信息，必须公开披露时，我们会向您告知此次公开披露的目的、披露信息的类型及根据实际情况涉及的敏感信息，并征得您的单独同意。</p>
+<p class="ql-align-justify"><strong>5.6 同意的例外情形</strong></p>
+<p class="ql-align-justify">根据《个人信息保护法》的规定，以下情形下，我们共享、转让、公开披露您的个人信息，无需事先取得您的同意：</p>
+<p class="ql-align-justify">(1)&nbsp;为订立、履行您作为一方当事人的合同所必需，或者按照依法制定的劳动规章制度和依法签订的集体合同实施人力资源管理所必需；</p>
+<p class="ql-align-justify">(2)&nbsp;为履行法定职责或者法定义务所必需；</p>
+<p class="ql-align-justify">(3)&nbsp;为应对突发公共卫生事件，或者紧急情况下为保护自然人的生命健康和财产安全所必需；</p>
+<p class="ql-align-justify">(4) 为公共利益实施新闻报道、舆论监督的行为，在合理的范围内处理个人信息；</p>
+<p class="ql-align-justify">(5)&nbsp;依照《个人信息保护法》的规定在合理的范围内处理个人自行公开或者其他已经合法公开的个人信息；</p>
+<p class="ql-align-justify">(6)&nbsp;法律、行政法规规定的其他情形。</p>
+<p class="ql-align-justify">&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52746" name="content-item">6. 您的权利</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">在您使用腾讯应用宝期间，为了让您更便捷地查询、复制、更正、删除您的个人信息，同时保障您撤回个人信息处理的同意和注销账户的权利，我们在产品设计中为您提供了相应的操作设置，您可参考下面的指引进行操作。此外，我们还设置了投诉举报渠道，您的意见将会得到及时的处理。如果您无法通过上述途径和方式行使您的个人信息主体权利，您可以通过本隐私保护指引中提供的联系方式提出您的请求，我们会按照法律法规的规定予以反馈。</p>
+<p class="ql-align-justify"><strong>6.1&nbsp;查询个人信息</strong></p>
+<p class="ql-align-justify">(1)&nbsp;您可以通过路径“腾讯应用宝-管理-设置-隐私设置-个人信息查阅与管理-账号信息”查询您的微信或QQ头像、昵称；</p>
+<p class="ql-align-justify">(2) 您可以通过路径：“腾讯应用宝-我的-设置-隐私设置-个人信息查阅与管理-我的在装应用”查询您的已安装应用列表；</p>
+<p class="ql-align-justify">(3) 您可以通过路径：“腾讯应用宝-我的-我的游戏-我的预约”或“腾讯应用宝-我的-设置-隐私设置-个人信息查询与管理-游戏预约历史”查询您的游戏预约记录；</p>
+<p class="ql-align-justify">(4) 您可以通过路径：“腾讯应用宝-我的-我的游戏-秒玩记录”或“腾讯应用宝-我的-设置-隐私设置-个人信息查询与管理-云游戏历史”查询您的云游戏试玩记录；</p>
+<p class="ql-align-justify">(5) 您可以通过路径：“腾讯应用宝-我的-我的游戏-已领福利”或“腾讯应用宝-我的-设置-隐私设置-个人信息查询与管理-我的游戏福利”查询您的宝券和道具礼包；</p>
+<p class="ql-align-justify">(6) 您可以通过路径：“腾讯应用宝-我的-更多功能-免费小说-个人”查询您的小说阅读历史；</p>
+<p class="ql-align-justify">(7) 您可以通过路径：“腾讯应用宝-我的-我的消息”查询您在平台内的互动记录。</p>
+<p class="ql-align-justify"><strong>6.2&nbsp;个人信息副本获取</strong></p>
+<p class="ql-align-justify">如您需要您的个人信息的副本，您可以通过本隐私保护指引文末提供的方式或通过路径：“腾讯应用宝-我的-设置-个人信息下载”中提供的方式联系我们，在核实您的身份后，我们将向您提供您在我们的服务中的个人信息副本，但法律法规另有规定的或本隐私保护指引另有约定的除外。</p>
+<p class="ql-align-justify">在技术可行的前提下，符合国家网信部门规定条件的，我们还可按您的要求，将您的个人信息副本传输给您指定的第三方。</p>
+<p class="ql-align-justify"><strong>6.3&nbsp;更正、补充个人信息</strong></p>
+<p class="ql-align-justify">6.3.1&nbsp;您可以在腾讯应用宝用户专享界面更正、补充您的收货信息（收货人姓名、收货地址及联系电话）。</p>
+<p class="ql-align-justify">6.3.2&nbsp;您也可以通过本隐私保护指引第10节提供的方式联系我们，我们对您的个人信息予以核实后，会及时更正、补充您的个人信息。</p>
+<p class="ql-align-justify"><strong>6.4&nbsp;删除个人信息</strong></p>
+<p class="ql-align-justify">6.4.1&nbsp;您可以通过以下路径自行删除您的个人信息：</p>
+<p class="ql-align-justify">(1) 您可以通过路径：“腾讯应用宝-我的-更多功能-免费小说-个人-阅读历史-管理”删除您的小说阅读历史；</p>
+<p class="ql-align-justify">(2) 您可以通过路径：“腾讯应用宝-我的-我的消息”删除您在平台内的互动记录；</p>
+<p class="ql-align-justify">6.4.2&nbsp;在以下情形中，您可以通过本隐私保护指引文末提供的方式联系我们，请求我们删除您的个人信息：</p>
+<p class="ql-align-justify">(1)&nbsp;如果我们处理个人信息的行为违反法律法规；</p>
+<p class="ql-align-justify">(2)&nbsp;如果我们收集、使用您的个人信息，却未征得您的同意；</p>
+<p class="ql-align-justify">(3)&nbsp;如果您同意我们收集、使用您的个人信息后又撤回同意；</p>
+<p class="ql-align-justify">(4)&nbsp;如果我们处理个人信息的行为违反了与您的约定；</p>
+<p class="ql-align-justify">(5)&nbsp;如果您不再使用我们的产品或服务，或您注销了账号；</p>
+<p class="ql-align-justify">(6)&nbsp;如果我们不再为您提供产品或服务；</p>
+<p class="ql-align-justify">(7)&nbsp;如果您个人信息的处理目的已实现、无法实现或者为实现处理目的不再必要；</p>
+<p class="ql-align-justify">(8)&nbsp;如果您个人信息的保存期限已经届满。</p>
+<p class="ql-align-justify"><strong>6.5&nbsp;撤回同意</strong></p>
+<p class="ql-align-justify">(1) 您可以通过对您的硬件设备进行修改或通过下列路径：“腾讯应用宝-我的-权限中心”撤回通知、悬浮窗权限的授权；</p>
+<p class="ql-align-justify">(2) 您可以通过下列路径：<a href="tmast://personalswitch">“腾讯应用宝-我的-设置-个性化推荐”撤回个性化推荐授权及个性化广告服务；</a></p>
+<p class="ql-align-justify">(3)&nbsp;您可以通过以下路径撤回游戏信息使用授权：针对一次性的游戏信息使用授权，我们仅会在当次活动中使用授权信息；针对非一次性的游戏信息使用授权，您可以回到权限授权所在的活动界面，通过页面底部的“游戏信息授权管理”撤回相应的游戏信息使用授权。</p>
+<p class="ql-align-justify">请您理解，每项业务功能需要一些必要的信息才能得以完成，当您撤回同意或授权后，我们将无法继续为您提供撤回同意或授权所对应的服务，也不再处理您相应的个人信息。但您撤回同意或授权的决定，不会影响此前基于您的授权而开展的信息处理。</p>
+<p class="ql-align-justify"><strong>6.6&nbsp;注销账号</strong></p>
+<p class="ql-align-justify">您可以通过路径：“腾讯应用宝-我的-设置-账号注销”注销您的腾讯应用宝账号。</p>
+<p class="ql-align-justify">在您注销腾讯应用宝账号后，我们将停止为您提供腾讯应用宝的全部产品和/或服务，并依据法律法规相关要求通过匿名化的方式处理您的个人信息，或删除与您账号相关的个人信息，但法律法规或监管机构对用户信息存储时间另有规定的除外。</p>
+<p class="ql-align-justify"><strong>6.7&nbsp;获取本隐私保护指引的解释说明</strong></p>
+<p class="ql-align-justify">您可以通过本隐私保护指引第10节提供的方式联系我们，要求我们对本隐私保护指引进行解释说明。</p>
+<p class="ql-align-justify"><strong>6.8&nbsp;约束信息系统自动决策</strong></p>
+<p class="ql-align-justify">在某些业务功能中，我们仅依据信息系统、算法在内的非人工自动决策机制作出决定。如果这些决定显著影响您的合法权益，您可以通过本隐私保护指引第10节提供的方式联系我们，要求我们予以说明，并拒绝我们仅通过自动化决策的方式作出决定。</p>
+<p class="ql-align-justify"><strong>6.9&nbsp;已故用户的个人信息保护</strong></p>
+<p class="ql-align-justify">用户不幸去世的，其近亲属为了自身的合法、正当利益，可以对已故用户的相关个人信息行使本隐私保护指引规定的查阅、复制、更正、删除的权利；已故用户生前另有安排的除外。</p>
+<p class="ql-align-justify"><strong>6.10&nbsp;响应您的上述请求</strong></p>
+<p class="ql-align-justify">为保障安全，如您根据本隐私保护指引第6节向我们提出请求，我们将先验证您的个人信息主体身份，然后再处理您的请求。</p>
+<p class="ql-align-justify">我们将在十五（15）个工作日或法律法规规定的期限内予以反馈。如您不满意或有任何问题，您可以通过本隐私保护指引第10节提供的方式联系我们。</p>
+<p class="ql-align-justify">对于您合理的请求，我们原则上不收取费用，但对多次重复、超出合理限度的请求，我们将视情况收取一定成本费用。对于那些技术上难以实现、根据法律、行政法规的规定无需响应的请求或响应您的请求将违反法律、行政法规时，我们会予以拒绝，并向您说明理由。</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52747" name="content-item">7. 变更</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">我们会适时对本隐私保护指引进行修订。当本隐私保护指引的条款发生变更时，我们会在版本更新时向您提示变更后的隐私保护指引，并向您说明生效日期。当本隐私保护指引发生重大变更时，我们还会提供更为显著的通知，将变更部分告知您。</p>
+<p class="ql-align-justify">上述“重大变更”包括：</p>
+<p class="ql-align-justify">(1)&nbsp;个人信息处理者的名称或者姓名和联系方式；</p>
+<p class="ql-align-justify">(2)&nbsp;个人信息的处理目的、处理方式，处理的个人信息种类、保存期限；</p>
+<p class="ql-align-justify">(3)&nbsp;个人行使本法规定权利的方式和程序；</p>
+<p class="ql-align-justify">(4)&nbsp;法律、行政法规规定应当告知的其他事项。</p>
+<p class="ql-align-justify">请您仔细阅读变更后的隐私保护指引内容，您继续使用腾讯应用宝表示您同意我们按照更新后的隐私保护指引处理您的个人信息。如果个人信息的处理目的、处理方式和处理的个人信息种类发生变更的，我们将重新取得您的同意。</p>
+<p>&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52748" name="content-item">8. 未成年人保护</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify">我们非常重视对未成年人个人信息的保护。若您是18周岁以下的未成年人，在取得您或您的监护人同意之前，我们不会处理您的个人信息。若您是未成年人的监护人，当您对您所监护的未成年人的个人信息有相关疑问时，请通过第10节中的联系方式与我们联系。</p><p class="ql-align-justify">特别地，若您是14周岁以下的儿童，我们还专门为您制定了<strong>《</strong><a href="https://privacy.qq.com/mb/policy/kids-privacypolicy" rel="noopener noreferrer" target="_blank" style="color: rgb(23, 92, 235);">儿童隐私保护声明</a><strong>》</strong>，儿童及其监护人在为14周岁以下的儿童使用腾讯应用宝服务前，还应仔细阅读<strong>《</strong><a href="https://privacy.qq.com/mb/policy/kids-privacypolicy" rel="noopener noreferrer" target="_blank" style="color: rgb(23, 92, 235);">儿童隐私保护声明</a><strong>》</strong>。只有在取得监护人对<strong>《</strong><a href="https://privacy.qq.com/mb/policy/kids-privacypolicy" rel="noopener noreferrer" target="_blank" style="color: rgb(23, 92, 235);">儿童隐私保护声明</a><strong>》</strong>的同意后，我们才会处理14周岁以下的<strong><em>儿童个人信息</em></strong>。</p><p><br></p><p class="ql-align-justify"><br></p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52749" name="content-item">9. 其他</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify"><strong>《</strong><a href="https://privacy.qq.com/policy/tencent-privacypolicy" rel="noopener noreferrer" target="_blank" style="color: rgb(0, 176, 240);"><strong><em>腾讯隐私政策</em></strong></a><strong>》</strong>是我们统一适用的一般性隐私条款，其中所规定的用户权利及信息安全保障措施均适用于腾讯应用宝用户。如<strong>《</strong><a href="https://privacy.qq.com/policy/tencent-privacypolicy" rel="noopener noreferrer" target="_blank" style="color: rgb(0, 176, 240);"><strong><em>腾讯隐私政策</em></strong></a><strong>》</strong>与本隐私保护指引存在不一致或矛盾之处，请以本隐私保护指引为准。</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52750" name="content-item">10. 联系我们</span></div><div data-v-49c41d7e="" class="ql-editor"><p>我们设立了专门的个人信息保护团队和个人信息保护负责人，如果您对本隐私保护指引或个人信息保护相关事宜有任何疑问或投诉、建议时，您可以通过以下方式与我们及我们的个人信息保护负责人联系：</p><p>1. 您可以填写&nbsp;<a href="https://privacy.qq.com/questionnaire" rel="noopener noreferrer" target="_blank" style="color: rgb(20, 147, 214);">个人信息保护和隐私问题反馈问卷&nbsp;</a>与我们联系；</p><p>2. 将问题发送至Dataprivacy@tencent.com；</p><p>3. 通过<a href="https://kf.qq.com/" rel="noopener noreferrer" target="_blank" style="color: rgb(20, 147, 214);">https://kf.qq.com/</a>与我们联系；</p><p>4. 将您的问题邮寄至下列地址：</p><p>中国广东省深圳市南山区海天二路33号腾讯滨海大厦 数据合规与隐私保护部（收）</p><p>邮编：518054</p><p class="ql-align-justify">我们将尽快审核所涉问题，并在收到疑问或投诉、建议之日起15个工作日或法律法规规定的期限内予以反馈。</p><p class="ql-align-right"><strong>深圳市腾讯计算机系统有限公司</strong></p><p><br></p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52751" name="content-item">附录：定义</span></div><div data-v-49c41d7e="" class="ql-editor"><p class="ql-align-justify"><strong>个人信息</strong>：指以电子或者其他方式记录的与已识别或者可识别的自然人有关的各种信息，不包括匿名化处理后的信息（出自《中华人民共和国个人信息保护法》第四条）。</p>
+<p class="ql-align-justify"><strong>敏感个人信息</strong>：一旦泄露或者非法使用，容易导致自然人的人格尊严受到侵害或者人身、财产安全受到危害的个人信息，包括生物识别、宗教信仰、特定身份、医疗健康、金融账户、行踪轨迹等信息，以及不满十四周岁未成年人的个人信息（出自《中华人民共和国个人信息保护法》第二十八条）。</p>
+<p class="ql-align-justify"><strong>匿名化</strong>：是指个人信息经过处理无法识别特定自然人且不能复原的过程（出自《中华人民共和国个人信息保护法》第七十三条）。</p>
+<p class="ql-align-justify"><strong>去标识化</strong>：是指个人信息经过处理，使其在不借助额外信息的情况下无法识别特定自然人的过程（出自《中华人民共和国个人信息保护法》第七十三条）。</p>
+<p class="ql-align-justify"><strong>关联公司</strong>：是指与我们间存在直接或间接控制关系或重大影响关系的公司。</p>
+<p class="ql-align-justify"><strong>儿童</strong>：指不满十四周岁的未成年人。</p>
+<p class="ql-align-justify"><strong>处理个人信息</strong>：指个人信息的收集、存储、使用、加工、传输、提供、公开、删除。</p>
+<p class="ql-align-justify"><strong>自动化决策：</strong>指通过计算机程序自动分析、评估个人的行为习惯、兴趣爱好或者经济、健康、信用状况，并进行决策的活动（出自《中华人民共和国个人信息保护法》第七十三条）。</p>
+<p class="ql-align-justify"><strong>Cookie：</strong>Cookie是包含字符串的小文件，在您登入和使用网站或其他网络内容时发送、存放在您的计算机、移动设备或其他装置内（通常经过加密）。Cookie同类技术是可用于与Cookie类似用途的其他技术，例如：Web Beacon、Proxy、嵌入式脚本、像素标签。</p>
+<p class="ql-align-justify"><strong>SSL</strong>：SSL（Secure Socket Layer）又称为安全套接层，是在传输通信协议（TCP/IP）上实现的一种安全协议。SSL支持各种类型的网络，同时提供三种基本的安全服务，均通过使用公开密钥和对称密钥技术以达到信息保密的效果。</p>
+<p>&nbsp;</p></div></div><div data-v-49c41d7e=""><div data-v-49c41d7e="" class="header"><span data-v-49c41d7e="" id="52752" name="content-item">历史隐私政策</span></div><div data-v-49c41d7e="" class="ql-editor"><p>如您想查看历史隐私政策，请点击这里：</p>
+<p>发布日期： &nbsp;<a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13/v_20230508113802">2023年5月8日</a>；</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13/v_20230428171843">2023年4月28日</a>；</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13/v_20230316110952">2023年3月16日</a>；</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="https://privacy.qq.com/document/preview/41461bd464274ce0b5e34181785f5c13/v_20230223140533">&nbsp;2023年2月23日</a></p></div></div><div data-v-49c41d7e=""><!----><!----></div></div></div></div></div><!----></div></div></div><script src="/document/static/js/chunk-elementUI.f6f70094.js"></script><script src="/document/static/js/chunk-jspdf.53ce4900.js"></script><script src="/document/static/js/chunk-html2canvas.59c4e88c.js"></script><script src="/document/static/js/chunk-libs.02352699.js"></script><script src="/document/static/js/index.c18257ce.js"></script></body><div id="codex-browser-sidebar-comments-root" style="position: fixed; inset: 0px; pointer-events: none; z-index: 2147483647;"></div></html>
