@@ -107,7 +107,7 @@ async function loadCredential(): Promise<Credential> {
   // production deployment must always use environment variables.
   if (process.env.NODE_ENV !== "production") {
     try {
-      const filePath = path.resolve(process.cwd(), "../法规数据/调用代码/key.md");
+      const filePath = path.resolve(process.cwd(), "产品文档/04-法规与知识库材料/调用代码/key.md");
       const text = await readFile(filePath, "utf8");
       const appKey = readCredentialLine(text, "key");
       const appSecret = readCredentialLine(text, "secret");
